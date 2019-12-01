@@ -29,7 +29,7 @@ Creates deployment with management software, mounts your device over the network
 
 # Install
 
-### Install manually 
+### Install manually
 
 Create the Deployment, CRDs, ServiceAccount etc.
 
@@ -54,6 +54,11 @@ spec:
       idvendor:   "0403"
       idproduct:  "6001"
       manager:    "octoprint"
+  ingress:
+    enabled: true
+    domain: .my.home
+    annotations:
+        kubernetes.io/ingress.class: traefik
 ```
 
 ```

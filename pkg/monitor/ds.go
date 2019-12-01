@@ -57,7 +57,7 @@ func CreateDaemonSet(cr *appv1alpha1.KubeSerial) *v1beta2.DaemonSet {
 					Containers: []corev1.Container{
 						{
 							Name:				"udev-monitor",
-							Image:				"janekbaraniewski/udev-monitor:latest",
+							Image:				"janekbaraniewski/kubeserial-device-monitor:latest",
 							SecurityContext:	&corev1.SecurityContext{
 								Privileged:	&[]bool{true}[0],
 							},
@@ -77,7 +77,7 @@ func CreateDaemonSet(cr *appv1alpha1.KubeSerial) *v1beta2.DaemonSet {
 						},
 						{
 							Name:				"device-monitor",
-							Image:				"janekbaraniewski/udev-monitor:latest",
+							Image:				"janekbaraniewski/kubeserial-device-monitor:latest",
 							Command:			[]string {"/bin/sh"},
 							Args:				[]string{
 								"-c",

@@ -4,23 +4,38 @@ Manage your serial devices like 3D printers or CNC machines on your k8s cluster.
 
 ---
 
-# Components
+KubeSerial monitors your cluster nodes for physical devices specified in spec. Once the device is connected, it creates gateway service that exposes it over the network and manager service with specified management software. When the device gets disconnected everything is cleaned up.
 
-### controller
+### Example:
 
-Manages operator components by observing state of each of the devices.
+This is an example configuration for 2 popular cheap printers - Ender 3 and Anet A8 - that handles their management and exposes Octoprint instance for each of them at `http://ender3.my.home` and `http://aneta8.my.home`.
 
-### monitor
+```yaml
+# deployment/my-kubeserial.yaml
+apiVersion: app.kubeserial.com/v1alpha1
+kind: KubeSerial
+metadata:
+  name: kubeserial
+  namespace: kubeserial
+spec:
+  devices:
+    - name:       "ender3"
+      idVendor:   "0403"
+      idProduct:  "6001"
+      manager:    "octoprint"
+    - name:       "aneta8"
+      idVendor:   "1a86"
+      idProduct:  "7523"
+      manager:    "octoprint"
+  ingress:
+    enabled: true
+    domain: ".my.home"
+    annotations:
+      kubernetes.io/ingress.class: traefik
+```
 
-Monitors cluster nodes waiting for specified serial devices to be connected and updates their state.
+![Example usage 1](demo1.gif)
 
-### gateway
-
-Reacts to state changes and exposes your device in cluster network over TCP.
-
-### manager
-
-Creates deployment with management software, mounts your device over the network and gives you access through ingress rule.
 
 # Requirements
 
@@ -37,31 +52,34 @@ Create the Deployment, CRDs, ServiceAccount etc.
 kubectl create -f deploy/kubeserial.yaml
 ```
 
-Configure
-
-> Example configuration for Ender3 3D printer:
-
-```yaml
-# my-kubeserial.yaml
-apiVersion: app.kubeserial.com/v1alpha1
-kind: KubeSerial
-metadata:
-  name: kubeserial
-  namespace: kubeserial
-spec:
-  devices:
-    - name:       "ender3"
-      idvendor:   "0403"
-      idproduct:  "6001"
-      manager:    "octoprint"
-  ingress:
-    enabled: true
-    domain: .my.home
-    annotations:
-        kubernetes.io/ingress.class: traefik
+Create your configuration file based on example above. To find out values of `idVendor` and `idProduct` for your device, connect it to your computer, locate where it is (let's say `/dev/ttyUSB0`) and run:
 ```
+udevadm info -q all -n /dev/ttyUSB0 --attribute-walk
+```
+Look for them from the top. Once you've got your configuration, run
 
 ```
 kubectl create -f my-kubeserial.yaml
 ```
 
+# Components
+
+### Controller
+
+Manages operator components by observing state of each of the devices.
+
+### Monitor
+
+Monitors cluster nodes waiting for specified serial devices to be connected and updates their state.
+
+### Gateway
+
+Exposed specific device in cluster network over TCP.
+
+### Manager
+
+Creates deployment with management software, mounts your device over the network and gives you access through ingress rule.
+
+###### Supported managers
+
+- Octoprint

@@ -4,17 +4,29 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// Device defines monitored device
+// +k8s:openapi-gen=true
 type Device struct {
 	Name 		string 	`json:"name"`
-	IDVendor	string 	`json:"idvendor"`
-	IDProduct	string 	`json:"idproduct"`
+	IdVendor	string 	`json:"idVendor"`
+	IdProduct	string 	`json:"idProduct"`
 	Manager		string 	`json:"manager"`
+}
+
+// IngressSpec defines the desired Ingress configuration
+// +k8s:openapi-gen=true
+type IngressSpec struct {
+	Enabled		bool 				`json:"enabled"`
+	Domain		string 				`json:"domain,omitempty"`
+	Annotations	map[string]string 	`json:"annotations,omitempty"`
 }
 
 // KubeSerialSpec defines the desired state of KubeSerial
 // +k8s:openapi-gen=true
 type KubeSerialSpec struct {
-	Devices []Device `json:"devices"`
+	// +listType=set
+	Devices 	[]Device 	`json:"devices"`
+	Ingress		IngressSpec	`json:"ingress"`
 }
 
 // KubeSerialStatus defines the observed state of KubeSerial
@@ -35,7 +47,7 @@ type KubeSerial struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   KubeSerialSpec   `json:"spec,omitempty"`
+	Spec   KubeSerialSpec   `json:"spec"`
 	Status KubeSerialStatus `json:"status,omitempty"`
 }
 

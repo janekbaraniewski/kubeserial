@@ -134,7 +134,7 @@ func (r *ReconcileKubeSerial) Reconcile(request reconcile.Request) (reconcile.Re
 		}
 		return reconcile.Result{}, err
 	}
-
+	reqLogger.Info(instance.Spec.Ingress.Domain)
 	if err := r.reconcileDevicesConfig(instance); err != nil {
 		reqLogger.Info("ReconcileConfig fail")
 		return reconcile.Result{}, err
@@ -169,7 +169,7 @@ func (r *ReconcileKubeSerial) ReconcileConfigMap(cr *appv1alpha1.KubeSerial, cm 
 	found := &corev1.ConfigMap{}
 	err := r.client.Get(context.TODO(), types.NamespacedName{Name: cm.Name, Namespace: cm.Namespace}, found)
 	if err != nil && errors.IsNotFound(err) {
-		logger.Info("Creating a new ConfigMap", "ConfigMap.Namespace", cm.Namespace, "ConfigMap.Name", cm.Name)
+		logger.Info("Creating a new ConfigMap " + cm.Name)
 		err = r.client.Create(context.TODO(), cm)
 		if err != nil {
 			logger.Info("ConfigMap not created")
@@ -194,7 +194,7 @@ func (r *ReconcileKubeSerial) ReconcileDeployment(cr *appv1alpha1.KubeSerial, de
 	found := &v1beta2.Deployment{}
 	err := r.client.Get(context.TODO(), types.NamespacedName{Name: deployment.Name, Namespace: deployment.Namespace}, found)
 	if err != nil && errors.IsNotFound(err) {
-		logger.Info("Creating a new Deployment", "Deployment.Namespace", deployment.Namespace, "Deployment.Name", deployment.Name)
+		logger.Info("Creating a new Deployment " + deployment.Name)
 		err = r.client.Create(context.TODO(), deployment)
 		if err != nil {
 			logger.Info("Deployment not created")

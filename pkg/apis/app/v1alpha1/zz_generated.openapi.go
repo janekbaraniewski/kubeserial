@@ -11,9 +11,89 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
+		"./pkg/apis/app/v1alpha1.Device":           schema_pkg_apis_app_v1alpha1_Device(ref),
+		"./pkg/apis/app/v1alpha1.IngressSpec":      schema_pkg_apis_app_v1alpha1_IngressSpec(ref),
 		"./pkg/apis/app/v1alpha1.KubeSerial":       schema_pkg_apis_app_v1alpha1_KubeSerial(ref),
 		"./pkg/apis/app/v1alpha1.KubeSerialSpec":   schema_pkg_apis_app_v1alpha1_KubeSerialSpec(ref),
 		"./pkg/apis/app/v1alpha1.KubeSerialStatus": schema_pkg_apis_app_v1alpha1_KubeSerialStatus(ref),
+	}
+}
+
+func schema_pkg_apis_app_v1alpha1_Device(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Device defines monitored device",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"name": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"idVendor": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"idProduct": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"manager": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+				Required: []string{"name", "idVendor", "idProduct", "manager"},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_app_v1alpha1_IngressSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "IngressSpec defines the desired Ingress configuration",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"enabled": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"boolean"},
+							Format: "",
+						},
+					},
+					"domain": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"annotations": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Allows: true,
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"enabled"},
+			},
+		},
 	}
 }
 
@@ -54,6 +134,7 @@ func schema_pkg_apis_app_v1alpha1_KubeSerial(ref common.ReferenceCallback) commo
 						},
 					},
 				},
+				Required: []string{"spec"},
 			},
 		},
 		Dependencies: []string{
@@ -67,8 +148,35 @@ func schema_pkg_apis_app_v1alpha1_KubeSerialSpec(ref common.ReferenceCallback) c
 			SchemaProps: spec.SchemaProps{
 				Description: "KubeSerialSpec defines the desired state of KubeSerial",
 				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"devices": {
+						VendorExtensible: spec.VendorExtensible{
+							Extensions: spec.Extensions{
+								"x-kubernetes-list-type": "set",
+							},
+						},
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("./pkg/apis/app/v1alpha1.Device"),
+									},
+								},
+							},
+						},
+					},
+					"ingress": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("./pkg/apis/app/v1alpha1.IngressSpec"),
+						},
+					},
+				},
+				Required: []string{"devices", "ingress"},
 			},
 		},
+		Dependencies: []string{
+			"./pkg/apis/app/v1alpha1.Device", "./pkg/apis/app/v1alpha1.IngressSpec"},
 	}
 }
 

@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kubeserial
+  namespace: kubeserial
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: kubeserial
+  template:
+    metadata:
+      labels:
+        name: kubeserial
+    spec:
+      serviceAccountName: kubeserial
+      containers:
+        - name: kubeserial
+          image: janekbaraniewski/kubeserial
+          command:
+          - kubeserial
+          imagePullPolicy: Always
+          env:
+            - name: WATCH_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: OPERATOR_NAME
+              value: "kubeserial"

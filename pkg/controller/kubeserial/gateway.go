@@ -1,21 +1,14 @@
 package kubeserial
 
 import (
-	"context"
-
 	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/app/v1alpha1"
 	"github.com/janekbaraniewski/kubeserial/pkg/gateway"
-	corev1 "k8s.io/api/core/v1"
-	v1beta2 "k8s.io/api/apps/v1beta2"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/apimachinery/pkg/api/errors"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	"github.com/janekbaraniewski/kubeserial/pkg/controller/api"
 )
 
 
 
-func (r *ReconcileKubeSerial) ReconcileGateway(cr *appv1alpha1.KubeSerial) error {
+func (r *ReconcileKubeSerial) ReconcileGateway(cr *appv1alpha1.KubeSerial, api *api.ApiClient) error {
 	logger := log.WithValues("Namespace", cr.Namespace, "Name", cr.Name)
 
 	for _, device := range cr.Spec.Devices {
@@ -28,12 +21,12 @@ func (r *ReconcileKubeSerial) ReconcileGateway(cr *appv1alpha1.KubeSerial) error
 
 		if stateCM.Data["available"] == "true" {
 			logger.Info(device.Name, "available on node", stateCM.Data["node"])
-			if err := r.scheduleGateway(cr, &device, stateCM.Data["node"]); err != nil {
+			if err := r.scheduleGateway(cr, &device, stateCM.Data["node"], api); err != nil {
 				return err
 			}
 		} else {
 			logger.Info(device.Name, "unavailable")
-			if err := r.deleteGateway(cr, &device); err != nil {
+			if err := r.deleteGateway(cr, &device, api); err != nil {
 				return err
 			}
 		}
@@ -42,55 +35,43 @@ func (r *ReconcileKubeSerial) ReconcileGateway(cr *appv1alpha1.KubeSerial) error
 	return nil
 }
 
-func (r *ReconcileKubeSerial) scheduleGateway(cr *appv1alpha1.KubeSerial, p *appv1alpha1.Device, node string) error {
+func (r *ReconcileKubeSerial) scheduleGateway(cr *appv1alpha1.KubeSerial, p *appv1alpha1.Device, node string, api *api.ApiClient) error {
 	cm := gateway.CreateConfigMap(cr, p)
 	deploy := gateway.CreateDeployment(cr, p, node)
 	svc := gateway.CreateService(cr, p)
 
-	if err := r.ReconcileConfigMap(cr, cm); err != nil {
+	if err := api.EnsureConfigMap(cr, cm); err != nil {
 		return err
 	}
 
-	if err := r.ReconcileDeployment(cr, deploy); err != nil {
+	if err := api.EnsureDeployment(cr, deploy); err != nil {
 		return err
 	}
 
-	if err := r.ReconcileService(cr, svc); err != nil {
+	if err := api.EnsureService(cr, svc); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (r *ReconcileKubeSerial) deleteGateway(cr *appv1alpha1.KubeSerial, p *appv1alpha1.Device) error {
+func (r *ReconcileKubeSerial) deleteGateway(cr *appv1alpha1.KubeSerial, p *appv1alpha1.Device, api *api.ApiClient) error {
 	logger := log.WithValues("Component", "gateway", "func", "ensureNotRunning")
 
 	logger.Info("Device " + p.Name)
 
 	name := cr.Name + "-" + p.Name + "-gateway"  // TODO: move name generation to some utils so it's in one place
 
-	d := &v1beta2.Deployment{}
-	err := r.client.Get(context.TODO(), types.NamespacedName{Name: name, Namespace: cr.Namespace}, d)
-	if err != nil && !errors.IsNotFound(err) {
+	if err := api.DeleteDeployment(cr, name); err != nil {
 		return err
-	} else if err == nil {
-		r.client.Delete(context.TODO(), d, client.PropagationPolicy(metav1.DeletePropagationForeground))
 	}
 
-	cm := &corev1.ConfigMap{}
-	err = r.client.Get(context.TODO(), types.NamespacedName{Name: name, Namespace: cr.Namespace}, cm)
-	if err != nil && !errors.IsNotFound(err) {
+	if err := api.DeleteConfigMap(cr, name); err != nil {
 		return err
-	} else if err == nil {
-		r.client.Delete(context.TODO(), cm, client.PropagationPolicy(metav1.DeletePropagationForeground))
 	}
 
-	s := &corev1.Service{}
-	err = r.client.Get(context.TODO(), types.NamespacedName{Name: name, Namespace: cr.Namespace}, s)
-	if err != nil && !errors.IsNotFound(err) {
+	if err := api.DeleteService(cr, name); err != nil {
 		return err
-	} else if err == nil {
-		r.client.Delete(context.TODO(), s, client.PropagationPolicy(metav1.DeletePropagationForeground))
 	}
 
 	return nil

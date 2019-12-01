@@ -1,0 +1,12 @@
+apiVersion: app.kubeprint.com/v1alpha1
+kind: Kubeprint
+metadata:
+  name: kubeprint
+  namespace: kubeprint
+spec:
+  printers:
+    - name: "ender3"
+      subsystem: "tty"
+      idvendor: "0403"
+      idproduct: "6001"
+      devpath: "1.1.2"

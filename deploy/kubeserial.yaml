@@ -3,9 +3,7 @@ kind: ServiceAccount
 metadata:
   name: kubeserial
   namespace: kubeserial
-
 ---
-
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -74,9 +72,7 @@ rules:
   - ingresses
   verbs:
   - '*'
-
 ---
-
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -89,9 +85,7 @@ roleRef:
   kind: ClusterRole
   name: kubeserial
   apiGroup: rbac.authorization.k8s.io
-
 ---
-
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
@@ -124,19 +118,56 @@ spec:
           type: object
         spec:
           description: KubeSerialSpec defines the desired state of KubeSerial
+          properties:
+            devices:
+              items:
+                description: Device defines monitored device
+                properties:
+                  idProduct:
+                    type: string
+                  idVendor:
+                    type: string
+                  manager:
+                    type: string
+                  name:
+                    type: string
+                required:
+                - idProduct
+                - idVendor
+                - manager
+                - name
+                type: object
+              type: array
+            ingress:
+              description: IngressSpec defines the desired Ingress configuration
+              properties:
+                annotations:
+                  additionalProperties:
+                    type: string
+                  type: object
+                domain:
+                  type: string
+                enabled:
+                  type: boolean
+              required:
+              - enabled
+              type: object
+          required:
+          - devices
+          - ingress
           type: object
         status:
           description: KubeSerialStatus defines the observed state of KubeSerial
           type: object
+      required:
+      - spec
       type: object
   version: v1alpha1
   versions:
   - name: v1alpha1
     served: true
     storage: true
-
 ---
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:

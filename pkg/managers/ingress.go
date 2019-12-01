@@ -1,4 +1,4 @@
-package octoprint
+package managers
 
 import (
 	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/app/v1alpha1"
@@ -7,20 +7,22 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-func CreateIngress(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device) *v1beta1.Ingress {
+func CreateIngress(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device, domain string) *v1beta1.Ingress {
+	name := GetManagerName(cr.Name, device.Name)
 	labels := map[string]string{
-		"app": cr.Name + "-" + device.Name + "-manager",
+		"app": name,
 	}
 	return &v1beta1.Ingress{
 		ObjectMeta:	metav1.ObjectMeta {
-			Name:		cr.Name + "-" + device.Name + "-manager",
-			Namespace:	cr.Namespace,
-			Labels:		labels,
+			Name:			name,
+			Namespace:		cr.Namespace,
+			Labels:			labels,
+			Annotations: 	cr.Spec.Ingress.Annotations,
 		},
 		Spec:		v1beta1.IngressSpec{
 			Rules:		[]v1beta1.IngressRule{
 				{
-					Host:				device.Name + ".my.home",  // TODO: parametrize
+					Host:				device.Name + domain,
 					IngressRuleValue:	v1beta1.IngressRuleValue{
 						HTTP: &v1beta1.HTTPIngressRuleValue{
 							Paths:	[]v1beta1.HTTPIngressPath{

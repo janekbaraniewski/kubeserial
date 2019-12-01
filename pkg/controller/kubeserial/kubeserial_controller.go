@@ -19,6 +19,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+	apiclient "github.com/janekbaraniewski/kubeserial/pkg/controller/api"
 )
 
 var log = logf.Log.WithName("controller_kubeserial")
@@ -134,23 +135,28 @@ func (r *ReconcileKubeSerial) Reconcile(request reconcile.Request) (reconcile.Re
 		}
 		return reconcile.Result{}, err
 	}
-	reqLogger.Info(instance.Spec.Ingress.Domain)
-	if err := r.reconcileDevicesConfig(instance); err != nil {
+
+	apiClient := apiclient.ApiClient{
+		Client:		r.client,
+		Scheme:		r.scheme,
+	}
+
+	if err := r.reconcileDevicesConfig(instance, &apiClient); err != nil {
 		reqLogger.Info("ReconcileConfig fail")
 		return reconcile.Result{}, err
 	}
 
-	if err := r.ReconcileMonitor(instance); err != nil {
+	if err := r.ReconcileMonitor(instance, &apiClient); err != nil {
 		reqLogger.Info("ReconcileMonitor fail")
 		return reconcile.Result{}, err
 	}
 
-	if err := r.ReconcileGateway(instance); err != nil {
+	if err := r.ReconcileGateway(instance, &apiClient); err != nil {
 		reqLogger.Info("ReconcileGateway fail")
 		return reconcile.Result{}, err
 	}
 
-	if err := r.ReconcileManager(instance); err != nil {
+	if err := r.ReconcileManagers(instance, &apiClient); err != nil {
 		reqLogger.Info("ReconcileManager fail")
 		return reconcile.Result{}, err
 	}
@@ -258,7 +264,7 @@ func (r *ReconcileKubeSerial) ReconcileService(cr *appv1alpha1.KubeSerial, svc *
 	return nil
 }
 
-func (r *ReconcileKubeSerial) reconcileDevicesConfig(cr *appv1alpha1.KubeSerial) error {
+func (r *ReconcileKubeSerial) reconcileDevicesConfig(cr *appv1alpha1.KubeSerial, api *apiclient.ApiClient) error {
 	logger := log.WithValues("KubeSerial.Namespace", cr.Namespace, "KubeSerial.Name", cr.Name)
 	deviceConfs 	:= createDeviceConfig(cr)
 
@@ -270,17 +276,7 @@ func (r *ReconcileKubeSerial) reconcileDevicesConfig(cr *appv1alpha1.KubeSerial)
 	}
 
 	for _, deviceConf := range deviceConfs {
-		found := &corev1.ConfigMap{}
-		err := r.client.Get(context.TODO(), types.NamespacedName{Name: deviceConf.Name, Namespace: deviceConf.Namespace}, found)
-		if err != nil && errors.IsNotFound(err) {
-			logger.Info("Creating a new ConfigMap", "ConfigMap.Namespace", deviceConf.Namespace, "ConfigMap.Name", deviceConf.Name)
-			err = r.client.Create(context.TODO(), deviceConf)
-			if err != nil {
-				logger.Info("ConfigMap set not created")
-				return err
-			}
-		} else if err != nil {
-			logger.Info("ConfigMap set not found")
+		if err := api.EnsureConfigMap(cr, deviceConf); err != nil {
 			return err
 		}
 	}

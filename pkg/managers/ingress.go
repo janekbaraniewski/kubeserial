@@ -7,8 +7,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-func CreateIngress(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device, domain string) *v1beta1.Ingress {
-	name := GetManagerName(cr.Name, device.Name)
+func (m *Manager)CreateIngress(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device, domain string) *v1beta1.Ingress {
+	name := m.GetName(cr.Name, device.Name)
 	labels := map[string]string{
 		"app": name,
 	}
@@ -29,7 +29,7 @@ func CreateIngress(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device, domai
 								{
 									Path: 		"/",
 									Backend: 	v1beta1.IngressBackend {
-										ServiceName: cr.Name + "-" + device.Name + "-manager",
+										ServiceName: m.GetName(cr.Name, device.Name),
 										ServicePort: intstr.FromInt(80),
 									},
 								},

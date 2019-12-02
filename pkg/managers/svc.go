@@ -1,4 +1,4 @@
-package octoprint
+package managers
 
 import (
 	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/app/v1alpha1"
@@ -7,13 +7,13 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-func CreateService(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device) *corev1.Service {
+func (m *Manager)CreateService(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device) *corev1.Service {
 	labels := map[string]string{
-		"app": cr.Name + "-" + device.Name + "-manager",
+		"app": m.GetName(cr.Name, device.Name),
 	}
 	return &corev1.Service {
 		ObjectMeta:	metav1.ObjectMeta {
-			Name:		cr.Name + "-" + device.Name + "-manager",
+			Name:		m.GetName(cr.Name, device.Name),
 			Namespace:	cr.Namespace,
 			Labels:		labels,
 		},
@@ -27,7 +27,7 @@ func CreateService(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device) *core
 				},
 			},
 			Selector: 	map[string]string {
-				"app": cr.Name + "-" + device.Name + "-manager",
+				"app": m.GetName(cr.Name, device.Name),
 			},
 			Type:	corev1.ServiceTypeClusterIP,
 		},

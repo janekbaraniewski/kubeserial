@@ -1,17 +1,19 @@
-package octoprint
+package managers
 
-import (
-	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/app/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
 
-func CreateConfigMap(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device) *corev1.ConfigMap {
-	labels := map[string]string{
-		"app": cr.Name + "-" + device.Name + "-manager",
-	}
-  // TODO: parametrize
-	conf := `
+var Available = map[string]*Manager{
+	"octoprint":	&Octoprint,
+}
+
+var Octoprint = Manager{
+	Image: 		"janekbaraniewski/octoprint:1.3.10",
+	RunCmnd: 	"mkdir /root/.octoprint && cp /data/config.yaml /root/.octoprint/config.yaml && /OctoPrint-1.3.10/run --iknowwhatimdoing --port 80",
+	Config: 	octoprintConfig,
+	ConfigPath:	"/data/config.yaml",
+}
+
+
+var octoprintConfig = `
 accessControl:
   enabled: false
 plugins:
@@ -52,15 +54,3 @@ server:
     corewizard: 3
     cura: null
     tracking: null`
-
-	return &corev1.ConfigMap {
-		ObjectMeta:		metav1.ObjectMeta {
-			Name: 		cr.Name + "-" + device.Name + "-manager",
-			Namespace:	cr.Namespace,
-			Labels:		labels,
-		},
-		Data:			map[string]string {
-			"config.yaml": conf,
-		},
-	}
-}

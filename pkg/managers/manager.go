@@ -6,8 +6,10 @@ import (
 )
 
 type Manager struct {
-	Image 	string
-	RunCmnd	string
+	Image 		string
+	RunCmnd		string
+	Config  	string
+	ConfigPath 	string
 }
 
 

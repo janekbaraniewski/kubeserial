@@ -1,6 +1,8 @@
 package managers
 
 import (
+	"path/filepath"
+
 	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/app/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	v1beta2 "k8s.io/api/apps/v1beta2"
@@ -34,12 +36,12 @@ func (m *Manager)CreateDeployment(cr *appv1alpha1.KubeSerial, device *appv1alpha
 							VolumeSource:	corev1.VolumeSource{
 								ConfigMap:		&corev1.ConfigMapVolumeSource {
 									LocalObjectReference:	corev1.LocalObjectReference{
-										Name: 		cr.Name + "-" + device.Name + "-manager",
+										Name: 		m.GetName(cr.Name, device.Name),
 									},
 									Items:					[]corev1.KeyToPath {
 										{
-											Key:	"config.yaml",
-											Path:	"config.yaml",
+											Key:	filepath.Base(m.ConfigPath),
+											Path:	filepath.Base(m.ConfigPath),
 										},
 									},
 								},
@@ -48,7 +50,7 @@ func (m *Manager)CreateDeployment(cr *appv1alpha1.KubeSerial, device *appv1alpha
 					},
 					Containers: 	[]corev1.Container{
 						{
-							Name:				cr.Name + "-" + device.Name + "-manager",
+							Name:				m.GetName(cr.Name, device.Name),
 							Image:				m.Image,
 							Command:			[]string {"/bin/sh"},
 							Args:				[]string {
@@ -66,8 +68,8 @@ func (m *Manager)CreateDeployment(cr *appv1alpha1.KubeSerial, device *appv1alpha
 								{
 									Name:		"config",
 									ReadOnly:	false,
-									MountPath:	"/data/config.yaml",
-									SubPath:	"config.yaml",
+									MountPath:	m.ConfigPath,
+									SubPath:	filepath.Base(m.ConfigPath),
 								},
 							},
 						},

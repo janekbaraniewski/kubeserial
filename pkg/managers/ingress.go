@@ -8,7 +8,7 @@ import (
 )
 
 func (m *Manager)CreateIngress(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device, domain string) *v1beta1.Ingress {
-	name := GetManagerName(cr.Name, device.Name)
+	name := m.GetName(cr.Name, device.Name)
 	labels := map[string]string{
 		"app": name,
 	}

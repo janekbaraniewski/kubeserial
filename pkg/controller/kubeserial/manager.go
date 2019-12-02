@@ -14,9 +14,13 @@ func (r *ReconcileKubeSerial) ReconcileManagers(cr *appv1alpha1.KubeSerial, api 
 		}
 		manager := managers.Available[device.Manager]
 		if stateCM.Data["available"] == "true" {
-			return manager.Schedule(cr, &device, api)
+			if err := manager.Schedule(cr, &device, api); err != nil {
+				return err
+			}
 		} else {
-			return manager.Delete(cr, &device, api)
+			if err := manager.Delete(cr, &device, api); err != nil {
+				return err
+			}
 		}
 	}
 	return nil

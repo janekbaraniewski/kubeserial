@@ -8,7 +8,7 @@ import (
 
 func (m *Manager)CreateConfigMap(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device) *corev1.ConfigMap {
 	labels := map[string]string{
-		"app": cr.Name + "-" + device.Name + "-manager",
+		"app": m.GetName(cr.Name, device.Name),
 	}
   // TODO: parametrize
 	conf := `
@@ -55,7 +55,7 @@ server:
 
 	return &corev1.ConfigMap {
 		ObjectMeta:		metav1.ObjectMeta {
-			Name: 		cr.Name + "-" + device.Name + "-manager",
+			Name: 		m.GetName(cr.Name, device.Name),
 			Namespace:	cr.Namespace,
 			Labels:		labels,
 		},

@@ -29,7 +29,7 @@ func (m *Manager)CreateIngress(cr *appv1alpha1.KubeSerial, device *appv1alpha1.D
 								{
 									Path: 		"/",
 									Backend: 	v1beta1.IngressBackend {
-										ServiceName: cr.Name + "-" + device.Name + "-manager",
+										ServiceName: m.GetName(cr.Name, device.Name),
 										ServicePort: intstr.FromInt(80),
 									},
 								},

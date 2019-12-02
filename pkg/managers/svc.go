@@ -9,11 +9,11 @@ import (
 
 func (m *Manager)CreateService(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device) *corev1.Service {
 	labels := map[string]string{
-		"app": cr.Name + "-" + device.Name + "-manager",
+		"app": m.GetName(cr.Name, device.Name),
 	}
 	return &corev1.Service {
 		ObjectMeta:	metav1.ObjectMeta {
-			Name:		cr.Name + "-" + device.Name + "-manager",
+			Name:		m.GetName(cr.Name, device.Name),
 			Namespace:	cr.Namespace,
 			Labels:		labels,
 		},
@@ -27,7 +27,7 @@ func (m *Manager)CreateService(cr *appv1alpha1.KubeSerial, device *appv1alpha1.D
 				},
 			},
 			Selector: 	map[string]string {
-				"app": cr.Name + "-" + device.Name + "-manager",
+				"app": m.GetName(cr.Name, device.Name),
 			},
 			Type:	corev1.ServiceTypeClusterIP,
 		},

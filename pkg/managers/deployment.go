@@ -9,11 +9,11 @@ import (
 
 func (m *Manager)CreateDeployment(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device) *v1beta2.Deployment {
 	labels := map[string]string{
-		"app": cr.Name + "-" + device.Name + "-manager",
+		"app": m.GetName(cr.Name, device.Name),
 	}
 	return &v1beta2.Deployment {
 		ObjectMeta:	metav1.ObjectMeta {
-			Name: 	cr.Name + "-" + device.Name + "-manager",
+			Name: 	m.GetName(cr.Name, device.Name),
 			Namespace:	cr.Namespace,
 			Labels:		labels,
 		},
@@ -23,7 +23,7 @@ func (m *Manager)CreateDeployment(cr *appv1alpha1.KubeSerial, device *appv1alpha
 			},
 			Template:	corev1.PodTemplateSpec {
 				ObjectMeta:	metav1.ObjectMeta{
-					Name:		cr.Name + "-" + device.Name + "-manager",
+					Name:		m.GetName(cr.Name, device.Name),
 					Namespace:	cr.Namespace,
 					Labels:		labels,
 				},

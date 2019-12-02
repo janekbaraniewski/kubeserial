@@ -40,7 +40,7 @@ func (m *Manager) Schedule(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Devic
 
 
 func (m *Manager) Delete(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device, api *api.ApiClient) error {
-	name := cr.Name + "-" + device.Name + "-manager"  // TODO: this should be set level above (1 place for all types of managers)
+	name := m.GetName(cr.Name, device.Name)
 
 	if err := api.DeleteDeployment(cr, name); err != nil {
 		return err

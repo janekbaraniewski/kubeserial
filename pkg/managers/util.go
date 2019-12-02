@@ -1,6 +1,6 @@
 package managers
 
 
-func GetManagerName(crName string, deviceName string) string {
+func (m *Manager)GetName(crName string, deviceName string) string {
 	return crName + "-" + deviceName + "-manager"
 }

@@ -1,4 +1,4 @@
-package octoprint
+package managers
 
 import (
 	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/app/v1alpha1"
@@ -7,7 +7,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-func CreateService(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device) *corev1.Service {
+func (m *Manager)CreateService(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device) *corev1.Service {
 	labels := map[string]string{
 		"app": cr.Name + "-" + device.Name + "-manager",
 	}

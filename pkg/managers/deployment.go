@@ -1,4 +1,4 @@
-package octoprint
+package managers
 
 import (
 	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/app/v1alpha1"
@@ -7,7 +7,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func CreateDeployment(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device) *v1beta2.Deployment {
+func (m *Manager)CreateDeployment(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device) *v1beta2.Deployment {
 	labels := map[string]string{
 		"app": cr.Name + "-" + device.Name + "-manager",
 	}
@@ -49,11 +49,11 @@ func CreateDeployment(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device) *v
 					Containers: 	[]corev1.Container{
 						{
 							Name:				cr.Name + "-" + device.Name + "-manager",
-							Image:				"janekbaraniewski/octoprint:1.3.10",
+							Image:				m.Image,
 							Command:			[]string {"/bin/sh"},
 							Args:				[]string {
 								"-c",
-								"socat pty,wait-slave,link=/dev/device,perm=0660,group=tty tcp:" + cr.Name + "-" + device.Name + "-gateway:3333 & mkdir /root/.octoprint && cp /data/config.yaml /root/.octoprint/config.yaml && /OctoPrint-1.3.10/run --iknowwhatimdoing --port 80",  // TODO: make init container
+								"socat pty,wait-slave,link=/dev/device,perm=0660,group=tty tcp:" + cr.Name + "-" + device.Name + "-gateway:3333 & " + m.RunCmnd,  // TODO: make init container
 							},
 							Ports:				[]corev1.ContainerPort{
 								{

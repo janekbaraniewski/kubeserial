@@ -164,106 +164,6 @@ func (r *ReconcileKubeSerial) Reconcile(request reconcile.Request) (reconcile.Re
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileKubeSerial) ReconcileConfigMap(cr *appv1alpha1.KubeSerial, cm *corev1.ConfigMap) error {
-	logger := log.WithValues("KubeSerial.Namespace", cr.Namespace, "KubeSerial.Name", cr.Name)
-
-	if err := controllerutil.SetControllerReference(cr, cm, r.scheme); err != nil {
-			logger.Info("Can't set reference")
-			return err
-	}
-
-	found := &corev1.ConfigMap{}
-	err := r.client.Get(context.TODO(), types.NamespacedName{Name: cm.Name, Namespace: cm.Namespace}, found)
-	if err != nil && errors.IsNotFound(err) {
-		logger.Info("Creating a new ConfigMap " + cm.Name)
-		err = r.client.Create(context.TODO(), cm)
-		if err != nil {
-			logger.Info("ConfigMap not created")
-			return err
-		}
-	} else if err != nil {
-		logger.Info("ConfigMap not found")
-		return err
-	}
-
-	return nil
-}
-
-func (r *ReconcileKubeSerial) ReconcileDeployment(cr *appv1alpha1.KubeSerial, deployment *v1beta2.Deployment) error {
-	logger := log.WithValues("KubeSerial.Namespace", cr.Namespace, "KubeSerial.Name", cr.Name)
-
-	if err := controllerutil.SetControllerReference(cr, deployment, r.scheme); err != nil {
-			logger.Info("Can't set reference")
-			return err
-	}
-
-	found := &v1beta2.Deployment{}
-	err := r.client.Get(context.TODO(), types.NamespacedName{Name: deployment.Name, Namespace: deployment.Namespace}, found)
-	if err != nil && errors.IsNotFound(err) {
-		logger.Info("Creating a new Deployment " + deployment.Name)
-		err = r.client.Create(context.TODO(), deployment)
-		if err != nil {
-			logger.Info("Deployment not created")
-			return err
-		}
-	} else if err != nil {
-		logger.Info("Deployment not found")
-		return err
-	}
-
-	return nil
-}
-
-func (r *ReconcileKubeSerial) ReconcileIngress(cr *appv1alpha1.KubeSerial, ingress *v1beta1.Ingress) error {
-	logger := log.WithValues("KubeSerial.Namespace", cr.Namespace, "KubeSerial.Name", cr.Name)
-
-	if err := controllerutil.SetControllerReference(cr, ingress, r.scheme); err != nil {
-			logger.Info("Can't set reference")
-			return err
-	}
-
-	found := &v1beta1.Ingress{}
-	err := r.client.Get(context.TODO(), types.NamespacedName{Name: ingress.Name, Namespace: ingress.Namespace}, found)
-	if err != nil && errors.IsNotFound(err) {
-		logger.Info("Creating a new Ingress " + ingress.Name)
-		err = r.client.Create(context.TODO(), ingress)
-		if err != nil {
-			logger.Info("Deployment not created")
-			return err
-		}
-	} else if err != nil {
-		logger.Info("Deployment not found")
-		return err
-	}
-
-	return nil
-}
-
-func (r *ReconcileKubeSerial) ReconcileService(cr *appv1alpha1.KubeSerial, svc *corev1.Service) error {
-	logger := log.WithValues("KubeSerial.Namespace", cr.Namespace, "KubeSerial.Name", cr.Name)
-
-	if err := controllerutil.SetControllerReference(cr, svc, r.scheme); err != nil {
-			logger.Info("Can't set reference")
-			return err
-	}
-
-	found := &corev1.Service{}
-	err := r.client.Get(context.TODO(), types.NamespacedName{Name: svc.Name, Namespace: svc.Namespace}, found)
-	if err != nil && errors.IsNotFound(err) {
-		logger.Info("Creating a new Service" + svc.Name)
-		err = r.client.Create(context.TODO(), svc)
-		if err != nil {
-			logger.Info("Service not created")
-			return err
-		}
-	} else if err != nil {
-		logger.Info("Service not found")
-		return err
-	}
-
-	return nil
-}
-
 func (r *ReconcileKubeSerial) reconcileDevicesConfig(cr *appv1alpha1.KubeSerial, api *apiclient.ApiClient) error {
 	logger := log.WithValues("KubeSerial.Namespace", cr.Namespace, "KubeSerial.Name", cr.Name)
 	deviceConfs 	:= createDeviceConfig(cr)
@@ -282,6 +182,20 @@ func (r *ReconcileKubeSerial) reconcileDevicesConfig(cr *appv1alpha1.KubeSerial,
 	}
 
 	return nil
+}
+
+func (r *ReconcileKubeSerial) GetDeviceState(p *appv1alpha1.Device, cr *appv1alpha1.KubeSerial) (*corev1.ConfigMap, error) {
+	logger := log.WithValues("Namespace", cr.Namespace, "Name", cr.Name)
+
+	found := &corev1.ConfigMap{}
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: cr.Name + "-" + p.Name, Namespace: cr.Namespace}, found)
+	if err != nil && errors.IsNotFound(err) {
+		logger.Info("Can't get device state")
+		return nil, err
+	} else if err != nil {
+		return nil, err
+	}
+	return found, nil
 }
 
 func createDeviceConfig(cr *appv1alpha1.KubeSerial) []*corev1.ConfigMap { // TODO: move to separate module
@@ -306,18 +220,4 @@ func createDeviceConfig(cr *appv1alpha1.KubeSerial) []*corev1.ConfigMap { // TOD
 		})
 	}
 	return confs
-}
-
-func (r *ReconcileKubeSerial) GetDeviceState(p *appv1alpha1.Device, cr *appv1alpha1.KubeSerial) (*corev1.ConfigMap, error) {
-	logger := log.WithValues("Namespace", cr.Namespace, "Name", cr.Name)
-
-	found := &corev1.ConfigMap{}
-	err := r.client.Get(context.TODO(), types.NamespacedName{Name: cr.Name + "-" + p.Name, Namespace: cr.Namespace}, found)
-	if err != nil && errors.IsNotFound(err) {
-		logger.Info("Can't get device state")
-		return nil, err
-	} else if err != nil {
-		return nil, err
-	}
-	return found, nil
 }

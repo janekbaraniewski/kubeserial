@@ -16,7 +16,7 @@ spec:
       serviceAccountName: kubeserial
       containers:
         - name: kubeserial
-          image: janekbaraniewski/kubeserial
+          image: janekbaraniewski/kubeserial:stable
           command:
           - kubeserial
           imagePullPolicy: Always

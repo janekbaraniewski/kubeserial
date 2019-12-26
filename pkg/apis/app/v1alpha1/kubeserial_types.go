@@ -11,6 +11,7 @@ type Device struct {
 	IdVendor	string 	`json:"idVendor"`
 	IdProduct	string 	`json:"idProduct"`
 	Manager		string 	`json:"manager"`
+	Subsystem	string 	`json:"subsystem"`
 }
 
 // IngressSpec defines the desired Ingress configuration

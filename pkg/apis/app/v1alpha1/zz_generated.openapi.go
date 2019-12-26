@@ -50,8 +50,14 @@ func schema_pkg_apis_app_v1alpha1_Device(ref common.ReferenceCallback) common.Op
 							Format: "",
 						},
 					},
+					"subsystem": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
 				},
-				Required: []string{"name", "idVendor", "idProduct", "manager"},
+				Required: []string{"name", "idVendor", "idProduct", "manager", "subsystem"},
 			},
 		},
 	}

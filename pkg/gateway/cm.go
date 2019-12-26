@@ -12,7 +12,7 @@ func CreateConfigMap(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device) *co
 		"app": cr.Name + "-" + device.Name + "-gateway",
 	}
 
-	conf := "3333:raw:600:/dev/tty" + device.Name + ":115200 8DATABITS NONE 1STOPBIT -XONXOFF LOCAL -RTSCTS HANGUP_WHEN_DONE\n"
+	conf := "3333:raw:600:/dev/" + device.Name + ":115200 8DATABITS NONE 1STOPBIT -XONXOFF LOCAL -RTSCTS HANGUP_WHEN_DONE\n"
 
 	return &corev1.ConfigMap {
 		ObjectMeta:		metav1.ObjectMeta {

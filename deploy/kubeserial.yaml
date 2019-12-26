@@ -131,11 +131,14 @@ spec:
                     type: string
                   name:
                     type: string
+                  subsystem:
+                    type: string
                 required:
                 - idProduct
                 - idVendor
                 - manager
                 - name
+                - subsystem
                 type: object
               type: array
             ingress:

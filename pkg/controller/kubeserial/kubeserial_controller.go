@@ -24,31 +24,20 @@ import (
 
 var log = logf.Log.WithName("controller_kubeserial")
 
-/**
-* USER ACTION REQUIRED: This is a scaffold file intended for the user to modify with their own Controller
-* business logic.  Delete these comments after modifying this file.*
- */
-
-// Add creates a new KubeSerial Controller and adds it to the Manager. The Manager will set fields on the Controller
-// and Start it when the Manager is Started.
 func Add(mgr manager.Manager) error {
 	return add(mgr, newReconciler(mgr))
 }
 
-// newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 	return &ReconcileKubeSerial{client: mgr.GetClient(), scheme: mgr.GetScheme()}
 }
 
-// add adds a new Controller to mgr with r as the reconcile.Reconciler
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
-	// Create a new controller
 	c, err := controller.New("kubeserial-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
 		return err
 	}
 
-	// Watch for changes to primary resource KubeSerial
 	err = c.Watch(&source.Kind{Type: &appv1alpha1.KubeSerial{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		return err
@@ -116,13 +105,6 @@ type ReconcileKubeSerial struct {
 	scheme *runtime.Scheme
 }
 
-// Reconcile reads that state of the cluster for a KubeSerial object and makes changes based on the state read
-// and what is in the KubeSerial.Spec
-// TODO(user): Modify this Reconcile function to implement your Controller logic.  This example creates
-// a Pod as an example
-// Note:
-// The Controller will requeue the Request to be processed again if the returned error is non-nil or
-// Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
 func (r *ReconcileKubeSerial) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
 	reqLogger.Info("Reconciling KubeSerial")

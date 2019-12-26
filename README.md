@@ -23,10 +23,12 @@ spec:
       idVendor:   "0403"
       idProduct:  "6001"
       manager:    "octoprint"
+      subsystem:  "tty"
     - name:       "aneta8"
       idVendor:   "1a86"
       idProduct:  "7523"
       manager:    "octoprint"
+      subsystem:  "tty"
   ingress:
     enabled: true
     domain: ".my.home"

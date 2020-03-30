@@ -4,20 +4,20 @@ import (
 	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/app/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	v1beta2 "k8s.io/api/apps/v1beta2"
+	appsv1 "k8s.io/api/apps/v1"
 )
 
-func CreateDaemonSet(cr *appv1alpha1.KubeSerial) *v1beta2.DaemonSet {
+func CreateDaemonSet(cr *appv1alpha1.KubeSerial) *appsv1.DaemonSet {
 	labels := map[string]string{
 		"app": cr.Name + "-monitor",
 	}
-	return &v1beta2.DaemonSet{
+	return &appsv1.DaemonSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:		cr.Name + "-monitor",
 			Namespace: 	cr.Namespace,
 			Labels:		labels,
 		},
-		Spec: v1beta2.DaemonSetSpec{
+		Spec: appsv1.DaemonSetSpec{
 			Selector: &metav1.LabelSelector {
 				MatchLabels:	labels,
 			},

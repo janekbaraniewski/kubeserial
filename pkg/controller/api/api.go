@@ -6,7 +6,7 @@ import (
 	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/app/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	v1beta1 "k8s.io/api/extensions/v1beta1"
-	v1beta2 "k8s.io/api/apps/v1beta2"
+	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -98,7 +98,7 @@ func (r *ApiClient) EnsureIngress(cr *appv1alpha1.KubeSerial, ingress *v1beta1.I
 	return nil
 }
 
-func (r *ApiClient) EnsureDeployment(cr *appv1alpha1.KubeSerial, deployment *v1beta2.Deployment) error {
+func (r *ApiClient) EnsureDeployment(cr *appv1alpha1.KubeSerial, deployment *appsv1.Deployment) error {
 	logger := log.WithValues("KubeSerial.Namespace", cr.Namespace, "KubeSerial.Name", cr.Name)
 
 	if err := controllerutil.SetControllerReference(cr, deployment, r.Scheme); err != nil {
@@ -106,7 +106,7 @@ func (r *ApiClient) EnsureDeployment(cr *appv1alpha1.KubeSerial, deployment *v1b
 			return err
 	}
 
-	found := &v1beta2.Deployment{}
+	found := &appsv1.Deployment{}
 	err := r.Client.Get(context.TODO(), types.NamespacedName{Name: deployment.Name, Namespace: deployment.Namespace}, found)
 	if err != nil && errors.IsNotFound(err) {
 		logger.Info("Creating a new Deployment " + deployment.Name)
@@ -123,12 +123,12 @@ func (r *ApiClient) EnsureDeployment(cr *appv1alpha1.KubeSerial, deployment *v1b
 	return nil
 }
 
-func (r *ApiClient) EnsureDaemonSet(cr *appv1alpha1.KubeSerial, ds *v1beta2.DaemonSet) error {
+func (r *ApiClient) EnsureDaemonSet(cr *appv1alpha1.KubeSerial, ds *appsv1.DaemonSet) error {
 	if err := controllerutil.SetControllerReference(cr, ds, r.Scheme); err != nil {
 		return err
 	}
 
-	found := &v1beta2.DaemonSet{}
+	found := &appsv1.DaemonSet{}
 	err := r.Client.Get(context.TODO(), types.NamespacedName{Name: ds.Name, Namespace: ds.Namespace}, found)
 	if err != nil && errors.IsNotFound(err) {
 		err = r.Client.Create(context.TODO(), ds)
@@ -142,7 +142,7 @@ func (r *ApiClient) EnsureDaemonSet(cr *appv1alpha1.KubeSerial, ds *v1beta2.Daem
 }
 
 func (r *ApiClient) DeleteDeployment(cr *appv1alpha1.KubeSerial, name string) error {
-	d := &v1beta2.Deployment{}
+	d := &appsv1.Deployment{}
 	err := r.Client.Get(context.TODO(), types.NamespacedName{Name: name, Namespace: cr.Namespace}, d)
 	if err != nil && !errors.IsNotFound(err) {
 		return err

@@ -3,21 +3,21 @@ package gateway
 import (
 	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/app/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
-	v1beta2 "k8s.io/api/apps/v1beta2"
+	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func CreateDeployment(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device, nodeName string) *v1beta2.Deployment {
+func CreateDeployment(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device, nodeName string) *appsv1.Deployment {
 	labels := map[string]string{
 		"app": cr.Name + "-" + device.Name + "-gateway",
 	}
-	return &v1beta2.Deployment {  // TODO: add TCP probes
+	return &appsv1.Deployment {  // TODO: add TCP probes
 		ObjectMeta:	metav1.ObjectMeta {
 			Name: 		cr.Name + "-" + device.Name + "-gateway",
 			Namespace:	cr.Namespace,
 			Labels:		labels,
 		},
-		Spec:		v1beta2.DeploymentSpec {
+		Spec:		appsv1.DeploymentSpec {
 			Selector:	&metav1.LabelSelector {
 				MatchLabels:	labels,
 			},

@@ -5,21 +5,21 @@ import (
 
 	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/app/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
-	v1beta2 "k8s.io/api/apps/v1beta2"
+	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (m *Manager)CreateDeployment(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device) *v1beta2.Deployment {
+func (m *Manager)CreateDeployment(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device) *appsv1.Deployment {
 	labels := map[string]string{
 		"app": m.GetName(cr.Name, device.Name),
 	}
-	return &v1beta2.Deployment {
+	return &appsv1.Deployment {
 		ObjectMeta:	metav1.ObjectMeta {
 			Name: 	m.GetName(cr.Name, device.Name),
 			Namespace:	cr.Namespace,
 			Labels:		labels,
 		},
-		Spec:		v1beta2.DeploymentSpec {
+		Spec:		appsv1.DeploymentSpec {
 			Selector:	&metav1.LabelSelector {
 				MatchLabels:	labels,
 			},

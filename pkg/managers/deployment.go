@@ -55,7 +55,7 @@ func (m *Manager)CreateDeployment(cr *appv1alpha1.KubeSerial, device *appv1alpha
 							Command:			[]string {"/bin/sh"},
 							Args:				[]string {
 								"-c",
-								"socat pty,wait-slave,link=/dev/device,perm=0660,group=tty tcp:" + cr.Name + "-" + device.Name + "-gateway:3333 & " + m.RunCmnd,  // TODO: make init container
+								"socat -d -d pty,raw,echo=0,b115200,link=/dev/device,perm=0660,group=tty tcp:" + cr.Name + "-" + device.Name + "-gateway:3333 & " + m.RunCmnd,  // TODO: make init container
 							},
 							Ports:				[]corev1.ContainerPort{
 								{

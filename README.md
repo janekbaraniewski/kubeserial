@@ -85,3 +85,29 @@ Creates deployment with management software, mounts your device over the network
 ###### Supported managers
 
 - Octoprint
+
+
+# Build
+
+## Multi-Arch Setup
+
+If running from an x86 system, run the following to install necessary qemu emulation:
+
+```sh
+docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+```
+
+See <https://github.com/multiarch/qemu-user-static> for more details.
+
+## To Compile Kubeserial Binary
+
+```sh
+make compile
+```
+
+## Build The Docker Comtainer
+
+```sh
+make build
+```
+

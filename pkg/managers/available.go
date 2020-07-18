@@ -3,6 +3,7 @@ package managers
 
 var Available = map[string]*Manager{
 	"octoprint":	&Octoprint,
+  "openwebrx":  &OpenWebRX,
 }
 
 var Octoprint = Manager{
@@ -12,6 +13,12 @@ var Octoprint = Manager{
 	ConfigPath:	"/data/config.yaml",
 }
 
+var OpenWebRX = Manager{
+  Image:      "janekbaraniewski/openwebrx:latest", // TODO: fix version
+  RunCmnd:    "/src/openwebrx/openwebrx.py",
+  Config:     "",
+  ConfigPath: "/tmp/conf.yaml",
+}
 
 var octoprintConfig = `
 accessControl:

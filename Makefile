@@ -1,5 +1,5 @@
 DOCKERHUB=janekbaraniewski/kubeserial
-VERSION=stable
+VERSION ?= $(shell git rev-parse --short HEAD)
 
 PHONY: .compile
 compile: compile-arm

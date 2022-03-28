@@ -27,7 +27,3 @@ kubeserial-docker: docker-build
 
 docker-build:
 	docker buildx build . -f ${DOCKERFILE} ${DOCKERBUILD_EXTRA_OPTS} ${DOCKERBUILD_PLATFORM_OPT} ${PLATFORMS} -t $(DOCKERHUB):$(VERSION) ${DOCKERBUILD_ACTION}
-
-PHONY: .clean
-clean:
-	@rm -rf build/_output

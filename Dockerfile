@@ -10,7 +10,7 @@ RUN GOOS=$TARGETOS GOARCH=$TARGETARCH \
     GO_BUILD_OUTPUT_PATH=/build/bin/kubeserial \
     make kubeserial
 
-FROM --platform=$TARGETPLATFORM alpine
+FROM alpine
 
 ENV OPERATOR=/usr/local/bin/kubeserial \
     USER_UID=1001 \

@@ -1,5 +1,5 @@
 DOCKERHUB=janekbaraniewski/kubeserial
-SUPPORTED_PLATFORMS=linux/amd64,linux/386,linux/arm64,linux/arm/v7
+TARGET_PLATFORMS=$(shell cat TARGET_PLATFORMS)
 VERSION ?= $(shell git rev-parse --short HEAD)
 DOCKERBUILD_EXTRA_OPTS ?=
 DOCKERBUILD_PLATFORM_OPT=--platform
@@ -18,7 +18,7 @@ kubeserial-docker-local: VERSION=local
 kubeserial-docker-local: kubeserial-docker
 
 PHONY: .kubeserial-docker-all
-kubeserial-docker-all: PLATFORMS=${SUPPORTED_PLATFORMS}
+kubeserial-docker-all: PLATFORMS=${TARGET_PLATFORMS}
 kubeserial-docker-all: DOCKERBUILD_ACTION=--push
 kubeserial-docker-all: kubeserial-docker
 

@@ -2,22 +2,21 @@ DOCKERHUB=janekbaraniewski/kubeserial
 VERSION=stable
 
 PHONY: .compile
-compile: compilearm
+compile: compile-arm
 
-PHONY: .compilearm
-compilearm: build/_output/bin/kubeserial
-
-compilearm: export GOOS=linux
-compilearm: export GOARCH=arm
-compilearm: export GOARM=5
+PHONY: .compile-arm
+compile-arm: export GOOS=linux
+compile-arm: export GOARCH=arm
+compile-arm: export GOARM=5
+compile-arm: build/_output/bin/kubeserial
 
 build/_output/bin/kubeserial:
 	@mkdir -p build/_output/bin/
-	@go build -o build/_output/bin/kubeserial cmd/manager/main.go
+	go build -o build/_output/bin/kubeserial cmd/manager/main.go
 
-PHONY: .build
-build: compilearm
-	cd build/ && docker build . -t $(DOCKERHUB):$(VERSION) 
+PHONY: .docker-arm
+docker-arm: compile-arm
+	cd build/ && docker build . -t $(DOCKERHUB):$(VERSION)
 
 PHONY: .clean
 clean:

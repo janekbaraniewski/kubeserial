@@ -17,22 +17,10 @@ exit_on_error () {
 }
 
 replace_or_compare () {
-    echo "Path1 -> ${1}"
-    echo "Path2 -> ${2}"
-    echo "PWD -> ${PWD}"
-
-    ls ${1}
-    ls ${2}
-
-    printf "\n\n\n file 1 \n\n\n"
-    cat ${1}
-    printf "\n\n\n file 2 \n\n\n"
-    cat ${2}
-
     if [[ "${COPY_OR_DIFF}" == "copy" ]]; then
         cp -r $1 $2
     elif [[ "${COPY_OR_DIFF}" == "diff" ]]; then
-        diff -r $1 $2 || exit_on_error "To fix run:\n    make codegen"
+        diff -qr $1 $2 || exit_on_error "To fix run:\n    make codegen"
     fi
 }
 
@@ -110,7 +98,7 @@ informer-gen \
     --listers-package=github.com/janekbaraniewski/kubeserial/pkg/generated/listers \
     --output-package=github.com/janekbaraniewski/kubeserial/pkg/generated/informers
 
-rm -rf ./pkg/generated || true
+if [[ "${COPY_OR_DIFF}" == "copy" ]]; then rm -rf ./pkg/generated || true; fi;
 replace_or_compare $GOPATH/src/github.com/janekbaraniewski/kubeserial/pkg/generated/ ./pkg/generated
 
 printf "Done!\n"
@@ -118,6 +106,6 @@ printf "Done!\n"
 printf "controller-gen... "
 
 controller-gen crd paths=./pkg/apis/app/... output:crd:dir=/tmp/deploy/crds
-replace_or_compare /tmp/deploy/crds deploy/
+replace_or_compare /tmp/deploy/crds/* deploy/crds
 
 printf "Done!\n"

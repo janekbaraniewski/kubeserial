@@ -31,7 +31,7 @@ jobs:
           version: v3.5.1
 
       - name: Run chart-testing (lint)
-        run: ct lint --charts deploy/chart/kubeserial
+        run: make helm-lint
 
       # - name: Create kind cluster
       #   uses: helm/kind-action@v1.2.0

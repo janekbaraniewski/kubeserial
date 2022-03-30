@@ -37,7 +37,7 @@ GO111MODULE=on "$GO" install \
 printf "deepcopy-gen... "
 
 deepcopy-gen \
-  --go-header-file "scripts/boilerplate.go.txt" \
+  --go-header-file "scripts/template.go.txt" \
   --input-dirs="github.com/janekbaraniewski/kubeserial/pkg/apis/app/v1alpha1" \
   --output-package="github.com/janekbaraniewski/kubeserial/pkg/apis/app/v1alpha1" \
   --output-file-base=zz_generated.deepcopy -v 1
@@ -49,7 +49,7 @@ printf "Done!\n"
 printf "register-gen... "
 
 register-gen all \
-  --go-header-file "scripts/boilerplate.go.txt" \
+  --go-header-file "scripts/template.go.txt" \
   --input-dirs="github.com/janekbaraniewski/kubeserial/pkg/apis/app/v1alpha1" \
   --output-package="github.com/janekbaraniewski/kubeserial/pkg/apis/app/v1alpha1" \
   --output-file-base=zz_generated.register -v 1
@@ -61,7 +61,7 @@ printf "Done!\n"
 printf "openapi-gen... "
 
 openapi-gen \
-  --go-header-file "scripts/boilerplate.go.txt" \
+  --go-header-file "scripts/template.go.txt" \
   --input-dirs="github.com/janekbaraniewski/kubeserial/pkg/apis/app/v1alpha1" \
   --output-package="github.com/janekbaraniewski/kubeserial/pkg/apis/app/v1alpha1" \
   --output-file-base=zz_generated.openapi -v 1
@@ -73,7 +73,7 @@ printf "Done!\n"
 printf "client-gen... "
 
 client-gen \
-    --go-header-file "scripts/boilerplate.go.txt" \
+    --go-header-file "scripts/template.go.txt" \
     --input-base="" \
     --input="github.com/janekbaraniewski/kubeserial/pkg/apis/app/v1alpha1" \
     --output-package=github.com/janekbaraniewski/kubeserial/pkg/generated/clientset \
@@ -84,7 +84,7 @@ printf "Done!\n"
 printf "lister-gen... "
 
 lister-gen \
-    --go-header-file "scripts/boilerplate.go.txt" \
+    --go-header-file "scripts/template.go.txt" \
     --input-dirs="github.com/janekbaraniewski/kubeserial/pkg/apis/app/v1alpha1" \
     --output-package=github.com/janekbaraniewski/kubeserial/pkg/generated/listers
 printf "Done!\n"
@@ -92,7 +92,7 @@ printf "Done!\n"
 printf "informer-gen... "
 
 informer-gen \
-    --go-header-file "scripts/boilerplate.go.txt" \
+    --go-header-file "scripts/template.go.txt" \
     --input-dirs="github.com/janekbaraniewski/kubeserial/pkg/apis/app/v1alpha1" \
     --versioned-clientset-package=github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned \
     --listers-package=github.com/janekbaraniewski/kubeserial/pkg/generated/listers \

@@ -30,7 +30,7 @@ require (
 	github.com/evanphx/json-patch v4.5.0+incompatible // indirect
 	github.com/fatih/color v1.7.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
-	github.com/go-logr/logr v1.2.0 // indirect
+	github.com/go-logr/logr v0.1.0 // indirect
 	github.com/go-logr/zapr v0.1.1 // indirect
 	github.com/go-openapi/jsonpointer v0.19.2 // indirect
 	github.com/go-openapi/jsonreference v0.19.2 // indirect
@@ -86,7 +86,7 @@ require (
 	k8s.io/code-generator v0.0.0 // indirect
 	k8s.io/gengo v0.0.0-20191010091904-7fa3014cb28f // indirect
 	k8s.io/klog v1.0.0 // indirect
-	k8s.io/klog/v2 v2.30.0 // indirect
+	k8s.io/klog/v2 v2.1.0 // indirect
 	k8s.io/kube-state-metrics v1.7.2 // indirect
 	k8s.io/utils v0.0.0-20210930125809-cb0fa318a74b // indirect
 	sigs.k8s.io/controller-tools v0.2.2 // indirect

@@ -36,3 +36,24 @@ jobs:
           platforms: ${{ env.PLATFORMS }}
           push: true
           tags: janekbaraniewski/kubeserial:${{ env.RELEASE_VERSION }}
+
+  helm-chart:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Push chart to charts repository
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          source-directory: 'deploy/chart/kubeserial'
+          destination-github-username: 'janekbaraniewski'
+          destination-repository-name: 'charts'
+          user-email: dev@baraniewski.com
+          target-branch: main
+          target-directory: 'charts/kubeserial'
+
+      - name: Test get variable exported by push-to-another-repository
+        run: echo $DESTINATION_CLONED_DIRECTORY

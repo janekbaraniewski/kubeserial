@@ -106,7 +106,7 @@ printf "Done!\n"
 printf "controller-gen... "
 
 controller-gen crd paths=./pkg/apis/app/... output:crd:dir=/tmp/deploy/crds
-replace_or_compare /tmp/deploy/crds/* deploy/crds
+replace_or_compare /tmp/deploy/crds/* deploy/chart/kubeserial/crds
 rm -r /tmp/deploy/crds
 
 printf "Done!\n"

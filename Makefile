@@ -5,6 +5,9 @@ DOCKERBUILD_EXTRA_OPTS ?=
 DOCKERBUILD_PLATFORM_OPT=--platform
 GO_BUILD_OUTPUT_PATH ?= build/_output/bin/kubeserial
 
+PHONY: .all
+all: kubeserial
+
 PHONY: .kubeserial
 kubeserial:
 	@mkdir -p build/_output/bin/
@@ -27,3 +30,17 @@ kubeserial-docker: docker-build
 
 docker-build:
 	docker buildx build . -f ${DOCKERFILE} ${DOCKERBUILD_EXTRA_OPTS} ${DOCKERBUILD_PLATFORM_OPT} ${PLATFORMS} -t $(DOCKERHUB):$(VERSION) ${DOCKERBUILD_ACTION}
+
+PHONY: .codegen
+codegen: COPY_OR_DIFF=copy
+codegen: code-gen.sh
+
+PHONY: .check-codegen
+check-codegen: COPY_OR_DIFF=diff
+check-codegen: code-gen.sh
+
+code-gen.sh:
+	@COPY_OR_DIFF=${COPY_OR_DIFF} ./scripts/code-gen.sh
+
+PHONY: .test
+test:

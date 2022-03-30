@@ -44,3 +44,7 @@ code-gen.sh:
 
 PHONY: .test
 test:
+
+PHONY: .update-chart-version
+update-chart-version:
+	@./scripts/update-chart-version.sh

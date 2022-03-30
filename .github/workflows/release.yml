@@ -35,4 +35,4 @@ jobs:
           context: .
           platforms: ${{ env.PLATFORMS }}
           push: true
-          tags: ${{ env.RELEASE_VERSION }}
+          tags: janekbaraniewski/kubeserial:${{ env.RELEASE_VERSION }}

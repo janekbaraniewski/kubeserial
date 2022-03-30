@@ -2,7 +2,11 @@
 
 CHART_PATH="./deploy/chart/kubeserial"
 PLACEHOLDER_VALUE="APP_VERSION"
-VERSION="works!"
+
+if [[ -z "${VERSION}" ]]; then
+    echo "VERSION not set"
+    exit 1
+fi
 
 sed="sed"
 

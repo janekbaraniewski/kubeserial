@@ -5,6 +5,9 @@ DOCKERBUILD_EXTRA_OPTS ?=
 DOCKERBUILD_PLATFORM_OPT=--platform
 GO_BUILD_OUTPUT_PATH ?= build/_output/bin/kubeserial
 
+PHONY: .all
+all: kubeserial
+
 PHONY: .kubeserial
 kubeserial:
 	@mkdir -p build/_output/bin/
@@ -38,3 +41,6 @@ check-codegen: code-gen.sh
 
 code-gen.sh:
 	@COPY_OR_DIFF=${COPY_OR_DIFF} ./scripts/code-gen.sh
+
+PHONY: .test
+test:

@@ -1,8 +1,9 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  creationTimestamp: null
-  name: kubeserial
+  name: {{ include "kubeserial.fullname" . }}
+  labels:
+    {{- include "kubeserial.labels" . | nindent 4 }}
 rules:
 - apiGroups:
   - ""

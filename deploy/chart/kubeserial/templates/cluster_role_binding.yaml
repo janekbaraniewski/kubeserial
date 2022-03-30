@@ -1,0 +1,14 @@
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ include "kubeserial.fullname" . }}
+  labels:
+    {{- include "kubeserial.labels" . | nindent 4 }}
+subjects:
+- kind: ServiceAccount
+  name: {{ include "kubeserial.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ include "kubeserial.fullname" . }}
+  apiGroup: rbac.authorization.k8s.io

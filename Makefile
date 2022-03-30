@@ -48,3 +48,7 @@ test:
 PHONY: .update-chart-version
 update-chart-version:
 	@./scripts/update-chart-version.sh
+
+PHONY: .helm-lint
+helm-lint:
+	@ct lint --charts deploy/chart/kubeserial

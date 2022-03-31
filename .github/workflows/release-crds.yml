@@ -3,7 +3,7 @@ name: Release CRDs
 on:
   push:
     tags:
-    - '^crds-[0-9]+.[0-9]+.[0-9]+$'
+    - 'crds-[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
   helm-chart:

@@ -2,74 +2,75 @@ package managers
 
 import (
 	"path/filepath"
+	"strings"
 
-	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/app/v1alpha1"
-	corev1 "k8s.io/api/core/v1"
+	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (m *Manager)CreateDeployment(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device) *appsv1.Deployment {
+func (m *Manager) CreateDeployment(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device) *appsv1.Deployment {
 	labels := map[string]string{
 		"app": m.GetName(cr.Name, device.Name),
 	}
-	return &appsv1.Deployment {
-		ObjectMeta:	metav1.ObjectMeta {
-			Name: 	m.GetName(cr.Name, device.Name),
-			Namespace:	cr.Namespace,
-			Labels:		labels,
+	return &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      m.GetName(cr.Name, device.Name),
+			Namespace: cr.Namespace,
+			Labels:    labels,
 		},
-		Spec:		appsv1.DeploymentSpec {
-			Selector:	&metav1.LabelSelector {
-				MatchLabels:	labels,
+		Spec: appsv1.DeploymentSpec{
+			Selector: &metav1.LabelSelector{
+				MatchLabels: labels,
 			},
-			Template:	corev1.PodTemplateSpec {
-				ObjectMeta:	metav1.ObjectMeta{
-					Name:		m.GetName(cr.Name, device.Name),
-					Namespace:	cr.Namespace,
-					Labels:		labels,
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      m.GetName(cr.Name, device.Name),
+					Namespace: cr.Namespace,
+					Labels:    labels,
 				},
-				Spec: 		corev1.PodSpec{
-					Volumes: 		[]corev1.Volume{
+				Spec: corev1.PodSpec{
+					Volumes: []corev1.Volume{
 						{
-							Name:			"config",
-							VolumeSource:	corev1.VolumeSource{
-								ConfigMap:		&corev1.ConfigMapVolumeSource {
-									LocalObjectReference:	corev1.LocalObjectReference{
-										Name: 		m.GetName(cr.Name, device.Name),
+							Name: "config",
+							VolumeSource: corev1.VolumeSource{
+								ConfigMap: &corev1.ConfigMapVolumeSource{
+									LocalObjectReference: corev1.LocalObjectReference{
+										Name: m.GetName(cr.Name, device.Name),
 									},
-									Items:					[]corev1.KeyToPath {
+									Items: []corev1.KeyToPath{
 										{
-											Key:	filepath.Base(m.ConfigPath),
-											Path:	filepath.Base(m.ConfigPath),
+											Key:  filepath.Base(m.ConfigPath),
+											Path: filepath.Base(m.ConfigPath),
 										},
 									},
 								},
 							},
 						},
 					},
-					Containers: 	[]corev1.Container{
+					Containers: []corev1.Container{
 						{
-							Name:				m.GetName(cr.Name, device.Name),
-							Image:				m.Image,
-							Command:			[]string {"/bin/sh"},
-							Args:				[]string {
+							Name:    m.GetName(cr.Name, device.Name),
+							Image:   m.Image,
+							Command: []string{"/bin/sh"},
+							Args: []string{
 								"-c",
-								"socat -d -d pty,raw,echo=0,b115200,link=/dev/device,perm=0660,group=tty tcp:" + cr.Name + "-" + device.Name + "-gateway:3333 & " + m.RunCmnd,  // TODO: make init container
+								"socat -d -d pty,raw,echo=0,b115200,link=/dev/device,perm=0660,group=tty tcp:" + strings.ToLower(cr.Name+"-"+device.Name+"-gateway") + ":3333 & " + m.RunCmnd, // TODO: make init container
 							},
-							Ports:				[]corev1.ContainerPort{
+							Ports: []corev1.ContainerPort{
 								{
-									Name: 			"http",
-									Protocol:		corev1.ProtocolTCP,
-									ContainerPort:	80,
+									Name:          "http",
+									Protocol:      corev1.ProtocolTCP,
+									ContainerPort: 80,
 								},
 							},
-							VolumeMounts:		[]corev1.VolumeMount{
+							VolumeMounts: []corev1.VolumeMount{
 								{
-									Name:		"config",
-									ReadOnly:	false,
-									MountPath:	m.ConfigPath,
-									SubPath:	filepath.Base(m.ConfigPath),
+									Name:      "config",
+									ReadOnly:  false,
+									MountPath: m.ConfigPath,
+									SubPath:   filepath.Base(m.ConfigPath),
 								},
 							},
 						},

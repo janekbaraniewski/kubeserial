@@ -62,8 +62,14 @@ rules:
   verbs:
   - '*'
 - apiGroups:
-  - extensions
+  - networking.k8s.io
   resources:
-  - ingresses
+  - '*'
+  verbs:
+  - '*'
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  -  '*'
   verbs:
   - '*'

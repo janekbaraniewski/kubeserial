@@ -1,17 +1,16 @@
 package managers
 
 import (
-	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/app/v1alpha1"
-	"github.com/janekbaraniewski/kubeserial/pkg/controller/api"
+	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
+	"github.com/janekbaraniewski/kubeserial/pkg/controllers/api"
 )
 
 type Manager struct {
-	Image 		string
-	RunCmnd		string
-	Config  	string
-	ConfigPath 	string
+	Image      string
+	RunCmnd    string
+	Config     string
+	ConfigPath string
 }
-
 
 func (m *Manager) Schedule(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device, api *api.ApiClient) error {
 	cm := m.CreateConfigMap(cr, device)
@@ -39,7 +38,6 @@ func (m *Manager) Schedule(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Devic
 
 	return nil
 }
-
 
 func (m *Manager) Delete(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device, api *api.ApiClient) error {
 	name := m.GetName(cr.Name, device.Name)

@@ -19,7 +19,7 @@ GO111MODULE=on "$GO" install \
 printf "controller-gen... "
 
 controller-gen rbac:roleName=manager-role crd paths=./pkg/apis/kubeserial/... output:crd:dir=/tmp/deploy/crds
-replace_or_compare /tmp/deploy/crds/* deploy/crds
+replace_or_compare /tmp/deploy/crds/* deploy/chart/kubeserial-crds/templates/
 rm -r /tmp/deploy/crds
 
 printf "Done!\n"

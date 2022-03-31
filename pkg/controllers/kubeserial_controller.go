@@ -31,7 +31,6 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
 	kubeserialv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
 	apiclient "github.com/janekbaraniewski/kubeserial/pkg/controllers/api"
 )
@@ -47,16 +46,6 @@ type KubeSerialReconciler struct {
 //+kubebuilder:rbac:groups=app.kubeserial.com,resources=kubeserials,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=app.kubeserial.com,resources=kubeserials/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=app.kubeserial.com,resources=kubeserials/finalizers,verbs=update
-
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the KubeSerial object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.11.0/pkg/reconcile
 func (r *KubeSerialReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	reqLogger := log.WithName("Reconcile")
 
@@ -99,7 +88,7 @@ func (r *KubeSerialReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	return reconcile.Result{}, nil
 }
 
-func (r *KubeSerialReconciler) reconcileDevicesConfig(cr *appv1alpha1.KubeSerial, api *apiclient.ApiClient) error {
+func (r *KubeSerialReconciler) reconcileDevicesConfig(cr *kubeserialv1alpha1.KubeSerial, api *apiclient.ApiClient) error {
 	logger := log.WithName("reconcileDevicesConfig")
 	deviceConfs := createDeviceConfig(cr)
 
@@ -119,7 +108,7 @@ func (r *KubeSerialReconciler) reconcileDevicesConfig(cr *appv1alpha1.KubeSerial
 	return nil
 }
 
-func (r *KubeSerialReconciler) GetDeviceState(p *appv1alpha1.Device, cr *appv1alpha1.KubeSerial) (*corev1.ConfigMap, error) {
+func (r *KubeSerialReconciler) GetDeviceState(p *kubeserialv1alpha1.Device, cr *kubeserialv1alpha1.KubeSerial) (*corev1.ConfigMap, error) {
 	logger := log.WithName("GetDevicesState")
 
 	found := &corev1.ConfigMap{}
@@ -133,7 +122,7 @@ func (r *KubeSerialReconciler) GetDeviceState(p *appv1alpha1.Device, cr *appv1al
 	return found, nil
 }
 
-func createDeviceConfig(cr *appv1alpha1.KubeSerial) []*corev1.ConfigMap { // TODO: move to separate module
+func createDeviceConfig(cr *kubeserialv1alpha1.KubeSerial) []*corev1.ConfigMap { // TODO: move to separate module
 	confs := []*corev1.ConfigMap{}
 	for _, device := range cr.Spec.Devices {
 		labels := map[string]string{

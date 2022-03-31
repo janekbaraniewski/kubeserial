@@ -48,21 +48,33 @@ help: ## Display this help.
 
 ##@ Development
 
-.PHONY: manifests
-manifests: COPY_OR_DIFF=copy
-manifests:
+.PHONY: manifests-gen
+manifests-gen: COPY_OR_DIFF=copy
+manifests-gen: ./hack/manifests-gen.sh
+
+.PHONY: check-manifests-gen
+check-manifests-gen: COPY_OR_DIFF=diff
+check-manifests-gen: ./hack/manifests-gen.sh
+
+./hack/manifests-gen.sh:
 	@COPY_OR_DIFF=${COPY_OR_DIFF} ./hack/manifests-gen.sh
 
-.PHONY: generate
-generate: COPY_OR_DIFF=copy
-generate:
+.PHONY: code-gen
+code-gen: COPY_OR_DIFF=copy
+code-gen: ./hack/code-gen.sh
+
+.PHONY: check-code-gen
+check-code-gen: COPY_OR_DIFF=diff
+check-code-gen: ./hack/code-gen.sh
+
+./hack/code-gen.sh:
 	@COPY_OR_DIFF=${COPY_OR_DIFF} ./hack/code-gen.sh
 
+.PHONY: generate
+generate: manifests-gen code-gen
+
 .PHONY: check-generated
-check-generated: COPY_OR_DIFF=diff
-check-generated:
-	@COPY_OR_DIFF=$(COPY_OR_DIFF) ./hack/manifests-gen.sh
-	@COPY_OR_DIFF=$(COPY_OR_DIFF) ./hack/code-gen.sh
+check-generated: check-code-gen check-manifests-gen
 
 .PHONY: fmt
 fmt: ## Run go fmt against code.

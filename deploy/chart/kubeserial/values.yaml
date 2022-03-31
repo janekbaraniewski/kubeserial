@@ -3,7 +3,10 @@ replicaCount: 1
 image:
   repository: janekbaraniewski/kubeserial
   pullPolicy: IfNotPresent
-  tag: "APP_VERSION"
+  tag: "dev"
+
+service:
+  type: ClusterIP
 
 imagePullSecrets: []
 nameOverride: ""

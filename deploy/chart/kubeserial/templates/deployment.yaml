@@ -31,18 +31,31 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - -leader-elect=true
+          env:
+            - name: WATCH_NAMESPACE
+              value: {{ .Release.Namespace }}
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: OPERATOR_NAME
+              value: kubeserial
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 9443
               protocol: TCP
+            - name: health
+              containerPort: 8081
+            - name: metrics
+              containerPort: 8080
           livenessProbe:
-            httpGet:
-              path: /
-              port: http
+            tcpSocket:
+              port: health
           readinessProbe:
-            httpGet:
-              path: /
-              port: http
+            tcpSocket:
+              port: health
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

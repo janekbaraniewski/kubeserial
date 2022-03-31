@@ -102,6 +102,10 @@ PHONY: .helm-lint
 helm-lint: ## Run chart-testing to lint kubeserial chart.
 	@ct lint --charts deploy/chart/kubeserial
 
+PHONY: .update-crds-labels
+update-crds-labels:
+	@python3 ./hack/update-crd-metadata.py deploy/chart/kubeserial-crds/templates/app.kubeserial.com_kubeserials.yaml hack/crd_metadata_template.yaml
+
 ##@ Deployment
 
 .PHONY: uninstall

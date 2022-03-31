@@ -3,7 +3,7 @@ FROM --platform=$BUILDPLATFORM golang:1.18-alpine as builder
 RUN apk update
 RUN apk add make bash
 WORKDIR /workspace
-COPY go.mod go.sum .
+COPY go.mod go.sum ./
 RUN go mod download
 
 # Copy the go source

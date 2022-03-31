@@ -48,7 +48,7 @@ jobs:
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
 
       - name: Use release version in chart
-        run: VERSION=${RELEASE_VERSION} make update-chart-version
+        run: VERSION=${RELEASE_VERSION} make update-kubeserial-chart-version
 
       - name: Push chart to charts repository
         uses: cpina/github-action-push-to-another-repository@main

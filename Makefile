@@ -94,13 +94,19 @@ docker-build:
 
 ##@ Helm
 
-PHONY: .update-chart-version
-update-chart-version: ## Update version used in chart. Requires VERSION var to be set
-	@./hack/update-chart-version.sh
+PHONY: .update-kubeserial-chart-version
+update-kubeserial-chart-version: CHART_PATH=./deploy/chart/kubeserial
+update-kubeserial-chart-version: ## Update version used in chart. Requires VERSION var to be set
+	@CHART_PATH=${CHART_PATH} ./hack/update-chart-version.sh
+
+PHONY: .update-kubeserial-crds-chart-version
+update-kubeserial-crds-chart-version: CHART_PATH=./deploy/chart/kubeserial-crds
+update-kubeserial-crds-chart-version: ## Update version used in chart. Requires VERSION var to be set
+	@CHART_PATH=${CHART_PATH} ./hack/update-chart-version.sh
 
 PHONY: .helm-lint
 helm-lint: ## Run chart-testing to lint kubeserial chart.
-	@ct lint --charts deploy/chart/kubeserial
+	@ct lint --chart-dirs deploy/chart/
 
 PHONY: .update-crds-labels
 update-crds-labels:
@@ -113,5 +119,5 @@ uninstall: ## Uninstall release.
 	helm uninstall ${RELEASE_NAME}
 
 .PHONY: deploy
-deploy: manifests update-chart-version ## Install release in current context/namespace.
+deploy: manifests update-kubeserial-chart-version ## Install release in current context/namespace.
 	helm upgrade --install ${RELEASE_NAME} ${CHART_PATH}

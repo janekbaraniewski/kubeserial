@@ -11,7 +11,6 @@ KubeSerial monitors your cluster nodes for physical devices specified in spec. O
 This is an example configuration for 2 popular cheap printers - Ender 3 and Anet A8 - that handles their management and exposes Octoprint instance for each of them at `http://ender3.my.home` and `http://aneta8.my.home`.
 
 ```yaml
-# deployment/my-kubeserial.yaml
 apiVersion: app.kubeserial.com/v1alpha1
 kind: KubeSerial
 metadata:
@@ -41,18 +40,31 @@ spec:
 
 # Requirements
 
-- k8s cluster - ATM only ARM clusters are supported.
+- k8s cluster
 - Ingress controller installed in the cluster for ingress rules to work.
 
-# Install
+# Install with Helm
 
-### Install manually
+## Add help repo
 
-Create the Deployment, CRDs, ServiceAccount etc.
 
+```bash
+$ helm repo add baraniewski https://baraniewski.com/charts/
 ```
-kubectl create -f deploy/kubeserial.yaml
+## Install CRDs
+
+Due to way in which helm handles CRDs, they are managed using separate chart.
+
+```bash
+$ helm upgrade --install kubeserial-crds baraniewski/kubeserial-crds
 ```
+## Install Controller
+
+```bash
+$ helm upgrade --install kubeserial baraniewski/kubeserial
+```
+
+## Create your configuration
 
 Create your configuration file based on example above. To find out values of `idVendor` and `idProduct` for your device, connect it to your computer, locate where it is (let's say `/dev/ttyUSB0`) and run:
 ```

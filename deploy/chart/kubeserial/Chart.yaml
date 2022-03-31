@@ -2,8 +2,8 @@ apiVersion: v2
 name: kubeserial
 description: Kubeserial helps you manage and use serial devices in Kubernetes
 type: application
-version: "0.1.0"
-appVersion: "0.1.0"
+version: "0.0.1"
+appVersion: "APP_VERSION"
 maintainers:
   - name: janekbaraniewski
     url: https://github.com/janekbaraniewski

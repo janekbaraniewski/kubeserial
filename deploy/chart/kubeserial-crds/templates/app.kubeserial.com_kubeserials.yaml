@@ -3,7 +3,6 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.8.0
-    some-other-annotation: works
   creationTimestamp: null
   labels:
     app.kubernetes.io/instance: '{{ .Release.Name }}'

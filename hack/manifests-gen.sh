@@ -19,6 +19,7 @@ GO111MODULE=on "$GO" install \
 printf "controller-gen... "
 
 controller-gen rbac:roleName=manager-role crd paths=./pkg/apis/kubeserial/... output:crd:dir=/tmp/deploy/crds
+find /tmp/deploy/crds -name "*.yaml" | xargs -I % python3 ./hack/update-crd-metadata.py % ./hack/crd_metadata_template.yaml
 replace_or_compare /tmp/deploy/crds/* deploy/chart/kubeserial-crds/templates/
 rm -r /tmp/deploy/crds
 

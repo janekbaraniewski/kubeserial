@@ -1,23 +1,28 @@
-FROM --platform=$BUILDPLATFORM golang:1.13-alpine AS build
-RUN apk add make
-WORKDIR /go/src/github.com/janekbaraniewski/kubeserial
+# Build the manager binary
+FROM --platform=$BUILDPLATFORM golang:1.18-alpine as builder
+RUN apk update
+RUN apk add make bash
+WORKDIR /workspace
 COPY go.mod go.sum .
 RUN go mod download
-COPY . .
+
+# Copy the go source
+COPY Makefile Makefile
+COPY cmd cmd
+COPY pkg pkg
+
 ARG TARGETOS TARGETARCH TARGETVARIANT
 RUN if [[ -n "${TARGETVARIANT}" ]]; then export GOARM=${TARGETVARIANT}; fi
+# Build
 RUN GOOS=$TARGETOS GOARCH=$TARGETARCH \
     GO_BUILD_OUTPUT_PATH=/build/bin/kubeserial \
     make kubeserial
 
-FROM alpine
+# Use distroless as minimal base image to package the manager binary
+# Refer to https://github.com/GoogleContainerTools/distroless for more details
+FROM gcr.io/distroless/static:nonroot
+WORKDIR /
+COPY --from=builder /build/bin/kubeserial .
+USER 65532:65532
 
-ENV OPERATOR=/usr/local/bin/kubeserial \
-    USER_UID=1001 \
-    USER_NAME=kubeserial
-
-COPY --from=build /build/bin/kubeserial ${OPERATOR}
-COPY build/bin/entrypoint /usr/local/bin/entrypoint
-
-ENTRYPOINT ["/usr/local/bin/entrypoint"]
-USER ${USER_UID}
+ENTRYPOINT ["/kubeserial"]

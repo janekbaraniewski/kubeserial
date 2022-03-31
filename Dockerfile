@@ -20,9 +20,13 @@ RUN GOOS=$TARGETOS GOARCH=$TARGETARCH \
 
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
-FROM gcr.io/distroless/static:nonroot
+FROM alpine
 WORKDIR /
+ENV USER_NAME=kubeserial \
+    USER_UID=1001
 COPY --from=builder /build/bin/kubeserial .
-USER 65532:65532
+COPY build/bin/entrypoint .
 
-ENTRYPOINT ["/kubeserial"]
+
+ENTRYPOINT ["/entrypoint", "/kubeserial"]
+USER ${USER_UID}

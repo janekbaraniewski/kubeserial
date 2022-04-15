@@ -23,7 +23,7 @@ type ApiClient struct {
 	Scheme *runtime.Scheme
 }
 
-func (c *ApiClient) EnsureConfigMap(cr *appv1alpha1.KubeSerial, cm *corev1.ConfigMap) error {
+func (c *ApiClient) EnsureConfigMap(ctx context.Context, cr *appv1alpha1.KubeSerial, cm *corev1.ConfigMap) error {
 	logger := log.WithValues("KubeSerial.Namespace", cr.Namespace, "KubeSerial.Name", cr.Name)
 
 	if err := controllerutil.SetControllerReference(cr, cm, c.Scheme); err != nil {
@@ -32,10 +32,10 @@ func (c *ApiClient) EnsureConfigMap(cr *appv1alpha1.KubeSerial, cm *corev1.Confi
 	}
 
 	found := &corev1.ConfigMap{}
-	err := c.Client.Get(context.TODO(), types.NamespacedName{Name: cm.Name, Namespace: cm.Namespace}, found)
+	err := c.Client.Get(ctx, types.NamespacedName{Name: cm.Name, Namespace: cm.Namespace}, found)
 	if err != nil && errors.IsNotFound(err) {
 		logger.Info("Creating a new ConfigMap " + cm.Name)
-		err = c.Client.Create(context.TODO(), cm)
+		err = c.Client.Create(ctx, cm)
 		if err != nil {
 			logger.Info("ConfigMap not created")
 			return err
@@ -48,7 +48,7 @@ func (c *ApiClient) EnsureConfigMap(cr *appv1alpha1.KubeSerial, cm *corev1.Confi
 	return nil
 }
 
-func (r *ApiClient) EnsureService(cr *appv1alpha1.KubeSerial, svc *corev1.Service) error {
+func (r *ApiClient) EnsureService(ctx context.Context, cr *appv1alpha1.KubeSerial, svc *corev1.Service) error {
 	logger := log.WithValues("KubeSerial.Namespace", cr.Namespace, "KubeSerial.Name", cr.Name)
 
 	if err := controllerutil.SetControllerReference(cr, svc, r.Scheme); err != nil {
@@ -57,10 +57,10 @@ func (r *ApiClient) EnsureService(cr *appv1alpha1.KubeSerial, svc *corev1.Servic
 	}
 
 	found := &corev1.Service{}
-	err := r.Client.Get(context.TODO(), types.NamespacedName{Name: svc.Name, Namespace: svc.Namespace}, found)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: svc.Name, Namespace: svc.Namespace}, found)
 	if err != nil && errors.IsNotFound(err) {
 		logger.Info("Creating a new Service" + svc.Name)
-		err = r.Client.Create(context.TODO(), svc)
+		err = r.Client.Create(ctx, svc)
 		if err != nil {
 			logger.Info("Service not created")
 			return err
@@ -73,7 +73,7 @@ func (r *ApiClient) EnsureService(cr *appv1alpha1.KubeSerial, svc *corev1.Servic
 	return nil
 }
 
-func (r *ApiClient) EnsureIngress(cr *appv1alpha1.KubeSerial, ingress *networkingv1.Ingress) error {
+func (r *ApiClient) EnsureIngress(ctx context.Context, cr *appv1alpha1.KubeSerial, ingress *networkingv1.Ingress) error {
 	logger := log.WithValues("KubeSerial.Namespace", cr.Namespace, "KubeSerial.Name", cr.Name)
 
 	if err := controllerutil.SetControllerReference(cr, ingress, r.Scheme); err != nil {
@@ -82,10 +82,10 @@ func (r *ApiClient) EnsureIngress(cr *appv1alpha1.KubeSerial, ingress *networkin
 	}
 
 	found := &networkingv1.Ingress{}
-	err := r.Client.Get(context.TODO(), types.NamespacedName{Name: ingress.Name, Namespace: ingress.Namespace}, found)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: ingress.Name, Namespace: ingress.Namespace}, found)
 	if err != nil && errors.IsNotFound(err) {
 		logger.Info("Creating a new Ingress " + ingress.Name)
-		err = r.Client.Create(context.TODO(), ingress)
+		err = r.Client.Create(ctx, ingress)
 		if err != nil {
 			logger.Info("Deployment not created")
 			return err
@@ -98,7 +98,7 @@ func (r *ApiClient) EnsureIngress(cr *appv1alpha1.KubeSerial, ingress *networkin
 	return nil
 }
 
-func (r *ApiClient) EnsureDeployment(cr *appv1alpha1.KubeSerial, deployment *appsv1.Deployment) error {
+func (r *ApiClient) EnsureDeployment(ctx context.Context, cr *appv1alpha1.KubeSerial, deployment *appsv1.Deployment) error {
 	logger := log.WithValues("KubeSerial.Namespace", cr.Namespace, "KubeSerial.Name", cr.Name)
 
 	if err := controllerutil.SetControllerReference(cr, deployment, r.Scheme); err != nil {
@@ -107,10 +107,10 @@ func (r *ApiClient) EnsureDeployment(cr *appv1alpha1.KubeSerial, deployment *app
 	}
 
 	found := &appsv1.Deployment{}
-	err := r.Client.Get(context.TODO(), types.NamespacedName{Name: deployment.Name, Namespace: deployment.Namespace}, found)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: deployment.Name, Namespace: deployment.Namespace}, found)
 	if err != nil && errors.IsNotFound(err) {
 		logger.Info("Creating a new Deployment " + deployment.Name)
-		err = r.Client.Create(context.TODO(), deployment)
+		err = r.Client.Create(ctx, deployment)
 		if err != nil {
 			logger.Info("Deployment not created")
 			return err
@@ -123,15 +123,15 @@ func (r *ApiClient) EnsureDeployment(cr *appv1alpha1.KubeSerial, deployment *app
 	return nil
 }
 
-func (r *ApiClient) EnsureDaemonSet(cr *appv1alpha1.KubeSerial, ds *appsv1.DaemonSet) error {
+func (r *ApiClient) EnsureDaemonSet(ctx context.Context, cr *appv1alpha1.KubeSerial, ds *appsv1.DaemonSet) error {
 	if err := controllerutil.SetControllerReference(cr, ds, r.Scheme); err != nil {
 		return err
 	}
 
 	found := &appsv1.DaemonSet{}
-	err := r.Client.Get(context.TODO(), types.NamespacedName{Name: ds.Name, Namespace: ds.Namespace}, found)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: ds.Name, Namespace: ds.Namespace}, found)
 	if err != nil && errors.IsNotFound(err) {
-		err = r.Client.Create(context.TODO(), ds)
+		err = r.Client.Create(ctx, ds)
 		if err != nil {
 			return err
 		}
@@ -141,47 +141,47 @@ func (r *ApiClient) EnsureDaemonSet(cr *appv1alpha1.KubeSerial, ds *appsv1.Daemo
 	return nil
 }
 
-func (r *ApiClient) DeleteDeployment(cr *appv1alpha1.KubeSerial, name string) error {
+func (r *ApiClient) DeleteDeployment(ctx context.Context, cr *appv1alpha1.KubeSerial, name string) error {
 	d := &appsv1.Deployment{}
-	err := r.Client.Get(context.TODO(), types.NamespacedName{Name: name, Namespace: cr.Namespace}, d)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: name, Namespace: cr.Namespace}, d)
 	if err != nil && !errors.IsNotFound(err) {
 		return err
 	} else if err == nil {
-		r.Client.Delete(context.TODO(), d, client.PropagationPolicy(metav1.DeletePropagationForeground))
+		r.Client.Delete(ctx, d, client.PropagationPolicy(metav1.DeletePropagationForeground))
 	}
 	return nil
 }
 
-func (r *ApiClient) DeleteConfigMap(cr *appv1alpha1.KubeSerial, name string) error {
+func (r *ApiClient) DeleteConfigMap(ctx context.Context, cr *appv1alpha1.KubeSerial, name string) error {
 	cm := &corev1.ConfigMap{}
-	err := r.Client.Get(context.TODO(), types.NamespacedName{Name: name, Namespace: cr.Namespace}, cm)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: name, Namespace: cr.Namespace}, cm)
 	if err != nil && !errors.IsNotFound(err) {
 		return err
 	} else if err == nil {
-		r.Client.Delete(context.TODO(), cm, client.PropagationPolicy(metav1.DeletePropagationForeground))
+		r.Client.Delete(ctx, cm, client.PropagationPolicy(metav1.DeletePropagationForeground))
 	}
 	return nil
 }
 
-func (r *ApiClient) DeleteService(cr *appv1alpha1.KubeSerial, name string) error {
+func (r *ApiClient) DeleteService(ctx context.Context, cr *appv1alpha1.KubeSerial, name string) error {
 	svc := &corev1.Service{}
-	err := r.Client.Get(context.TODO(), types.NamespacedName{Name: name, Namespace: cr.Namespace}, svc)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: name, Namespace: cr.Namespace}, svc)
 	if err != nil && !errors.IsNotFound(err) {
 		return err
 	} else if err == nil {
-		r.Client.Delete(context.TODO(), svc, client.PropagationPolicy(metav1.DeletePropagationForeground))
+		r.Client.Delete(ctx, svc, client.PropagationPolicy(metav1.DeletePropagationForeground))
 	}
 	return nil
 
 }
 
-func (r *ApiClient) DeleteIngress(cr *appv1alpha1.KubeSerial, name string) error {
+func (r *ApiClient) DeleteIngress(ctx context.Context, cr *appv1alpha1.KubeSerial, name string) error {
 	ingress := &networkingv1.Ingress{}
-	err := r.Client.Get(context.TODO(), types.NamespacedName{Name: name, Namespace: cr.Namespace}, ingress)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: name, Namespace: cr.Namespace}, ingress)
 	if err != nil && !errors.IsNotFound(err) {
 		return err
 	} else if err == nil {
-		r.Client.Delete(context.TODO(), ingress, client.PropagationPolicy(metav1.DeletePropagationForeground))
+		r.Client.Delete(ctx, ingress, client.PropagationPolicy(metav1.DeletePropagationForeground))
 	}
 	return nil
 }

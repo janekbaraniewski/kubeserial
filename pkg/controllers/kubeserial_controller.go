@@ -52,7 +52,7 @@ func (r *KubeSerialReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	reqLogger.Info("Reconciling KubeSerial")
 
 	instance := &kubeserialv1alpha1.KubeSerial{}
-	err := r.Client.Get(context.TODO(), req.NamespacedName, instance)
+	err := r.Client.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return reconcile.Result{}, nil
@@ -65,22 +65,22 @@ func (r *KubeSerialReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		Scheme: r.Scheme,
 	}
 
-	if err := r.reconcileDevicesConfig(instance, &apiClient); err != nil {
+	if err := r.reconcileDevicesConfig(ctx, instance, &apiClient); err != nil {
 		reqLogger.Info("ReconcileConfig fail")
 		return reconcile.Result{}, err
 	}
 
-	if err := r.ReconcileMonitor(instance, &apiClient); err != nil {
+	if err := r.ReconcileMonitor(ctx, instance, &apiClient); err != nil {
 		reqLogger.Info("ReconcileMonitor fail")
 		return reconcile.Result{}, err
 	}
 
-	if err := r.ReconcileGateway(instance, &apiClient); err != nil {
+	if err := r.ReconcileGateway(ctx, instance, &apiClient); err != nil {
 		reqLogger.Info("ReconcileGateway fail")
 		return reconcile.Result{}, err
 	}
 
-	if err := r.ReconcileManagers(instance, &apiClient); err != nil {
+	if err := r.ReconcileManagers(ctx, instance, &apiClient); err != nil {
 		reqLogger.Info("ReconcileManager fail")
 		return reconcile.Result{}, err
 	}
@@ -88,7 +88,7 @@ func (r *KubeSerialReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	return reconcile.Result{}, nil
 }
 
-func (r *KubeSerialReconciler) reconcileDevicesConfig(cr *kubeserialv1alpha1.KubeSerial, api *apiclient.ApiClient) error {
+func (r *KubeSerialReconciler) reconcileDevicesConfig(ctx context.Context, cr *kubeserialv1alpha1.KubeSerial, api *apiclient.ApiClient) error {
 	logger := log.WithName("reconcileDevicesConfig")
 	deviceConfs := createDeviceConfig(cr)
 
@@ -100,7 +100,7 @@ func (r *KubeSerialReconciler) reconcileDevicesConfig(cr *kubeserialv1alpha1.Kub
 	}
 
 	for _, deviceConf := range deviceConfs {
-		if err := api.EnsureConfigMap(cr, deviceConf); err != nil {
+		if err := api.EnsureConfigMap(ctx, cr, deviceConf); err != nil {
 			return err
 		}
 	}
@@ -108,11 +108,11 @@ func (r *KubeSerialReconciler) reconcileDevicesConfig(cr *kubeserialv1alpha1.Kub
 	return nil
 }
 
-func (r *KubeSerialReconciler) GetDeviceState(p *kubeserialv1alpha1.Device, cr *kubeserialv1alpha1.KubeSerial) (*corev1.ConfigMap, error) {
+func (r *KubeSerialReconciler) GetDeviceState(ctx context.Context, p *kubeserialv1alpha1.Device, cr *kubeserialv1alpha1.KubeSerial) (*corev1.ConfigMap, error) {
 	logger := log.WithName("GetDevicesState")
 
 	found := &corev1.ConfigMap{}
-	err := r.Client.Get(context.TODO(), types.NamespacedName{Name: strings.ToLower(cr.Name + "-" + p.Name), Namespace: cr.Namespace}, found)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: strings.ToLower(cr.Name + "-" + p.Name), Namespace: cr.Namespace}, found)
 	if err != nil && errors.IsNotFound(err) {
 		logger.Info("Can't get device state")
 		return nil, err

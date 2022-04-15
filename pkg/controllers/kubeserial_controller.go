@@ -90,7 +90,7 @@ func (r *KubeSerialReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 
 func (r *KubeSerialReconciler) reconcileDevicesConfig(ctx context.Context, cr *kubeserialv1alpha1.KubeSerial, api *apiclient.ApiClient) error {
 	logger := log.WithName("reconcileDevicesConfig")
-	deviceConfs := createDeviceConfig(cr)
+	deviceConfs := CreateDeviceConfig(cr)
 
 	for _, deviceConf := range deviceConfs {
 		if err := controllerutil.SetControllerReference(cr, deviceConf, r.Scheme); err != nil {
@@ -122,7 +122,7 @@ func (r *KubeSerialReconciler) GetDeviceState(ctx context.Context, p *kubeserial
 	return found, nil
 }
 
-func createDeviceConfig(cr *kubeserialv1alpha1.KubeSerial) []*corev1.ConfigMap { // TODO: move to separate module
+func CreateDeviceConfig(cr *kubeserialv1alpha1.KubeSerial) []*corev1.ConfigMap { // TODO: move to separate module
 	confs := []*corev1.ConfigMap{}
 	for _, device := range cr.Spec.Devices {
 		labels := map[string]string{

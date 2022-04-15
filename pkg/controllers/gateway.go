@@ -8,7 +8,7 @@ import (
 	"github.com/janekbaraniewski/kubeserial/pkg/gateway"
 )
 
-func (r *KubeSerialReconciler) ReconcileGateway(ctx context.Context, cr *appv1alpha1.KubeSerial, api *api.ApiClient) error {
+func (r *KubeSerialReconciler) ReconcileGateway(ctx context.Context, cr *appv1alpha1.KubeSerial, api api.API) error {
 	logger := log.WithName("ReconcileGateway")
 	for _, device := range cr.Spec.Devices {
 		logger.Info("Reconciling " + device.Name)
@@ -34,7 +34,7 @@ func (r *KubeSerialReconciler) ReconcileGateway(ctx context.Context, cr *appv1al
 	return nil
 }
 
-func (r *KubeSerialReconciler) scheduleGateway(ctx context.Context, cr *appv1alpha1.KubeSerial, p *appv1alpha1.Device, node string, api *api.ApiClient) error {
+func (r *KubeSerialReconciler) scheduleGateway(ctx context.Context, cr *appv1alpha1.KubeSerial, p *appv1alpha1.Device, node string, api api.API) error {
 	cm := gateway.CreateConfigMap(cr, p)
 	deploy := gateway.CreateDeployment(cr, p, node)
 	svc := gateway.CreateService(cr, p)
@@ -54,7 +54,7 @@ func (r *KubeSerialReconciler) scheduleGateway(ctx context.Context, cr *appv1alp
 	return nil
 }
 
-func (r *KubeSerialReconciler) deleteGateway(ctx context.Context, cr *appv1alpha1.KubeSerial, p *appv1alpha1.Device, api *api.ApiClient) error {
+func (r *KubeSerialReconciler) deleteGateway(ctx context.Context, cr *appv1alpha1.KubeSerial, p *appv1alpha1.Device, api api.API) error {
 	logger := log.WithName("deleteGateway")
 
 	logger.Info("Device " + p.Name)

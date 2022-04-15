@@ -18,6 +18,17 @@ import (
 
 var log = logf.Log.WithName("ApiClient")
 
+type API interface {
+	EnsureConfigMap(ctx context.Context, cr *appv1alpha1.KubeSerial, cm *corev1.ConfigMap) error
+	EnsureService(ctx context.Context, cr *appv1alpha1.KubeSerial, svc *corev1.Service) error
+	EnsureIngress(ctx context.Context, cr *appv1alpha1.KubeSerial, ingress *networkingv1.Ingress) error
+	EnsureDeployment(ctx context.Context, cr *appv1alpha1.KubeSerial, deployment *appsv1.Deployment) error
+	EnsureDaemonSet(ctx context.Context, cr *appv1alpha1.KubeSerial, ds *appsv1.DaemonSet) error
+	DeleteDeployment(ctx context.Context, cr *appv1alpha1.KubeSerial, name string) error
+	DeleteConfigMap(ctx context.Context, cr *appv1alpha1.KubeSerial, name string) error
+	DeleteService(ctx context.Context, cr *appv1alpha1.KubeSerial, name string) error
+	DeleteIngress(ctx context.Context, cr *appv1alpha1.KubeSerial, name string) error
+}
 type ApiClient struct {
 	Client client.Client
 	Scheme *runtime.Scheme

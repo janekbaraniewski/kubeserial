@@ -6,6 +6,7 @@ import (
 
 	kubeserialv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
 	"github.com/stretchr/testify/assert"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
@@ -215,4 +216,68 @@ func TestEnsureIngressDoesntOverwriteExisting(t *testing.T) {
 	found := &networkingv1.Ingress{}
 	fakeClient.Get(context.TODO(), types.NamespacedName{Name: "test-ingress", Namespace: "test-namespace"}, found)
 	assert.Equal(t, "original-host.com", found.Spec.Rules[0].Host)
+}
+
+func TestEnsureDeployment(t *testing.T) {
+	scheme, fakeClient := GetFakeApiAndScheme()
+	api := GetApi(fakeClient, scheme)
+
+	err := api.EnsureDeployment(context.TODO(), &kubeserialv1alpha1.KubeSerial{}, &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-deployment",
+			Namespace: "test-namespace",
+		},
+		Spec: appsv1.DeploymentSpec{
+			Template: v1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "test-deployment",
+				},
+			},
+		},
+	})
+
+	assert.Equal(t, nil, err)
+
+	found := &appsv1.Deployment{}
+	fakeClient.Get(context.TODO(), types.NamespacedName{Name: "test-deployment", Namespace: "test-namespace"}, found)
+	assert.Equal(t, "test-deployment", found.Spec.Template.ObjectMeta.Name)
+}
+
+func TestEnsureDeploymentDoesntOverwriteExisting(t *testing.T) {
+	scheme, fakeClient := GetFakeApiAndScheme()
+	api := GetApi(fakeClient, scheme)
+
+	fakeClient.Create(context.TODO(), &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-deployment",
+			Namespace: "test-namespace",
+		},
+		Spec: appsv1.DeploymentSpec{
+			Template: v1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "original-deployment",
+				},
+			},
+		},
+	})
+
+	err := api.EnsureDeployment(context.TODO(), &kubeserialv1alpha1.KubeSerial{}, &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-deployment",
+			Namespace: "test-namespace",
+		},
+		Spec: appsv1.DeploymentSpec{
+			Template: v1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "new-deployment",
+				},
+			},
+		},
+	})
+
+	assert.Equal(t, nil, err)
+
+	found := &appsv1.Deployment{}
+	fakeClient.Get(context.TODO(), types.NamespacedName{Name: "test-deployment", Namespace: "test-namespace"}, found)
+	assert.Equal(t, "original-deployment", found.Spec.Template.ObjectMeta.Name)
 }

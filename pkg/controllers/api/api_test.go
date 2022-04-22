@@ -345,29 +345,140 @@ func TestEnsureDaemonSetDoesntOverwriteExisting(t *testing.T) {
 	assert.Equal(t, "original-ds", found.Spec.Template.ObjectMeta.Name)
 }
 
-func TestDeleteDeployment(t *testing.T) {
+func TestDelete(t *testing.T) {
 	scheme, fakeClient := GetFakeApiAndScheme()
 	api := GetApi(fakeClient, scheme)
-
-	fakeClient.Create(context.TODO(), &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-deploy",
-			Namespace: "test-ns",
+	type PostValidationSetup struct {
+		Name  string
+		Found client.Object
+	}
+	testCases := []struct {
+		Name        string
+		ObjToCreate []client.Object
+		ExpectedErr error
+		ObjName     string
+		PostSetup   PostValidationSetup
+		DeleteFunc  func(context.Context, *kubeserialv1alpha1.KubeSerial, string) error
+	}{
+		{
+			Name:        "test-delete-cm-doesnt-exist",
+			ObjToCreate: []client.Object{},
+			ExpectedErr: nil,
+			ObjName:     "test-cm",
+			PostSetup:   PostValidationSetup{},
+			DeleteFunc:  api.DeleteConfigMap,
 		},
-	})
+		{
+			Name: "test-delete-cm",
+			ObjToCreate: []client.Object{
+				&corev1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "test-cm",
+						Namespace: "test-ns",
+					},
+				},
+			},
+			ExpectedErr: nil,
+			ObjName:     "test-cm",
+			PostSetup: PostValidationSetup{
+				Name:  "test-cm",
+				Found: &corev1.ConfigMap{},
+			},
+			DeleteFunc: api.DeleteConfigMap,
+		},
+		{
+			Name:        "test-delete-deployment-doesnt-exist",
+			ObjToCreate: []client.Object{},
+			ExpectedErr: nil,
+			ObjName:     "test-deploy",
+			PostSetup:   PostValidationSetup{},
+			DeleteFunc:  api.DeleteDeployment,
+		},
+		{
+			Name: "test-delete-deployment",
+			ObjToCreate: []client.Object{
+				&appsv1.Deployment{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "test-deploy",
+						Namespace: "test-ns",
+					},
+				},
+			},
+			ExpectedErr: nil,
+			ObjName:     "test-deploy",
+			PostSetup: PostValidationSetup{
+				Name:  "test-deploy",
+				Found: &appsv1.Deployment{},
+			},
+			DeleteFunc: api.DeleteDeployment,
+		},
+		{
+			Name:        "test-delete-svc-doesnt-exist",
+			ObjToCreate: []client.Object{},
+			ExpectedErr: nil,
+			ObjName:     "test-svc",
+			PostSetup:   PostValidationSetup{},
+			DeleteFunc:  api.DeleteService,
+		},
+		{
+			Name: "test-delete-svc",
+			ObjToCreate: []client.Object{
+				&corev1.Service{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "test-svc",
+						Namespace: "test-ns",
+					},
+				},
+			},
+			ExpectedErr: nil,
+			ObjName:     "test-svc",
+			PostSetup: PostValidationSetup{
+				Name:  "test-svc",
+				Found: &corev1.Service{},
+			},
+			DeleteFunc: api.DeleteService,
+		},
+		{
+			Name:        "test-delete-ingress-doesnt-exist",
+			ObjToCreate: []client.Object{},
+			ExpectedErr: nil,
+			ObjName:     "test-ingress",
+			PostSetup:   PostValidationSetup{},
+			DeleteFunc:  api.DeleteIngress,
+		},
+		{
+			Name: "test-delete-ingress",
+			ObjToCreate: []client.Object{
+				&networkingv1.Ingress{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "test-ingress",
+						Namespace: "test-ns",
+					},
+				},
+			},
+			ExpectedErr: nil,
+			ObjName:     "test-ingress",
+			PostSetup: PostValidationSetup{
+				Name:  "test-ingress",
+				Found: &networkingv1.Ingress{},
+			},
+			DeleteFunc: api.DeleteIngress,
+		},
+	}
 
-	err := api.DeleteDeployment(context.TODO(), &kubeserialv1alpha1.KubeSerial{ObjectMeta: metav1.ObjectMeta{Namespace: "test-ns"}}, "test-deploy")
-	assert.Equal(t, nil, err)
+	for _, testCase := range testCases {
+		t.Run(testCase.Name, func(t *testing.T) {
+			for _, obj := range testCase.ObjToCreate {
+				fakeClient.Create(context.TODO(), obj)
+			}
 
-	found := &appsv1.Deployment{}
-	errFound := fakeClient.Get(context.TODO(), types.NamespacedName{Namespace: "test-ns", Name: "test-deploy"}, found)
-	assert.Equal(t, true, errors.IsNotFound(errFound))
-}
+			err := testCase.DeleteFunc(context.TODO(), &kubeserialv1alpha1.KubeSerial{ObjectMeta: metav1.ObjectMeta{Namespace: "test-ns"}}, testCase.ObjName)
+			assert.Equal(t, testCase.ExpectedErr, err)
 
-func TestDeleteDeploymentThatDoesntExist(t *testing.T) {
-	scheme, fakeClient := GetFakeApiAndScheme()
-	api := GetApi(fakeClient, scheme)
-
-	err := api.DeleteDeployment(context.TODO(), &kubeserialv1alpha1.KubeSerial{ObjectMeta: metav1.ObjectMeta{Namespace: "test-ns"}}, "test-deploy")
-	assert.Equal(t, nil, err)
+			if (testCase.PostSetup != PostValidationSetup{}) {
+				errFound := fakeClient.Get(context.TODO(), types.NamespacedName{Namespace: "test-ns", Name: testCase.ObjName}, testCase.PostSetup.Found)
+				assert.Equal(t, true, errors.IsNotFound(errFound))
+			}
+		})
+	}
 }

@@ -1,4 +1,4 @@
-name: Lint, Test and build
+name: Test
 
 on:
   push:
@@ -19,7 +19,7 @@ jobs:
         run: echo "RELEASE_VERSION=${GITHUB_SHA}" >> $GITHUB_ENV
       - name: Set target platforms
         run: echo "PLATFORMS=$(cat TARGET_PLATFORMS)" >> $GITHUB_ENV
-      - name: Build and push
+      - name: Build
         uses: docker/build-push-action@v2
         with:
           context: .
@@ -63,3 +63,14 @@ jobs:
 
     - name: Build
       run: make all
+
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+    - name: Test
+      run: make test

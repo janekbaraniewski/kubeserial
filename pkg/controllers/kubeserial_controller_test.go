@@ -219,5 +219,22 @@ func TestReconcileManagers(t *testing.T) {
 			assert.Equal(t, testCase.ExpectedAPIOps, apiClient.Operations)
 		})
 	}
+}
 
+func TestReconcileMonitor(t *testing.T) {
+	scheme := runtime.NewScheme()
+	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
+	utilruntime.Must(kubeserialv1alpha1.AddToScheme(scheme))
+	fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).Build()
+
+	reconciler := KubeSerialReconciler{
+		Client: fakeClient,
+		Scheme: scheme,
+	}
+	apiClient := api.NewFakeApiClient()
+
+	err := reconciler.ReconcileMonitor(context.TODO(), getCR(), &apiClient)
+
+	assert.Equal(t, nil, err)
+	assert.Equal(t, []string{"EnsureConfigMap", "EnsureDaemonSet"}, apiClient.Operations)
 }

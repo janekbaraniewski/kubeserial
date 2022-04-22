@@ -56,7 +56,7 @@ vet: ## Run go vet against code.
 
 .PHONY: test
 test: fmt vet ## Run tests.
-	go test ./... -coverprofile cover.out
+	go test ./... -coverprofile coverage.txt -covermode atomic
 
 # ENVTEST = $(shell pwd)/bin/setup-envtest
 # .PHONY: envtest

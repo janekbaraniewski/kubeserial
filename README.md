@@ -4,9 +4,6 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/janekbaraniewski/kubeserial)](https://goreportcard.com/report/github.com/janekbaraniewski/kubeserial)
 [![codecov](https://codecov.io/gh/janekbaraniewski/kubeserial/branch/master/graph/badge.svg?token=Y95FB6H188)](https://codecov.io/gh/janekbaraniewski/kubeserial)
 
-
-Manage your serial devices like 3D printers or CNC machines on your k8s cluster.
-
 ---
 
 KubeSerial monitors your cluster nodes for physical devices specified in spec. Once the device is connected, it creates gateway service that exposes it over the network and manager service with specified management software. When the device gets disconnected everything is cleaned up.

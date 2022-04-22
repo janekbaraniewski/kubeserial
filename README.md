@@ -1,4 +1,6 @@
 # KubeSerial
+[![Go Report Card](https://goreportcard.com/badge/github.com/janekbaraniewski/kubeserial)](https://goreportcard.com/report/github.com/janekbaraniewski/kubeserial)
+
 
 Manage your serial devices like 3D printers or CNC machines on your k8s cluster.
 

@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
+	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -150,4 +151,68 @@ func TestEnsureServiceDoesntOverwriteExisting(t *testing.T) {
 	found := &corev1.Service{}
 	fakeClient.Get(context.TODO(), types.NamespacedName{Name: "test-service", Namespace: "test-namespace"}, found)
 	assert.Equal(t, "original-port", found.Spec.Ports[0].Name)
+}
+
+func TestEnsureIngress(t *testing.T) {
+	scheme, fakeClient := GetFakeApiAndScheme()
+	api := GetApi(fakeClient, scheme)
+
+	err := api.EnsureIngress(context.TODO(), &kubeserialv1alpha1.KubeSerial{}, &networkingv1.Ingress{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-ingress",
+			Namespace: "test-namespace",
+		},
+		Spec: networkingv1.IngressSpec{
+			Rules: []networkingv1.IngressRule{
+				{
+					Host: "test-host.com",
+				},
+			},
+		},
+	})
+
+	assert.Equal(t, nil, err)
+
+	found := &networkingv1.Ingress{}
+	fakeClient.Get(context.TODO(), types.NamespacedName{Name: "test-ingress", Namespace: "test-namespace"}, found)
+	assert.Equal(t, "test-host.com", found.Spec.Rules[0].Host)
+}
+
+func TestEnsureIngressDoesntOverwriteExisting(t *testing.T) {
+	scheme, fakeClient := GetFakeApiAndScheme()
+	api := GetApi(fakeClient, scheme)
+
+	fakeClient.Create(context.TODO(), &networkingv1.Ingress{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-ingress",
+			Namespace: "test-namespace",
+		},
+		Spec: networkingv1.IngressSpec{
+			Rules: []networkingv1.IngressRule{
+				{
+					Host: "original-host.com",
+				},
+			},
+		},
+	})
+
+	err := api.EnsureIngress(context.TODO(), &kubeserialv1alpha1.KubeSerial{}, &networkingv1.Ingress{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-ingress",
+			Namespace: "test-namespace",
+		},
+		Spec: networkingv1.IngressSpec{
+			Rules: []networkingv1.IngressRule{
+				{
+					Host: "new-host.com",
+				},
+			},
+		},
+	})
+
+	assert.Equal(t, nil, err)
+
+	found := &networkingv1.Ingress{}
+	fakeClient.Get(context.TODO(), types.NamespacedName{Name: "test-ingress", Namespace: "test-namespace"}, found)
+	assert.Equal(t, "original-host.com", found.Spec.Rules[0].Host)
 }

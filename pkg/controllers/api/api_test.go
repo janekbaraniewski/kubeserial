@@ -56,3 +56,39 @@ func TestEnsureConfigMap(t *testing.T) {
 
 	assert.Equal(t, "true", found.Data["works"])
 }
+
+func TestEnsureConfigMapDoesntOverwriteExisting(t *testing.T) {
+	scheme, fakeClient := GetFakeApiAndScheme()
+	api := GetApi(fakeClient, scheme)
+
+	fakeClient.Create(context.TODO(), &v1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-cm",
+			Namespace: "test-namespace",
+		},
+		Data: map[string]string{
+			"data": "not-overwritten",
+		},
+	})
+
+	err := api.EnsureConfigMap(context.TODO(), &kubeserialv1alpha1.KubeSerial{}, &v1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-cm",
+			Namespace: "test-namespace",
+		},
+		Data: map[string]string{
+			"data": "overwritten",
+		},
+	})
+
+	assert.Equal(t, nil, err)
+	found := &corev1.ConfigMap{}
+	fakeClient.Get(
+		context.TODO(),
+		types.NamespacedName{Name: "test-cm", Namespace: "test-namespace"},
+		found,
+	)
+
+	assert.Equal(t, "not-overwritten", found.Data["data"])
+
+}

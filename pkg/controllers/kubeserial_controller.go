@@ -31,8 +31,12 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
+	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
 	kubeserialv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
+	"github.com/janekbaraniewski/kubeserial/pkg/controllers/api"
 	apiclient "github.com/janekbaraniewski/kubeserial/pkg/controllers/api"
+	"github.com/janekbaraniewski/kubeserial/pkg/managers"
+	"github.com/janekbaraniewski/kubeserial/pkg/monitor"
 )
 
 var log = logf.Log.WithName("KubeSerialController")
@@ -88,7 +92,42 @@ func (r *KubeSerialReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	return reconcile.Result{}, nil
 }
 
-func (r *KubeSerialReconciler) reconcileDevicesConfig(ctx context.Context, cr *kubeserialv1alpha1.KubeSerial, api *apiclient.ApiClient) error {
+func (r *KubeSerialReconciler) ReconcileManagers(ctx context.Context, cr *appv1alpha1.KubeSerial, api api.API) error {
+	for _, device := range cr.Spec.Devices {
+		stateCM, err := r.GetDeviceState(ctx, &device, cr)
+		if err != nil {
+			return err
+		}
+		manager := managers.Available[device.Manager]
+		if stateCM.Data["available"] == "true" {
+			if err := manager.Schedule(ctx, cr, &device, api); err != nil {
+				return err
+			}
+		} else {
+			if err := manager.Delete(ctx, cr, &device, api); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (r *KubeSerialReconciler) ReconcileMonitor(ctx context.Context, cr *appv1alpha1.KubeSerial, api api.API) error {
+	conf := monitor.CreateConfigMap(cr)
+	monitorDaemon := monitor.CreateDaemonSet(cr)
+
+	if err := api.EnsureConfigMap(ctx, cr, conf); err != nil {
+		return err
+	}
+
+	if err := api.EnsureDaemonSet(ctx, cr, monitorDaemon); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *KubeSerialReconciler) reconcileDevicesConfig(ctx context.Context, cr *kubeserialv1alpha1.KubeSerial, api apiclient.API) error {
 	logger := log.WithName("reconcileDevicesConfig")
 	deviceConfs := CreateDeviceConfig(cr)
 

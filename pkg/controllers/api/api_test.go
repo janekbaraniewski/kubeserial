@@ -10,6 +10,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -342,4 +343,31 @@ func TestEnsureDaemonSetDoesntOverwriteExisting(t *testing.T) {
 	found := &appsv1.DaemonSet{}
 	fakeClient.Get(context.TODO(), types.NamespacedName{Name: "test-ds", Namespace: "test-ns"}, found)
 	assert.Equal(t, "original-ds", found.Spec.Template.ObjectMeta.Name)
+}
+
+func TestDeleteDeployment(t *testing.T) {
+	scheme, fakeClient := GetFakeApiAndScheme()
+	api := GetApi(fakeClient, scheme)
+
+	fakeClient.Create(context.TODO(), &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-deploy",
+			Namespace: "test-ns",
+		},
+	})
+
+	err := api.DeleteDeployment(context.TODO(), &kubeserialv1alpha1.KubeSerial{ObjectMeta: metav1.ObjectMeta{Namespace: "test-ns"}}, "test-deploy")
+	assert.Equal(t, nil, err)
+
+	found := &appsv1.Deployment{}
+	errFound := fakeClient.Get(context.TODO(), types.NamespacedName{Namespace: "test-ns", Name: "test-deploy"}, found)
+	assert.Equal(t, true, errors.IsNotFound(errFound))
+}
+
+func TestDeleteDeploymentThatDoesntExist(t *testing.T) {
+	scheme, fakeClient := GetFakeApiAndScheme()
+	api := GetApi(fakeClient, scheme)
+
+	err := api.DeleteDeployment(context.TODO(), &kubeserialv1alpha1.KubeSerial{ObjectMeta: metav1.ObjectMeta{Namespace: "test-ns"}}, "test-deploy")
+	assert.Equal(t, nil, err)
 }

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	kubeserialv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
+	"github.com/janekbaraniewski/kubeserial/pkg/controllers/api"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -30,7 +31,7 @@ func getCR() *kubeserialv1alpha1.KubeSerial {
 					Name:      "testDevice",
 					IdVendor:  "0",
 					IdProduct: "1",
-					Manager:   "testManager",
+					Manager:   "octoprint",
 					Subsystem: "tty",
 				},
 			},
@@ -139,9 +140,84 @@ func TestReconcile(t *testing.T) {
 		Scheme: scheme,
 	}
 
-	reconcileReq := reconcile.Request{NamespacedName: types.NamespacedName{Namespace: "test-namespace", Name: "kubeserialtest"}}
+	reconcileReq := reconcile.Request{
+		NamespacedName: types.NamespacedName{
+			Namespace: "test-namespace",
+			Name:      "kubeserialtest",
+		},
+	}
 
 	result, err := reconciler.Reconcile(context.TODO(), reconcileReq)
 	assert.Equal(t, nil, err)
 	assert.Equal(t, reconcile.Result{}, result)
+}
+
+func TestReconcileManagers(t *testing.T) {
+	testCases := []struct {
+		Name           string
+		ObjToCreate    []client.Object
+		ExpectedErr    error
+		ExpectedAPIOps []string
+	}{
+		{
+			Name: "delete-manager-when-not-available",
+			ObjToCreate: []client.Object{&corev1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "kubeserialtest-testdevice",
+					Namespace: "test-namespace",
+				},
+				Data: map[string]string{
+					"available": "false",
+				},
+			}},
+			ExpectedErr: nil,
+			ExpectedAPIOps: []string{
+				"DeleteDeployment",
+				"DeleteConfigMap",
+				"DeleteService",
+				"DeleteIngress",
+			},
+		},
+		{
+			Name: "schedule-manager-when-available",
+			ObjToCreate: []client.Object{&corev1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "kubeserialtest-testdevice",
+					Namespace: "test-namespace",
+				},
+				Data: map[string]string{
+					"available": "true",
+				},
+			}},
+			ExpectedErr: nil,
+			ExpectedAPIOps: []string{
+				"EnsureConfigMap",
+				"EnsureDeployment",
+				"EnsureService",
+			},
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.Name, func(t *testing.T) {
+			scheme := runtime.NewScheme()
+			utilruntime.Must(clientgoscheme.AddToScheme(scheme))
+			utilruntime.Must(kubeserialv1alpha1.AddToScheme(scheme))
+			fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).Build()
+
+			reconciler := KubeSerialReconciler{
+				Client: fakeClient,
+				Scheme: scheme,
+			}
+			apiClient := api.NewFakeApiClient()
+
+			for _, o := range testCase.ObjToCreate {
+				fakeClient.Create(context.TODO(), o)
+			}
+
+			err := reconciler.ReconcileManagers(context.TODO(), getCR(), &apiClient)
+			assert.Equal(t, testCase.ExpectedErr, err)
+			assert.Equal(t, testCase.ExpectedAPIOps, apiClient.Operations)
+		})
+	}
+
 }

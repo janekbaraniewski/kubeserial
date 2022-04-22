@@ -14,7 +14,7 @@ type Manager struct {
 	ConfigPath string
 }
 
-func (m *Manager) Schedule(ctx context.Context, cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device, api *api.ApiClient) error {
+func (m *Manager) Schedule(ctx context.Context, cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device, api api.API) error {
 	cm := m.CreateConfigMap(cr, device)
 	deploy := m.CreateDeployment(cr, device)
 	svc := m.CreateService(cr, device)
@@ -41,7 +41,7 @@ func (m *Manager) Schedule(ctx context.Context, cr *appv1alpha1.KubeSerial, devi
 	return nil
 }
 
-func (m *Manager) Delete(ctx context.Context, cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device, api *api.ApiClient) error {
+func (m *Manager) Delete(ctx context.Context, cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device, api api.API) error {
 	name := m.GetName(cr.Name, device.Name)
 
 	if err := api.DeleteDeployment(ctx, cr, name); err != nil {

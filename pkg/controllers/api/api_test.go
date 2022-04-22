@@ -92,3 +92,62 @@ func TestEnsureConfigMapDoesntOverwriteExisting(t *testing.T) {
 	assert.Equal(t, "not-overwritten", found.Data["data"])
 
 }
+
+func TestEnsureService(t *testing.T) {
+	scheme, fakeClient := GetFakeApiAndScheme()
+	api := GetApi(fakeClient, scheme)
+
+	err := api.EnsureService(context.TODO(), &kubeserialv1alpha1.KubeSerial{}, &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-service",
+			Namespace: "test-namespace",
+		},
+	})
+
+	assert.Equal(t, nil, err)
+
+	found := &corev1.Service{}
+	fakeClient.Get(context.TODO(), types.NamespacedName{Name: "test-service", Namespace: "test-namespace"}, found)
+	assert.Equal(t, "test-service", found.ObjectMeta.Name)
+}
+
+func TestEnsureServiceDoesntOverwriteExisting(t *testing.T) {
+	scheme, fakeClient := GetFakeApiAndScheme()
+	api := GetApi(fakeClient, scheme)
+
+	fakeClient.Create(context.TODO(), &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-service",
+			Namespace: "test-namespace",
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
+				{
+					Port: 8080,
+					Name: "original-port",
+				},
+			},
+		},
+	})
+
+	err := api.EnsureService(context.TODO(), &kubeserialv1alpha1.KubeSerial{}, &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-service",
+			Namespace: "test-namespace",
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
+				{
+					Port: 8080,
+					Name: "overwritten-port",
+				},
+			},
+		},
+	})
+
+	assert.Equal(t, nil, err)
+
+	found := &corev1.Service{}
+	fakeClient.Get(context.TODO(), types.NamespacedName{Name: "test-service", Namespace: "test-namespace"}, found)
+	assert.Equal(t, "original-port", found.Spec.Ports[0].Name)
+}

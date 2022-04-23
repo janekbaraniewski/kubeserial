@@ -35,7 +35,7 @@ func TestReconcileGateway_ScheduleForNewDevice(t *testing.T) {
 	reconciler, fakeClient, apiClient := GetTestSetup()
 	cr := &kubeserialv1alpha1.KubeSerial{
 		Spec: kubeserialv1alpha1.KubeSerialSpec{
-			Devices: []kubeserialv1alpha1.Device{
+			Devices: []kubeserialv1alpha1.Device_2{
 				{
 					Name:      "testDevice",
 					IdVendor:  "0",
@@ -64,7 +64,7 @@ func TestReconcileGateway_DeleteForMissingDevice(t *testing.T) {
 	reconciler, fakeClient, apiClient := GetTestSetup()
 	cr := &kubeserialv1alpha1.KubeSerial{
 		Spec: kubeserialv1alpha1.KubeSerialSpec{
-			Devices: []kubeserialv1alpha1.Device{
+			Devices: []kubeserialv1alpha1.Device_2{
 				{
 					Name:      "testDevice",
 					IdVendor:  "0",

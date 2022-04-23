@@ -22,7 +22,7 @@ import (
 
 // Device defines monitored device
 // +k8s:openapi-gen=true
-type Device struct {
+type Device_2 struct {
 	Name      string `json:"name"`
 	IdVendor  string `json:"idVendor"`
 	IdProduct string `json:"idProduct"`
@@ -41,7 +41,7 @@ type IngressSpec struct {
 // KubeSerialSpec defines the desired state of KubeSerial
 // +k8s:openapi-gen=true
 type KubeSerialSpec struct {
-	Devices []Device    `json:"devices"`
+	Devices []Device_2  `json:"devices"`
 	Ingress IngressSpec `json:"ingress"`
 }
 

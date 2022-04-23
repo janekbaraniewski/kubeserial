@@ -7,7 +7,7 @@ exit_on_error () {
 
 replace_or_compare () {
     if [[ "${COPY_OR_DIFF}" == "copy" ]]; then
-        cp -r $1 $2
+        cp -r $@
     elif [[ "${COPY_OR_DIFF}" == "diff" ]]; then
         diff -qr $1 $2 || exit_on_error "To fix run:\n    make generate"
     fi

@@ -9,7 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-func CreateService(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device) *corev1.Service {
+func CreateService(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device_2) *corev1.Service {
 	labels := map[string]string{
 		"app": cr.Name + "-" + device.Name + "-gateway",
 	}

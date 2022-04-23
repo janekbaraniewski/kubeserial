@@ -16,7 +16,7 @@ func TestCreateConfigMap(t *testing.T) {
 				Name: "test-cr",
 			},
 		},
-		&v1alpha1.Device{
+		&v1alpha1.Device_2{
 			Name: "test-device",
 		},
 	)

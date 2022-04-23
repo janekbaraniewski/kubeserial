@@ -1,0 +1,16 @@
+coverage:
+  status:
+    patch:
+      default:
+        target: 0% # FIXME: This should be auto
+        threshold: 5%
+        base: auto
+    project:
+      default:
+        target: auto
+        threshold: 5%
+        base: auto
+        paths:
+          - "pkg"
+        if_not_found: success
+        if_ci_failed: error

@@ -30,6 +30,9 @@ import (
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
 		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.Device":           schema_pkg_apis_kubeserial_v1alpha1_Device(ref),
+		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.DeviceSpec":       schema_pkg_apis_kubeserial_v1alpha1_DeviceSpec(ref),
+		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.DeviceStatus":     schema_pkg_apis_kubeserial_v1alpha1_DeviceStatus(ref),
+		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.Device_2":         schema_pkg_apis_kubeserial_v1alpha1_Device_2(ref),
 		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.IngressSpec":      schema_pkg_apis_kubeserial_v1alpha1_IngressSpec(ref),
 		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.KubeSerial":       schema_pkg_apis_kubeserial_v1alpha1_KubeSerial(ref),
 		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.KubeSerialSpec":   schema_pkg_apis_kubeserial_v1alpha1_KubeSerialSpec(ref),
@@ -38,6 +41,93 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 }
 
 func schema_pkg_apis_kubeserial_v1alpha1_Device(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Device is the Schema for the devices API",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+					"spec": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.DeviceSpec"),
+						},
+					},
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Default: map[string]interface{}{},
+							Ref:     ref("github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.DeviceStatus"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.DeviceSpec", "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.DeviceStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+	}
+}
+
+func schema_pkg_apis_kubeserial_v1alpha1_DeviceSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "DeviceSpec defines the desired state of Device",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"foo": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_kubeserial_v1alpha1_DeviceStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "DeviceStatus defines the observed state of Device",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"available": {
+						SchemaProps: spec.SchemaProps{
+							Default: false,
+							Type:    []string{"boolean"},
+							Format:  "",
+						},
+					},
+				},
+				Required: []string{"available"},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_kubeserial_v1alpha1_Device_2(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -190,7 +280,7 @@ func schema_pkg_apis_kubeserial_v1alpha1_KubeSerialSpec(ref common.ReferenceCall
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Default: map[string]interface{}{},
-										Ref:     ref("github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.Device"),
+										Ref:     ref("github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.Device_2"),
 									},
 								},
 							},
@@ -207,7 +297,7 @@ func schema_pkg_apis_kubeserial_v1alpha1_KubeSerialSpec(ref common.ReferenceCall
 			},
 		},
 		Dependencies: []string{
-			"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.Device", "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.IngressSpec"},
+			"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.Device_2", "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.IngressSpec"},
 	}
 }
 

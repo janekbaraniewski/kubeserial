@@ -10,7 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (m *Manager) CreateDeployment(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device) *appsv1.Deployment {
+func (m *Manager) CreateDeployment(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device_2) *appsv1.Deployment {
 	labels := map[string]string{
 		"app": m.GetName(cr.Name, device.Name),
 	}

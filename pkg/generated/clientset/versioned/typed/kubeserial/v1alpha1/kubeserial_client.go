@@ -27,12 +27,17 @@ import (
 
 type AppV1alpha1Interface interface {
 	RESTClient() rest.Interface
+	DevicesGetter
 	KubeSerialsGetter
 }
 
 // AppV1alpha1Client is used to interact with features provided by the app.kubeserial.com group.
 type AppV1alpha1Client struct {
 	restClient rest.Interface
+}
+
+func (c *AppV1alpha1Client) Devices(namespace string) DeviceInterface {
+	return newDevices(c, namespace)
 }
 
 func (c *AppV1alpha1Client) KubeSerials(namespace string) KubeSerialInterface {

@@ -9,7 +9,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func CreateDeployment(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device, nodeName string) *appsv1.Deployment {
+func CreateDeployment(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device_2, nodeName string) *appsv1.Deployment {
 	labels := map[string]string{
 		"app": cr.Name + "-" + device.Name + "-gateway",
 	}

@@ -8,7 +8,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (m *Manager) CreateConfigMap(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device) *corev1.ConfigMap {
+func (m *Manager) CreateConfigMap(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device_2) *corev1.ConfigMap {
 	labels := map[string]string{
 		"app": m.GetName(cr.Name, device.Name),
 	}

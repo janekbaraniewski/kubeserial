@@ -27,6 +27,10 @@ type FakeAppV1alpha1 struct {
 	*testing.Fake
 }
 
+func (c *FakeAppV1alpha1) Devices(namespace string) v1alpha1.DeviceInterface {
+	return &FakeDevices{c, namespace}
+}
+
 func (c *FakeAppV1alpha1) KubeSerials(namespace string) v1alpha1.KubeSerialInterface {
 	return &FakeKubeSerials{c, namespace}
 }

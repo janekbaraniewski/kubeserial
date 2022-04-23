@@ -26,7 +26,7 @@ func getCR() *kubeserialv1alpha1.KubeSerial {
 			Namespace: "test-namespace",
 		},
 		Spec: kubeserialv1alpha1.KubeSerialSpec{
-			Devices: []kubeserialv1alpha1.Device{
+			Devices: []kubeserialv1alpha1.Device_2{
 				{
 					Name:      "testDevice",
 					IdVendor:  "0",
@@ -80,7 +80,7 @@ func TestGetDeviceState(t *testing.T) {
 		ObjToCreate   client.Object
 		ExpectedState *corev1.ConfigMap
 		ValidateError func(error) bool
-		Device        kubeserialv1alpha1.Device
+		Device        kubeserialv1alpha1.Device_2
 		KS            *kubeserialv1alpha1.KubeSerial
 	}{
 		{
@@ -88,7 +88,7 @@ func TestGetDeviceState(t *testing.T) {
 			ObjToCreate:   nil,
 			ExpectedState: nil,
 			ValidateError: func(err error) bool { return errors.IsNotFound(err) },
-			Device:        kubeserialv1alpha1.Device{},
+			Device:        kubeserialv1alpha1.Device_2{},
 			KS:            getCR(),
 		},
 		{
@@ -111,7 +111,7 @@ func TestGetDeviceState(t *testing.T) {
 				},
 			},
 			ValidateError: func(err error) bool { return err == nil },
-			Device:        kubeserialv1alpha1.Device{Name: "testdevice"},
+			Device:        kubeserialv1alpha1.Device_2{Name: "testdevice"},
 			KS:            getCR(),
 		},
 	}

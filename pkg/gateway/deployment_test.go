@@ -9,7 +9,7 @@ import (
 
 func TestCreateDeployment(t *testing.T) {
 	// TODO: improve this test
-	deployment := CreateDeployment(&v1alpha1.KubeSerial{}, &v1alpha1.Device{}, "test-node")
+	deployment := CreateDeployment(&v1alpha1.KubeSerial{}, &v1alpha1.Device_2{}, "test-node")
 
 	assert.Equal(t, map[string]string{
 		"kubernetes.io/hostname": "test-node",

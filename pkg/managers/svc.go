@@ -7,7 +7,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-func (m *Manager) CreateService(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device) *corev1.Service {
+func (m *Manager) CreateService(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device_2) *corev1.Service {
 	labels := map[string]string{
 		"app": m.GetName(cr.Name, device.Name),
 	}

@@ -147,7 +147,7 @@ func (r *KubeSerialReconciler) reconcileDevicesConfig(ctx context.Context, cr *k
 	return nil
 }
 
-func (r *KubeSerialReconciler) GetDeviceState(ctx context.Context, p *kubeserialv1alpha1.Device, cr *kubeserialv1alpha1.KubeSerial) (*corev1.ConfigMap, error) {
+func (r *KubeSerialReconciler) GetDeviceState(ctx context.Context, p *kubeserialv1alpha1.Device_2, cr *kubeserialv1alpha1.KubeSerial) (*corev1.ConfigMap, error) {
 	logger := log.WithName("GetDevicesState")
 
 	found := &corev1.ConfigMap{}

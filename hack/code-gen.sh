@@ -86,7 +86,7 @@ informer-gen \
     --listers-package=github.com/janekbaraniewski/kubeserial/pkg/generated/listers \
     --output-package=github.com/janekbaraniewski/kubeserial/pkg/generated/informers
 
-if [[ "${COPY_OR_DIFF}" == "copy" ]]; then rm -rf ./pkg/generated || true; fi;
-replace_or_compare $GOPATH/src/github.com/janekbaraniewski/kubeserial/pkg/generated/ ./pkg/generated
+if [[ "${COPY_OR_DIFF}" == "copy" ]]; then rm -rf ./pkg/generated; mkdir ./pkg/generated || true; fi;
+replace_or_compare $GOPATH/src/github.com/janekbaraniewski/kubeserial/pkg/generated/ ./pkg/generated/
 
 printf "Done!\n"

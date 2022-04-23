@@ -7,8 +7,15 @@ exit_on_error () {
 
 replace_or_compare () {
     if [[ "${COPY_OR_DIFF}" == "copy" ]]; then
-        cp -r $@
+        if [[ -d $1 ]]; then
+            cp -r $1/* $2
+        elif [[ -f $1 ]]; then
+            cp -r $1 $2
+        else
+            echo "$1 is not valid"
+            exit 1
+        fi
     elif [[ "${COPY_OR_DIFF}" == "diff" ]]; then
-        diff -qr $1 $2 || exit_on_error "To fix run:\n    make generate"
+        diff -qr --exclude="_helpers.tpl" $1 $2 || exit_on_error "To fix run:\n    make generate"
     fi
 }

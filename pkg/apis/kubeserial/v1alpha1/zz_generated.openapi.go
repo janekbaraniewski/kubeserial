@@ -94,13 +94,43 @@ func schema_pkg_apis_kubeserial_v1alpha1_DeviceSpec(ref common.ReferenceCallback
 				Description: "DeviceSpec defines the desired state of Device",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"foo": {
+					"name": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"idVendor": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"idProduct": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"manager": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"subsystem": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
 						},
 					},
 				},
+				Required: []string{"name", "idVendor", "idProduct", "manager", "subsystem"},
 			},
 		},
 	}
@@ -113,17 +143,25 @@ func schema_pkg_apis_kubeserial_v1alpha1_DeviceStatus(ref common.ReferenceCallba
 				Description: "DeviceStatus defines the observed state of Device",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"available": {
+					"conditions": {
 						SchemaProps: spec.SchemaProps{
-							Default: false,
-							Type:    []string{"boolean"},
-							Format:  "",
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.DeviceCondition"),
+									},
+								},
+							},
 						},
 					},
 				},
-				Required: []string{"available"},
+				Required: []string{"conditions"},
 			},
 		},
+		Dependencies: []string{
+			"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.DeviceCondition"},
 	}
 }
 

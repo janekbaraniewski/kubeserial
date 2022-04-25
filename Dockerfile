@@ -18,8 +18,6 @@ RUN GOOS=$TARGETOS GOARCH=$TARGETARCH \
     GO_BUILD_OUTPUT_PATH=/build/bin/kubeserial \
     make kubeserial
 
-# Use distroless as minimal base image to package the manager binary
-# Refer to https://github.com/GoogleContainerTools/distroless for more details
 FROM alpine
 WORKDIR /
 ENV USER_NAME=kubeserial \

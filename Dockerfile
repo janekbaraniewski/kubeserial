@@ -15,7 +15,7 @@ ARG TARGETOS TARGETARCH TARGETVARIANT
 RUN if [[ -n "${TARGETVARIANT}" ]]; then export GOARM=${TARGETVARIANT}; fi
 # Build
 RUN GOOS=$TARGETOS GOARCH=$TARGETARCH \
-    GO_BUILD_OUTPUT_PATH=/build/bin/kubeserial \
+    KUBESERIAL_BUILD_OUTPUT_PATH=/build/bin/kubeserial \
     make kubeserial
 
 FROM alpine

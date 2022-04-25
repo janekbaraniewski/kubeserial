@@ -35,6 +35,10 @@ func (c *FakeAppV1alpha1) KubeSerials(namespace string) v1alpha1.KubeSerialInter
 	return &FakeKubeSerials{c, namespace}
 }
 
+func (c *FakeAppV1alpha1) Managers(namespace string) v1alpha1.ManagerInterface {
+	return &FakeManagers{c, namespace}
+}
+
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
 func (c *FakeAppV1alpha1) RESTClient() rest.Interface {

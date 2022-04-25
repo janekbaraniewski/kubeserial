@@ -20,3 +20,5 @@ package v1alpha1
 type DeviceExpansion interface{}
 
 type KubeSerialExpansion interface{}
+
+type ManagerExpansion interface{}

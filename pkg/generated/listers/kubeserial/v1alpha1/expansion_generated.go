@@ -32,3 +32,11 @@ type KubeSerialListerExpansion interface{}
 // KubeSerialNamespaceListerExpansion allows custom methods to be added to
 // KubeSerialNamespaceLister.
 type KubeSerialNamespaceListerExpansion interface{}
+
+// ManagerListerExpansion allows custom methods to be added to
+// ManagerLister.
+type ManagerListerExpansion interface{}
+
+// ManagerNamespaceListerExpansion allows custom methods to be added to
+// ManagerNamespaceLister.
+type ManagerNamespaceListerExpansion interface{}

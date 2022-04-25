@@ -44,7 +44,8 @@ var log = logf.Log.WithName("KubeSerialController")
 // KubeSerialReconciler reconciles a KubeSerial object
 type KubeSerialReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme               *runtime.Scheme
+	DeviceMonitorVersion string
 }
 
 //+kubebuilder:rbac:groups=app.kubeserial.com,resources=kubeserials,verbs=get;list;watch;create;update;patch;delete
@@ -74,7 +75,7 @@ func (r *KubeSerialReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		return reconcile.Result{}, err
 	}
 
-	if err := r.ReconcileMonitor(ctx, instance, &apiClient); err != nil {
+	if err := r.ReconcileMonitor(ctx, instance, &apiClient, r.DeviceMonitorVersion); err != nil {
 		reqLogger.Info("ReconcileMonitor fail")
 		return reconcile.Result{}, err
 	}
@@ -112,9 +113,9 @@ func (r *KubeSerialReconciler) ReconcileManagers(ctx context.Context, cr *appv1a
 	return nil
 }
 
-func (r *KubeSerialReconciler) ReconcileMonitor(ctx context.Context, cr *appv1alpha1.KubeSerial, api api.API) error {
+func (r *KubeSerialReconciler) ReconcileMonitor(ctx context.Context, cr *appv1alpha1.KubeSerial, api api.API, monitorVersion string) error {
 	conf := monitor.CreateConfigMap(cr)
-	monitorDaemon := monitor.CreateDaemonSet(cr)
+	monitorDaemon := monitor.CreateDaemonSet(cr, monitorVersion)
 
 	if err := api.EnsureConfigMap(ctx, cr, conf); err != nil {
 		return err

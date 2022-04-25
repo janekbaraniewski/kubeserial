@@ -79,7 +79,7 @@ func CreateDaemonSet(cr *appv1alpha1.KubeSerial, monitorVersion string) *appsv1.
 						},
 						{
 							Name:    "device-monitor",
-							Image:   "janekbaraniewski/kubeserial-device-monitor:latest",
+							Image:   fmt.Sprintf("janekbaraniewski/kubeserial-device-monitor:%s", monitorVersion),
 							Command: []string{"/bin/sh"},
 							Args: []string{
 								"-c",
@@ -111,7 +111,7 @@ func CreateDaemonSet(cr *appv1alpha1.KubeSerial, monitorVersion string) *appsv1.
 							},
 						},
 					},
-					ServiceAccountName: "kubeserial", // TODO: add separate ServiceAccount for monitor
+					ServiceAccountName: "kubeserial",
 				},
 			},
 		},

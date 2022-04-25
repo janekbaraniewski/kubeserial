@@ -27,6 +27,8 @@ type Interface interface {
 	Devices() DeviceInformer
 	// KubeSerials returns a KubeSerialInformer.
 	KubeSerials() KubeSerialInformer
+	// Managers returns a ManagerInformer.
+	Managers() ManagerInformer
 }
 
 type version struct {
@@ -48,4 +50,9 @@ func (v *version) Devices() DeviceInformer {
 // KubeSerials returns a KubeSerialInformer.
 func (v *version) KubeSerials() KubeSerialInformer {
 	return &kubeSerialInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// Managers returns a ManagerInformer.
+func (v *version) Managers() ManagerInformer {
+	return &managerInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }

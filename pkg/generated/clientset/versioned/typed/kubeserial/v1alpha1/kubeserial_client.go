@@ -29,6 +29,7 @@ type AppV1alpha1Interface interface {
 	RESTClient() rest.Interface
 	DevicesGetter
 	KubeSerialsGetter
+	ManagersGetter
 }
 
 // AppV1alpha1Client is used to interact with features provided by the app.kubeserial.com group.
@@ -42,6 +43,10 @@ func (c *AppV1alpha1Client) Devices(namespace string) DeviceInterface {
 
 func (c *AppV1alpha1Client) KubeSerials(namespace string) KubeSerialInterface {
 	return newKubeSerials(c, namespace)
+}
+
+func (c *AppV1alpha1Client) Managers(namespace string) ManagerInterface {
+	return newManagers(c, namespace)
 }
 
 // NewForConfig creates a new AppV1alpha1Client for the given config.

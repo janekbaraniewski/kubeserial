@@ -77,13 +77,13 @@ type DeviceStatus struct {
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
-// Device is the Schema for the devices API
 // +genclient
 // +k8s:openapi-gen=true
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 // +kubebuilder:resource:path=devices,scope=Namespaced
+
+// Device is the Schema for the devices API
 type Device struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -94,6 +94,7 @@ type Device struct {
 
 //+kubebuilder:object:root=true
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+
 // DeviceList contains a list of Device
 type DeviceList struct {
 	metav1.TypeMeta `json:",inline"`

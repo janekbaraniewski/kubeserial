@@ -16,7 +16,8 @@ func TestCreateDaemonSet(t *testing.T) {
 		},
 	}
 
-	result := CreateDaemonSet(cr)
+	result := CreateDaemonSet(cr, "0.0.1")
 
 	assert.Equal(t, "test-config-monitor", result.ObjectMeta.Name)
+	assert.Equal(t, "janekbaraniewski/kubeserial-device-monitor:0.0.1", result.Spec.Template.Spec.Containers[0].Image)
 }

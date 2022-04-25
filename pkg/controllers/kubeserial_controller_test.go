@@ -233,7 +233,7 @@ func TestReconcileMonitor(t *testing.T) {
 	}
 	apiClient := api.NewFakeApiClient()
 
-	err := reconciler.ReconcileMonitor(context.TODO(), getCR(), &apiClient)
+	err := reconciler.ReconcileMonitor(context.TODO(), getCR(), &apiClient, "latest")
 
 	assert.Equal(t, nil, err)
 	assert.Equal(t, []string{"EnsureConfigMap", "EnsureDaemonSet"}, apiClient.Operations)

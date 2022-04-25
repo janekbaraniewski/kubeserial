@@ -1,13 +1,15 @@
 package monitor
 
 import (
+	"fmt"
+
 	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func CreateDaemonSet(cr *appv1alpha1.KubeSerial) *appsv1.DaemonSet {
+func CreateDaemonSet(cr *appv1alpha1.KubeSerial, monitorVersion string) *appsv1.DaemonSet {
 	labels := map[string]string{
 		"app": cr.Name + "-monitor",
 	}
@@ -57,7 +59,7 @@ func CreateDaemonSet(cr *appv1alpha1.KubeSerial) *appsv1.DaemonSet {
 					Containers: []corev1.Container{
 						{
 							Name:  "udev-monitor",
-							Image: "janekbaraniewski/kubeserial-device-monitor:latest",
+							Image: fmt.Sprintf("janekbaraniewski/kubeserial-device-monitor:%s", monitorVersion),
 							SecurityContext: &corev1.SecurityContext{
 								Privileged: &[]bool{true}[0],
 							},

@@ -33,6 +33,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - -leader-elect=true
+            - -device-monitor-version={{ .Values.image.tag }}
           env:
             - name: WATCH_NAMESPACE
               value: {{ .Release.Namespace }}

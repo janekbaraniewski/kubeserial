@@ -1,9 +1,11 @@
-DOCKERHUB=janekbaraniewski/kubeserial
+KUBESERIAL_REGISTRY=janekbaraniewski/kubeserial
+DEVICE_MONITOR_REGISTRY=janekbaraniewski/kubeserial-device-monitor
 TARGET_PLATFORMS=$(shell cat TARGET_PLATFORMS)
 VERSION ?= 0.0.1-$(shell git rev-parse --short HEAD)
 DOCKERBUILD_EXTRA_OPTS ?=
 DOCKERBUILD_PLATFORM_OPT=--platform
-GO_BUILD_OUTPUT_PATH ?= build/_output/bin/kubeserial
+KUBESERIAL_BUILD_OUTPUT_PATH ?= build/_output/bin/kubeserial
+DEVICE_MONITOR_BUILD_OUTPUT_PATH ?= build/_output/bin/device-monitor
 RELEASE_NAME ?= kubeserial
 ENVTEST_K8S_VERSION = 1.23
 
@@ -70,7 +72,11 @@ all: generate kubeserial ## Run codegen and build all components.
 
 PHONY: .kubeserial
 kubeserial: ## Build manager binary.
-	go build -o ${GO_BUILD_OUTPUT_PATH} cmd/manager/main.go
+	go build -o ${KUBESERIAL_BUILD_OUTPUT_PATH} cmd/manager/main.go
+
+PHONY: .device-monitor
+device-monitor: ## Build device monitor binary
+	go build -o ${DEVICE_MONITOR_BUILD_OUTPUT_PATH} cmd/device-monitor/main.go
 
 .PHONY: run
 run: generate fmt vet ## Run codegen and start controller from your host.
@@ -92,11 +98,29 @@ kubeserial-docker-all: kubeserial-docker ## Build and push image for all target 
 
 PHONY: .kubeserial-docker
 kubeserial-docker: DOCKERFILE=Dockerfile
+kubeserial-docker: REGISTRY=${KUBESERIAL_REGISTRY}
 kubeserial-docker: docker-build
+
+PHONY: .device-monitor-docker-local
+device-monitor-docker-local: PLATFORMS=
+device-monitor-docker-local: DOCKERBUILD_PLATFORM_OPT=
+device-monitor-docker-local: DOCKERBUILD_ACTION=--load
+device-monitor-docker-local: VERSION ?= local
+device-monitor-docker-local: device-monitor-docker ## Build image for local development, tag local, supports only builder platform
+
+PHONY: .device-monitor-docker-all
+device-monitor-docker-all: PLATFORMS=$(TARGET_PLATFORMS)
+device-monitor-docker-all: DOCKERBUILD_ACTION=--push
+device-monitor-docker-all: device-monitor-docker ## Build and push image for all target platforms
+
+PHONY: .device-monitor-docker
+device-monitor-docker: DOCKERFILE=Dockerfile.monitor
+device-monitor-docker: REGISTRY=${DEVICE_MONITOR_REGISTRY}
+device-monitor-docker: docker-build
 
 PHONY: .docker-build
 docker-build:
-	docker buildx build . -f ${DOCKERFILE} ${DOCKERBUILD_EXTRA_OPTS} ${DOCKERBUILD_PLATFORM_OPT} ${PLATFORMS} -t $(DOCKERHUB):$(VERSION) ${DOCKERBUILD_ACTION}
+	docker buildx build . -f ${DOCKERFILE} ${DOCKERBUILD_EXTRA_OPTS} ${DOCKERBUILD_PLATFORM_OPT} ${PLATFORMS} -t $(REGISTRY):$(VERSION) ${DOCKERBUILD_ACTION}
 
 ##@ Helm
 

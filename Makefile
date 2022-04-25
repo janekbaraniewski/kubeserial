@@ -82,7 +82,7 @@ PHONY: .kubeserial-docker-local
 kubeserial-docker-local: PLATFORMS=
 kubeserial-docker-local: DOCKERBUILD_PLATFORM_OPT=
 kubeserial-docker-local: DOCKERBUILD_ACTION=--load
-kubeserial-docker-local: VERSION=local
+kubeserial-docker-local: VERSION ?= local
 kubeserial-docker-local: kubeserial-docker ## Build image for local development, tag local, supports only builder platform
 
 PHONY: .kubeserial-docker-all
@@ -103,12 +103,12 @@ docker-build:
 PHONY: .update-kubeserial-chart-version
 update-kubeserial-chart-version: CHART_PATH=./deploy/chart/kubeserial
 update-kubeserial-chart-version: ## Update version used in chart. Requires VERSION var to be set
-	@CHART_PATH=${CHART_PATH} ./hack/update-chart-version.sh
+	@CHART_PATH=${CHART_PATH} VERSION=${VERSION} ./hack/update-chart-version.sh
 
 PHONY: .update-kubeserial-crds-chart-version
 update-kubeserial-crds-chart-version: CHART_PATH=./deploy/chart/kubeserial-crds
 update-kubeserial-crds-chart-version: ## Update version used in chart. Requires VERSION var to be set
-	@CHART_PATH=${CHART_PATH} ./hack/update-chart-version.sh
+	@CHART_PATH=${CHART_PATH} VERSION=${VERSION} ./hack/update-chart-version.sh
 
 PHONY: .helm-lint
 helm-lint: ## Run chart-testing to lint kubeserial chart.
@@ -124,9 +124,10 @@ update-crds-labels:
 uninstall: ## Uninstall release.
 	helm uninstall ${RELEASE_NAME}
 
-.PHONY: deploy
-deploy: manifests-gen update-kubeserial-chart-version ## Install release in current context/namespace.
-	helm upgrade --install ${RELEASE_NAME} ${CHART_PATH}
+.PHONY: .deploy-dev
+deploy-dev: manifests-gen update-kubeserial-chart-version update-kubeserial-crds-chart-version ## Install dev release in current context/namespace.
+	helm upgrade --install ${RELEASE_NAME}-crds ./deploy/chart/kubeserial-crds
+	helm upgrade --install ${RELEASE_NAME} ./deploy/chart/kubeserial
 
 
 # # go-get-tool will 'go get' any package $2 and install it to $1.

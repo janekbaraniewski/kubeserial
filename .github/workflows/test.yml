@@ -26,8 +26,8 @@ jobs:
           platforms: ${{ env.PLATFORMS }}
           push: false
           tags: janekbaraniewski/kubeserial:${{ env.RELEASE_VERSION }}
-          cache-from: type=registry,ref=janekbaraniewski/kubeserial:buildcache
-          cache-to: type=registry,ref=janekbaraniewski/kubeserial:buildcache,mode=max
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   codegen:
     runs-on: ubuntu-latest

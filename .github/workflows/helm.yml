@@ -4,7 +4,8 @@ on:
   push:
     branches: [ master ]
     tags:
-    - 'v*.*.*'
+    - '[0-9]+.[0-9]+.[0-9]+'
+    - 'crds-[0-9]+.[0-9]+.[0-9]+'
   pull_request:
 
 jobs:
@@ -29,6 +30,9 @@ jobs:
         uses: helm/chart-testing-action@v2.2.1
         with:
           version: v3.5.1
+
+      - name: Use release version in chart
+        run: make update-kubeserial-crds-chart-version
 
       - name: Run chart-testing (lint)
         run: make helm-lint

@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/instance: '{{ .Release.Name }}'
     app.kubernetes.io/managed-by: '{{ .Release.Service }}'
     app.kubernetes.io/name: '{{ include "kubeserial-crds.name" . }}'
-    app.kubernetes.io/version: '{{ .Chart.AppVersion | quote }}'
+    app.kubernetes.io/version: '{{ .Chart.AppVersion }}'
     helm.sh/chart: '{{ include "kubeserial-crds.chart" . }}'
   name: devices.app.kubeserial.com
 spec:
@@ -40,16 +40,67 @@ spec:
           spec:
             description: DeviceSpec defines the desired state of Device
             properties:
-              foo:
+              idProduct:
                 type: string
+              idVendor:
+                type: string
+              manager:
+                type: string
+              name:
+                type: string
+              subsystem:
+                type: string
+            required:
+            - idProduct
+            - idVendor
+            - manager
+            - name
+            - subsystem
             type: object
           status:
             description: DeviceStatus defines the observed state of Device
             properties:
-              available:
-                type: boolean
+              conditions:
+                items:
+                  properties:
+                    lastHeartbeatTime:
+                      format: date-time
+                      type: string
+                    lastTransitionTime:
+                      format: date-time
+                      type: string
+                    message:
+                      description: message is a human readable message indicating
+                        details about the transition. This may be an empty string.
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      maxLength: 1024
+                      minLength: 1
+                      pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
+                      type: string
+                    status:
+                      enum:
+                      - 'True'
+                      - 'False'
+                      - Unknown
+                      type: string
+                    type:
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - message
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
             required:
-            - available
+            - conditions
             type: object
         type: object
     served: true

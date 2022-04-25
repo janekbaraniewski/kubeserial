@@ -20,4 +20,4 @@ esac
 find ${CHART_PATH} \( -type d -name .git -prune \) -o -type f | \
     xargs ${sed} -i 's/'"${PLACEHOLDER_VALUE}"'/'"${VERSION}"'/g'
 
-${sed} -i 's/version: "0.0.1"/version: "'"${VERSION}"'"/g' ${CHART_PATH}/Chart.yaml
+${sed} -i 's/version: "0.0.2"/version: "'"${VERSION}"'"/g' ${CHART_PATH}/Chart.yaml

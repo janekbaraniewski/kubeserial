@@ -1,6 +1,6 @@
 DOCKERHUB=janekbaraniewski/kubeserial
 TARGET_PLATFORMS=$(shell cat TARGET_PLATFORMS)
-VERSION ?= $(shell git rev-parse --short HEAD)
+VERSION ?= 0.0.1-$(shell git rev-parse --short HEAD)
 DOCKERBUILD_EXTRA_OPTS ?=
 DOCKERBUILD_PLATFORM_OPT=--platform
 GO_BUILD_OUTPUT_PATH ?= build/_output/bin/kubeserial
@@ -112,7 +112,7 @@ update-kubeserial-crds-chart-version: ## Update version used in chart. Requires 
 
 PHONY: .helm-lint
 helm-lint: ## Run chart-testing to lint kubeserial chart.
-	@ct lint --chart-dirs deploy/chart/
+	@ct lint --chart-dirs deploy/chart/ --check-version-increment=false
 
 PHONY: .update-crds-labels
 update-crds-labels:

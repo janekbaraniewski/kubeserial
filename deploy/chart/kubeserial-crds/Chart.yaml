@@ -2,7 +2,7 @@ apiVersion: v2
 name: kubeserial-crds
 description: CRDs for Kubeserial
 type: application
-version: "0.0.2"
+version: "0.0.1"
 appVersion: "APP_VERSION"
 maintainers:
   - name: janekbaraniewski

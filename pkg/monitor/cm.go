@@ -1,6 +1,8 @@
 package monitor
 
 import (
+	"fmt"
+
 	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -13,7 +15,13 @@ func CreateConfigMap(cr *appv1alpha1.KubeSerial) *corev1.ConfigMap {
 	}
 
 	for _, device := range cr.Spec.Devices {
-		rule += "SUBSYSTEM==\"" + device.Subsystem + "\", ATTRS{idVendor}==\"" + device.IdVendor + "\", ATTRS{idProduct}==\"" + device.IdProduct + "\", SYMLINK+=\"" + device.Name + "\"\n"
+		rule += fmt.Sprintf(
+			"SUBSYSTEM==\"%v\", ATTRS{idVendor}==\"%s\", ATTRS{idProduct}==\"%s\", SYMLINK+=\"%s\"\n",
+			device.Subsystem,
+			device.IdVendor,
+			device.IdProduct,
+			device.Name,
+		)
 	}
 
 	return &corev1.ConfigMap{

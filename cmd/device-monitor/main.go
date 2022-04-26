@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	"github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned"
 	"github.com/janekbaraniewski/kubeserial/pkg/monitor"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -25,6 +26,12 @@ func main() {
 		panic(err.Error())
 	}
 
+	clientsetKubeserial, err := versioned.NewForConfig(config)
+	if err != nil {
+		log.Error(err, "Can't create kubeserial clientset")
+		panic(err.Error())
+	}
+
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		log.Error(err, "Failed to get clientset")
@@ -33,7 +40,12 @@ func main() {
 	log.Info("Clientset initialised")
 	ctx := ctrl.SetupSignalHandler()
 	log.Info("Starting update loop")
-	go monitor.RunUpdateLoop(ctx, clientset, os.Getenv("OPERATOR_NAMESPACE"))
+	go monitor.RunUpdateLoop(
+		ctx,
+		clientset,
+		os.Getenv("OPERATOR_NAMESPACE"),
+		clientsetKubeserial,
+	)
 	<-ctx.Done()
 	log.Info("Exiting")
 }

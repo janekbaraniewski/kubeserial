@@ -1,7 +1,5 @@
-FROM --platform=$BUILDPLATFORM golang:1.18-alpine AS builder
+FROM --platform=$BUILDPLATFORM golang:1.18-buster AS builder
 
-RUN apk update
-RUN apk add make bash
 WORKDIR /workspace
 COPY go.mod go.sum ./
 RUN go mod download
@@ -19,7 +17,7 @@ RUN GOOS=$TARGETOS GOARCH=$TARGETARCH \
     DEVICE_MONITOR_BUILD_OUTPUT_PATH=/build/bin/device-monitor \
     make device-monitor
 
-FROM ubuntu:18.04
+FROM golang:1.18-buster
 
 COPY --from=builder /build/bin/device-monitor /go/bin/device-monitor
 

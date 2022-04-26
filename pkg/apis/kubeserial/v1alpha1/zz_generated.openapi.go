@@ -110,6 +110,12 @@ func schema_pkg_apis_kubeserial_v1alpha1_DeviceStatus(ref common.ReferenceCallba
 							},
 						},
 					},
+					"nodename": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
 				},
 				Required: []string{"conditions"},
 			},

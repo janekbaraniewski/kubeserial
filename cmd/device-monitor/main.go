@@ -16,8 +16,14 @@ import (
 )
 
 func main() {
-	opts := zap.Options{}
-	log := zap.New(zap.UseFlagOptions(&opts))
+	// TODO: move this to pkg and add tests
+	opts := zap.Options{
+		Development: true,
+	}
+	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
+	log := ctrl.Log.WithName("monitor")
+
+	log.Info("Start setup")
 
 	config, err := rest.InClusterConfig()
 	if err != nil {

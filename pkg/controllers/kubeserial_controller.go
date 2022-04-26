@@ -32,9 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
-	kubeserialv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
 	"github.com/janekbaraniewski/kubeserial/pkg/controllers/api"
-	apiclient "github.com/janekbaraniewski/kubeserial/pkg/controllers/api"
 	"github.com/janekbaraniewski/kubeserial/pkg/managers"
 	"github.com/janekbaraniewski/kubeserial/pkg/monitor"
 )
@@ -56,7 +54,7 @@ func (r *KubeSerialReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 
 	reqLogger.Info("Reconciling KubeSerial")
 
-	instance := &kubeserialv1alpha1.KubeSerial{}
+	instance := &appv1alpha1.KubeSerial{}
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -65,7 +63,7 @@ func (r *KubeSerialReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		return reconcile.Result{}, err
 	}
 
-	apiClient := apiclient.ApiClient{
+	apiClient := api.ApiClient{
 		Client: r.Client,
 		Scheme: r.Scheme,
 	}
@@ -128,7 +126,7 @@ func (r *KubeSerialReconciler) ReconcileMonitor(ctx context.Context, cr *appv1al
 	return nil
 }
 
-func (r *KubeSerialReconciler) reconcileDevicesConfig(ctx context.Context, cr *kubeserialv1alpha1.KubeSerial, api apiclient.API) error {
+func (r *KubeSerialReconciler) reconcileDevicesConfig(ctx context.Context, cr *appv1alpha1.KubeSerial, api api.API) error {
 	logger := log.WithName("reconcileDevicesConfig")
 	deviceConfs := CreateDeviceConfig(cr)
 
@@ -148,7 +146,7 @@ func (r *KubeSerialReconciler) reconcileDevicesConfig(ctx context.Context, cr *k
 	return nil
 }
 
-func (r *KubeSerialReconciler) GetDeviceState(ctx context.Context, p *kubeserialv1alpha1.Device_2, cr *kubeserialv1alpha1.KubeSerial) (*corev1.ConfigMap, error) {
+func (r *KubeSerialReconciler) GetDeviceState(ctx context.Context, p *appv1alpha1.Device_2, cr *appv1alpha1.KubeSerial) (*corev1.ConfigMap, error) {
 	logger := log.WithName("GetDevicesState")
 
 	found := &corev1.ConfigMap{}
@@ -162,7 +160,7 @@ func (r *KubeSerialReconciler) GetDeviceState(ctx context.Context, p *kubeserial
 	return found, nil
 }
 
-func CreateDeviceConfig(cr *kubeserialv1alpha1.KubeSerial) []*corev1.ConfigMap { // TODO: move to separate module
+func CreateDeviceConfig(cr *appv1alpha1.KubeSerial) []*corev1.ConfigMap { // TODO: move to separate module
 	confs := []*corev1.ConfigMap{}
 	for _, device := range cr.Spec.Devices {
 		labels := map[string]string{
@@ -189,6 +187,6 @@ func CreateDeviceConfig(cr *kubeserialv1alpha1.KubeSerial) []*corev1.ConfigMap {
 // SetupWithManager sets up the controller with the Manager.
 func (r *KubeSerialReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&kubeserialv1alpha1.KubeSerial{}).
+		For(&appv1alpha1.KubeSerial{}).
 		Complete(r)
 }

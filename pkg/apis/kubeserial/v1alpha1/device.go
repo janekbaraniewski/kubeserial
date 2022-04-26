@@ -24,6 +24,7 @@ type DeviceConditionType string
 
 const (
 	DeviceAvailable DeviceConditionType = "Available"
+	DeviceReady     DeviceConditionType = "Ready"
 )
 
 // +k8s:openapi-gen=true

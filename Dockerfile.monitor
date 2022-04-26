@@ -5,7 +5,7 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 # Copy the go source
-COPY Makefile Makefile
+COPY Makefile.build Makefile
 COPY cmd cmd
 COPY pkg pkg
 

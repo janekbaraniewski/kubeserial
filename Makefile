@@ -8,9 +8,12 @@ KUBESERIAL_BUILD_OUTPUT_PATH ?= build/_output/bin/kubeserial
 DEVICE_MONITOR_BUILD_OUTPUT_PATH ?= build/_output/bin/device-monitor
 RELEASE_NAME ?= kubeserial
 ENVTEST_K8S_VERSION = 1.23
+MINIKUBE_PROFILE=kubeserial
 
 SHELL = /usr/bin/env bash -o pipefail
 .SHELLFLAGS = -ec
+
+include Makefile.build
 
 ##@ General
 
@@ -65,18 +68,7 @@ test: fmt vet ## Run tests.
 # envtest: ## Download envtest-setup locally if necessary.
 # 	$(call go-get-tool,$(ENVTEST),sigs.k8s.io/controller-runtime/tools/setup-envtest@latest)
 
-##@ Build
-
-.PHONY: all
-all: generate kubeserial ## Run codegen and build all components.
-
-PHONY: .kubeserial
-kubeserial: ## Build manager binary.
-	go build -o ${KUBESERIAL_BUILD_OUTPUT_PATH} cmd/manager/main.go
-
-PHONY: .device-monitor
-device-monitor: ## Build device monitor binary
-	go build -o ${DEVICE_MONITOR_BUILD_OUTPUT_PATH} cmd/device-monitor/main.go
+##@ Run
 
 .PHONY: run
 run: generate fmt vet ## Run codegen and start controller from your host.
@@ -142,6 +134,45 @@ PHONY: .update-crds-labels
 update-crds-labels:
 	@python3 ./hack/update-crd-metadata.py deploy/chart/kubeserial-crds/templates/app.kubeserial.com_kubeserials.yaml hack/crd_metadata_template.yaml
 
+PHONY: .update-version
+update-version: update-kubeserial-crds-chart-version update-kubeserial-chart-version
+
+##@ Minikube
+
+.PHONY: .minikube
+minikube: minikube-start minikube-build-controller-image minikube-build-monitor-image update-version minikube-deploy ## Start local cluster, build image and deploy
+
+.PHONY: .minikube-start
+minikube-start: ## Start minikube cluster
+	@minikube -p ${MINIKUBE_PROFILE}  start
+
+.PHONY: .minikube-set-context
+minikube-set-context: ## Set context to use minikube cluster
+	@minikube -p ${MINIKUBE_PROFILE} update-context
+
+.PHONY: .minikube-build-controller-image
+minikube-build-controller-image: DOCKERFILE=Dockerfile
+minikube-build-controller-image: REGISTRY=${KUBESERIAL_REGISTRY}
+minikube-build-controller-image: minikube-build-image
+
+.PHONY: .minikube-build-monitor-image
+minikube-build-monitor-image: DOCKERFILE=Dockerfile.monitor
+minikube-build-monitor-image: REGISTRY=${DEVICE_MONITOR_REGISTRY}
+minikube-build-monitor-image: minikube-build-image
+
+.PHONY: .minikube-build-image
+minikube-build-image: DOCKERBUILD_EXTRA_OPTS=--load
+minikube-build-image:
+	@eval $$(minikube -p ${MINIKUBE_PROFILE} docker-env) ;\
+	docker buildx build . -f ${DOCKERFILE} ${DOCKERBUILD_EXTRA_OPTS} -t $(REGISTRY):$(VERSION)
+	@echo "Finished building image ${REGISTRY}:${VERSION}"
+	@echo "Available images:"
+	@eval $$(minikube -p ${MINIKUBE_PROFILE} docker-env) ;\
+	docker images
+
+.PHONY: .minikube-deploy
+minikube-deploy: update-version deploy-dev ## Deploy the app to local minikube
+
 ##@ Deployment
 
 .PHONY: uninstall
@@ -151,7 +182,7 @@ uninstall: ## Uninstall release.
 .PHONY: .deploy-dev
 deploy-dev: manifests-gen update-kubeserial-chart-version update-kubeserial-crds-chart-version ## Install dev release in current context/namespace.
 	helm upgrade --install ${RELEASE_NAME}-crds ./deploy/chart/kubeserial-crds
-	helm upgrade --install ${RELEASE_NAME} ./deploy/chart/kubeserial
+	helm upgrade --install ${RELEASE_NAME} ./deploy/chart/kubeserial -f ./deploy/chart/kubeserial/values-local.yaml
 
 
 # # go-get-tool will 'go get' any package $2 and install it to $1.

@@ -39,13 +39,9 @@ func main() {
 	}
 	log.Info("Clientset initialised")
 	ctx := ctrl.SetupSignalHandler()
-	log.Info("Starting update loop")
-	go monitor.RunUpdateLoop(
-		ctx,
-		clientset,
-		os.Getenv("OPERATOR_NAMESPACE"),
-		clientsetKubeserial,
-	)
+	deviceMonitor := monitor.NewMonitor(clientset, clientsetKubeserial, os.Getenv("OPERATOR_NAMESPACE"), os.Stat)
+	log.Info("Starting monitor update loop")
+	go deviceMonitor.RunUpdateLoop(ctx)
 	<-ctx.Done()
 	log.Info("Exiting")
 }

@@ -83,7 +83,7 @@ func CreateDaemonSet(cr *appv1alpha1.KubeSerial, monitorVersion string) *appsv1.
 							Command: []string{"/bin/sh"},
 							Args: []string{
 								"-c",
-								"./go/bin/device-monitor",
+								"./bin/device-monitor",
 							},
 							Env: []corev1.EnvVar{
 								{

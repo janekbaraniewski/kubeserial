@@ -19,8 +19,6 @@ RUN GOOS=$TARGETOS GOARCH=$TARGETARCH \
 
 FROM golang:1.18-buster
 
-COPY --from=builder /build/bin/device-monitor /go/bin/device-monitor
-
 ENV container docker
 ENV LC_ALL C
 
@@ -43,6 +41,8 @@ RUN rm -f /lib/systemd/system/multi-user.target.wants/* \
         /lib/systemd/system/anaconda.target.wants/* \
         /lib/systemd/system/plymouth* \
         /lib/systemd/system/systemd-update-utmp*
+
+COPY --from=builder /build/bin/device-monitor /go/bin/device-monitor
 
 VOLUME [ "/sys/fs/cgroup" ]
 CMD ["/lib/systemd/systemd-udevd"]

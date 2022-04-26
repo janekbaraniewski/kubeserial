@@ -1,5 +1,8 @@
 replicaCount: 1
 
+kubeserial:
+  devices: []
+
 image:
   repository: janekbaraniewski/kubeserial
   pullPolicy: IfNotPresent

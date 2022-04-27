@@ -10,6 +10,37 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+func TestGetCondition(t *testing.T) {
+	condition1 := v1alpha1.DeviceCondition{
+		Status: v1.ConditionTrue,
+		Type:   "test1",
+		Reason: "test",
+	}
+	condition2 := v1alpha1.DeviceCondition{
+		Status: v1.ConditionTrue,
+		Type:   "test2",
+		Reason: "test",
+	}
+	condition3 := v1alpha1.DeviceCondition{
+		Status: v1.ConditionTrue,
+		Type:   "test3",
+		Reason: "test",
+	}
+	device := &v1alpha1.Device{
+		Status: v1alpha1.DeviceStatus{
+			Conditions: []v1alpha1.DeviceCondition{
+				condition1,
+				condition2,
+				condition3,
+			},
+		},
+	}
+
+	conditionFound := GetCondition(device.Status.Conditions, "test3")
+
+	assert.Equal(t, &condition3, conditionFound)
+}
+
 func TestSetDeviceCondition(t *testing.T) {
 	device := &v1alpha1.Device{
 		ObjectMeta: v1.ObjectMeta{

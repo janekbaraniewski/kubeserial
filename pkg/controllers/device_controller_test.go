@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
+	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -26,23 +27,90 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			Name:      deviceName.Name,
 			Namespace: deviceName.Namespace,
 		},
+		Spec: v1alpha1.DeviceSpec{
+			Manager:   "test-manager",
+			IdVendor:  "123",
+			IdProduct: "456",
+			Subsystem: "tty",
+			Name:      "test-device",
+		},
 	}
+
+	manager := &v1alpha1.Manager{
+		ObjectMeta: v1.ObjectMeta{
+			Name:      "test-manager",
+			Namespace: "test-ns",
+		},
+		Spec: v1alpha1.ManagerSpec{
+			Image: v1alpha1.Image{
+				Repository: "test-image",
+				Tag:        "latest",
+			},
+			Config:     "test-config",
+			ConfigPath: "/home/config.yaml",
+			RunCmd:     "./test-manager",
+		},
+	}
+
 	scheme := runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(v1alpha1.AddToScheme(scheme))
 	fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).Build()
 
-	err := fakeClient.Create(context.TODO(), device)
+	{
+		t.Run("device-when-manager-not-available", func(t *testing.T) {
+			fakeClient.Create(context.TODO(), device)
 
-	assert.Equal(t, nil, err)
+			deviceReconciler := DeviceReconciler{
+				Client: fakeClient,
+				Scheme: scheme,
+			}
 
-	deviceReconciler := DeviceReconciler{
-		Client: fakeClient,
-		Scheme: scheme,
+			result, err := deviceReconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
+
+			assert.Equal(t, nil, err)
+			assert.Equal(t, false, result.Requeue)
+
+			foundDevice := &v1alpha1.Device{}
+			err = fakeClient.Get(context.TODO(), deviceName, foundDevice)
+
+			assert.Equal(t, nil, err)
+			assert.Equal(t, 2, len(foundDevice.Status.Conditions))
+
+			availableCondition := utils.GetCondition(foundDevice.Status.Conditions, v1alpha1.DeviceAvailable)
+			assert.Equal(t, v1.ConditionUnknown, availableCondition.Status)
+			assert.Equal(t, "NotValidated", availableCondition.Reason)
+
+			readyCondition := utils.GetCondition(foundDevice.Status.Conditions, v1alpha1.DeviceReady)
+			assert.Equal(t, v1.ConditionFalse, readyCondition.Status)
+			assert.Equal(t, "ManagerNotAvailable", readyCondition.Reason)
+		})
 	}
+	{
+		t.Run("device-and-manager-available", func(t *testing.T) {
+			fakeClient.Create(context.TODO(), device)
+			fakeClient.Create(context.TODO(), manager)
 
-	result, err := deviceReconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
+			deviceReconciler := DeviceReconciler{
+				Client: fakeClient,
+				Scheme: scheme,
+			}
 
-	assert.Equal(t, nil, err)
-	assert.Equal(t, false, result.Requeue)
+			result, err := deviceReconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
+
+			assert.Equal(t, nil, err)
+			assert.Equal(t, false, result.Requeue)
+
+			foundDevice := &v1alpha1.Device{}
+			fakeClient.Get(context.TODO(), deviceName, foundDevice)
+
+			availableCondition := utils.GetCondition(foundDevice.Status.Conditions, v1alpha1.DeviceAvailable)
+			assert.Equal(t, v1.ConditionUnknown, availableCondition.Status)
+			assert.Equal(t, "NotValidated", availableCondition.Reason)
+
+			readyCondition := utils.GetCondition(foundDevice.Status.Conditions, v1alpha1.DeviceReady)
+			assert.Equal(t, v1.ConditionTrue, readyCondition.Status)
+			assert.Equal(t, "AllChecksPassed", readyCondition.Reason)
+		})
+	}
 }

@@ -29,15 +29,17 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.DeviceSpec":       schema_pkg_apis_kubeserial_v1alpha1_DeviceSpec(ref),
-		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.DeviceStatus":     schema_pkg_apis_kubeserial_v1alpha1_DeviceStatus(ref),
-		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.Device_2":         schema_pkg_apis_kubeserial_v1alpha1_Device_2(ref),
-		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.IngressSpec":      schema_pkg_apis_kubeserial_v1alpha1_IngressSpec(ref),
-		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.KubeSerial":       schema_pkg_apis_kubeserial_v1alpha1_KubeSerial(ref),
-		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.KubeSerialSpec":   schema_pkg_apis_kubeserial_v1alpha1_KubeSerialSpec(ref),
-		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.KubeSerialStatus": schema_pkg_apis_kubeserial_v1alpha1_KubeSerialStatus(ref),
-		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.ManagerSpec":      schema_pkg_apis_kubeserial_v1alpha1_ManagerSpec(ref),
-		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.ManagerStatus":    schema_pkg_apis_kubeserial_v1alpha1_ManagerStatus(ref),
+		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.DeviceSpec":                   schema_pkg_apis_kubeserial_v1alpha1_DeviceSpec(ref),
+		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.DeviceStatus":                 schema_pkg_apis_kubeserial_v1alpha1_DeviceStatus(ref),
+		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.Device_2":                     schema_pkg_apis_kubeserial_v1alpha1_Device_2(ref),
+		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.IngressSpec":                  schema_pkg_apis_kubeserial_v1alpha1_IngressSpec(ref),
+		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.KubeSerial":                   schema_pkg_apis_kubeserial_v1alpha1_KubeSerial(ref),
+		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.KubeSerialSpec":               schema_pkg_apis_kubeserial_v1alpha1_KubeSerialSpec(ref),
+		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.KubeSerialStatus":             schema_pkg_apis_kubeserial_v1alpha1_KubeSerialStatus(ref),
+		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.ManagerScheduleRequestSpec":   schema_pkg_apis_kubeserial_v1alpha1_ManagerScheduleRequestSpec(ref),
+		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.ManagerScheduleRequestStatus": schema_pkg_apis_kubeserial_v1alpha1_ManagerScheduleRequestStatus(ref),
+		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.ManagerSpec":                  schema_pkg_apis_kubeserial_v1alpha1_ManagerSpec(ref),
+		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.ManagerStatus":                schema_pkg_apis_kubeserial_v1alpha1_ManagerStatus(ref),
 	}
 }
 
@@ -304,6 +306,36 @@ func schema_pkg_apis_kubeserial_v1alpha1_KubeSerialStatus(ref common.ReferenceCa
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
 				Description: "KubeSerialStatus defines the observed state of KubeSerial",
+				Type:        []string{"object"},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_kubeserial_v1alpha1_ManagerScheduleRequestSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ManagerScheduleRequestSpec defines the desired state of ManagerScheduleRequest",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"foo": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_kubeserial_v1alpha1_ManagerScheduleRequestStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ManagerScheduleRequestStatus defines the observed state of ManagerScheduleRequest",
 				Type:        []string{"object"},
 			},
 		},

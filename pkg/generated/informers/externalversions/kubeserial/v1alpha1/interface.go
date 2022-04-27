@@ -29,6 +29,8 @@ type Interface interface {
 	KubeSerials() KubeSerialInformer
 	// Managers returns a ManagerInformer.
 	Managers() ManagerInformer
+	// ManagerScheduleRequests returns a ManagerScheduleRequestInformer.
+	ManagerScheduleRequests() ManagerScheduleRequestInformer
 }
 
 type version struct {
@@ -55,4 +57,9 @@ func (v *version) KubeSerials() KubeSerialInformer {
 // Managers returns a ManagerInformer.
 func (v *version) Managers() ManagerInformer {
 	return &managerInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// ManagerScheduleRequests returns a ManagerScheduleRequestInformer.
+func (v *version) ManagerScheduleRequests() ManagerScheduleRequestInformer {
+	return &managerScheduleRequestInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }

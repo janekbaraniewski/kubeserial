@@ -7,6 +7,7 @@ import (
 
 	"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
 	"github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned/fake"
+	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
@@ -54,8 +55,12 @@ func TestUpdateDeviceState_Device(t *testing.T) {
 		Status: v1alpha1.DeviceStatus{
 			Conditions: []v1alpha1.DeviceCondition{
 				{
+					Type:   v1alpha1.DeviceReady,
+					Status: v1.ConditionTrue,
+				},
+				{
 					Type:   v1alpha1.DeviceAvailable,
-					Status: v1.ConditionFalse,
+					Status: v1.ConditionUnknown,
 				},
 			},
 		},
@@ -75,14 +80,16 @@ func TestUpdateDeviceState_Device(t *testing.T) {
 				ctx, device.Name, v1.GetOptions{})
 
 			assert.Equal(t, nil, err)
-			assert.Equal(t, v1.ConditionTrue, foundDevice.Status.Conditions[0].Status)
-			assert.Equal(t, "DeviceAvailable", foundDevice.Status.Conditions[0].Reason)
+
+			availableCondition := utils.GetCondition(foundDevice.Status.Conditions, v1alpha1.DeviceAvailable)
+			assert.Equal(t, v1.ConditionTrue, availableCondition.Status)
+			assert.Equal(t, "DeviceAvailable", availableCondition.Reason)
 			assert.Equal(t, "test-node", foundDevice.Status.NodeName)
 		})
 	}
 	{
 		t.Run("test-update-available-condition-when-unavailable", func(t *testing.T) {
-			device.Status.Conditions[0].Status = v1.ConditionTrue
+			device.Status.Conditions[1].Status = v1.ConditionTrue
 			device.Status.NodeName = "test-node"
 			fakeClientset := testclient.NewSimpleClientset()
 			fakeClientsetKubeserial := fake.NewSimpleClientset(device)
@@ -95,8 +102,9 @@ func TestUpdateDeviceState_Device(t *testing.T) {
 				ctx, device.Name, v1.GetOptions{})
 
 			assert.Equal(t, nil, err)
-			assert.Equal(t, v1.ConditionFalse, foundDevice.Status.Conditions[0].Status)
-			assert.Equal(t, "DeviceUnavailable", foundDevice.Status.Conditions[0].Reason)
+			availableCondition := utils.GetCondition(foundDevice.Status.Conditions, v1alpha1.DeviceAvailable)
+			assert.Equal(t, v1.ConditionFalse, availableCondition.Status)
+			assert.Equal(t, "DeviceUnavailable", availableCondition.Reason)
 			assert.Equal(t, "", foundDevice.Status.NodeName)
 		})
 	}

@@ -93,17 +93,24 @@ func (m *Monitor) updateCMBasedDevice(ctx context.Context) {
 
 func (m *Monitor) updateCRDBasedDevice(ctx context.Context) {
 	devices, err := m.devicesClient.List(ctx, metav1.ListOptions{})
+	readyDevices := []v1alpha1.Device{}
+	for _, device := range devices.Items {
+		readyCondition := utils.GetCondition(device.Status.Conditions, v1alpha1.DeviceReady)
+		if readyCondition != nil && readyCondition.Status == metav1.ConditionTrue {
+			readyDevices = append(readyDevices, device)
+		}
+	}
 	if err != nil {
 		log.Error(err, "Failed listing Device CRs")
 	}
-	for _, device := range devices.Items {
+	for _, device := range readyDevices {
 		log.V(2).Info("Got device!", "device", device)
 		deviceCondition := utils.GetCondition(device.Status.Conditions, v1alpha1.DeviceAvailable)
 		if deviceCondition == nil {
 			log.Error(err, "Can't find device condition")
 			continue
 		}
-		if deviceCondition.Status == metav1.ConditionFalse {
+		if deviceCondition.Status != metav1.ConditionTrue {
 			if m.isDeviceAvailable(device.Name) {
 				log.Info("Device available, updating state.")
 				utils.SetDeviceCondition(&device.Status.Conditions, v1alpha1.DeviceCondition{

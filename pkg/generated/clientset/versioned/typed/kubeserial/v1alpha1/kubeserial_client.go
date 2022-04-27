@@ -30,6 +30,7 @@ type AppV1alpha1Interface interface {
 	DevicesGetter
 	KubeSerialsGetter
 	ManagersGetter
+	ManagerScheduleRequestsGetter
 }
 
 // AppV1alpha1Client is used to interact with features provided by the app.kubeserial.com group.
@@ -47,6 +48,10 @@ func (c *AppV1alpha1Client) KubeSerials(namespace string) KubeSerialInterface {
 
 func (c *AppV1alpha1Client) Managers(namespace string) ManagerInterface {
 	return newManagers(c, namespace)
+}
+
+func (c *AppV1alpha1Client) ManagerScheduleRequests(namespace string) ManagerScheduleRequestInterface {
+	return newManagerScheduleRequests(c, namespace)
 }
 
 // NewForConfig creates a new AppV1alpha1Client for the given config.

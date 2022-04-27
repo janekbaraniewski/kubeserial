@@ -58,6 +58,8 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 		return &genericInformer{resource: resource.GroupResource(), informer: f.App().V1alpha1().KubeSerials().Informer()}, nil
 	case v1alpha1.SchemeGroupVersion.WithResource("managers"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.App().V1alpha1().Managers().Informer()}, nil
+	case v1alpha1.SchemeGroupVersion.WithResource("managerschedulerequests"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.App().V1alpha1().ManagerScheduleRequests().Informer()}, nil
 
 	}
 

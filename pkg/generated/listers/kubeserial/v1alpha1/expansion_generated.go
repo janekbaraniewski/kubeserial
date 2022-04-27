@@ -40,3 +40,11 @@ type ManagerListerExpansion interface{}
 // ManagerNamespaceListerExpansion allows custom methods to be added to
 // ManagerNamespaceLister.
 type ManagerNamespaceListerExpansion interface{}
+
+// ManagerScheduleRequestListerExpansion allows custom methods to be added to
+// ManagerScheduleRequestLister.
+type ManagerScheduleRequestListerExpansion interface{}
+
+// ManagerScheduleRequestNamespaceListerExpansion allows custom methods to be added to
+// ManagerScheduleRequestNamespaceLister.
+type ManagerScheduleRequestNamespaceListerExpansion interface{}

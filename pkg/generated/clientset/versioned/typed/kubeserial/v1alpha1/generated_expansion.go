@@ -22,3 +22,5 @@ type DeviceExpansion interface{}
 type KubeSerialExpansion interface{}
 
 type ManagerExpansion interface{}
+
+type ManagerScheduleRequestExpansion interface{}

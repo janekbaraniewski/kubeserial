@@ -40,7 +40,7 @@ func TestUpdateDeviceState_ConfigMap(t *testing.T) {
 
 func TestUpdateDeviceState_Device(t *testing.T) {
 	ctx := context.Background()
-	getDevice := func(ready, available v1.ConditionStatus) *v1alpha1.Device {
+	getDevice := func(ready, available v1.ConditionStatus, node string) *v1alpha1.Device {
 		return &v1alpha1.Device{
 			ObjectMeta: v1.ObjectMeta{
 				Name:      "test-device",
@@ -65,17 +65,56 @@ func TestUpdateDeviceState_Device(t *testing.T) {
 						Reason: "testing",
 					},
 				},
+				NodeName: node,
 			},
 		}
 	}
 	os.Setenv("NODE_NAME", "test-node")
-	{
-		t.Run("test-update-available-condition-when-available", func(t *testing.T) {
-			device := getDevice(v1.ConditionTrue, v1.ConditionFalse)
+	testCases := []struct {
+		Name            string
+		InitReady       v1.ConditionStatus
+		InitAvailable   v1.ConditionStatus
+		InitNode        string
+		ResultAvailable v1.ConditionStatus
+		ResultNode      string
+		CreateDevice    bool
+	}{
+		{
+			Name:            "test-update-available-condition-when-available",
+			InitReady:       v1.ConditionTrue,
+			InitAvailable:   v1.ConditionFalse,
+			InitNode:        "",
+			ResultAvailable: v1.ConditionTrue,
+			ResultNode:      "test-node",
+			CreateDevice:    true,
+		},
+		{
+			Name:            "test-update-available-condition-when-unavailable",
+			InitReady:       v1.ConditionTrue,
+			InitAvailable:   v1.ConditionTrue,
+			InitNode:        "test-node",
+			ResultAvailable: v1.ConditionFalse,
+			ResultNode:      "",
+			CreateDevice:    false,
+		},
+		{
+			Name:            "test-dont-update-not-ready-device",
+			InitReady:       v1.ConditionFalse,
+			InitAvailable:   v1.ConditionUnknown,
+			InitNode:        "",
+			ResultAvailable: v1.ConditionUnknown,
+			ResultNode:      "",
+		},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.Name, func(t *testing.T) {
+			device := getDevice(testCase.InitReady, testCase.InitAvailable, testCase.InitNode)
 			fakeClientset := testclient.NewSimpleClientset()
 			fakeClientsetKubeserial := fake.NewSimpleClientset(device)
 			fs := afero.NewMemMapFs()
-			fs.Create("/dev/tty" + device.Name)
+			if testCase.CreateDevice {
+				fs.Create("/dev/tty" + device.Name)
+			}
 			monitor := NewMonitor(fakeClientset, fakeClientsetKubeserial, "test-ns", fs.Stat)
 
 			monitor.UpdateDeviceState(ctx)
@@ -84,50 +123,9 @@ func TestUpdateDeviceState_Device(t *testing.T) {
 				ctx, device.Name, v1.GetOptions{})
 
 			assert.Equal(t, nil, err)
-
 			availableCondition := utils.GetCondition(foundDevice.Status.Conditions, v1alpha1.DeviceAvailable)
-			assert.Equal(t, v1.ConditionTrue, availableCondition.Status)
-			assert.Equal(t, "DeviceAvailable", availableCondition.Reason)
-			assert.Equal(t, "test-node", foundDevice.Status.NodeName)
-		})
-	}
-	{
-		t.Run("test-update-available-condition-when-unavailable", func(t *testing.T) {
-			device := getDevice(v1.ConditionTrue, v1.ConditionTrue)
-			device.Status.NodeName = "test-node"
-			fakeClientset := testclient.NewSimpleClientset()
-			fakeClientsetKubeserial := fake.NewSimpleClientset(device)
-			fs := afero.NewMemMapFs()
-			monitor := NewMonitor(fakeClientset, fakeClientsetKubeserial, "test-ns", fs.Stat)
-
-			monitor.UpdateDeviceState(ctx)
-
-			foundDevice, err := fakeClientsetKubeserial.AppV1alpha1().Devices("test-ns").Get(
-				ctx, device.Name, v1.GetOptions{})
-
-			assert.Equal(t, nil, err)
-			availableCondition := utils.GetCondition(foundDevice.Status.Conditions, v1alpha1.DeviceAvailable)
-			assert.Equal(t, v1.ConditionFalse, availableCondition.Status)
-			assert.Equal(t, "DeviceUnavailable", availableCondition.Reason)
-			assert.Equal(t, "", foundDevice.Status.NodeName)
-		})
-	}
-	{
-		t.Run("test-dont-update-not-ready-device", func(t *testing.T) {
-			device := getDevice(v1.ConditionFalse, v1.ConditionUnknown)
-			fakeClientset := testclient.NewSimpleClientset()
-			fakeClientsetKubeserial := fake.NewSimpleClientset(device)
-			monitor := NewMonitor(fakeClientset, fakeClientsetKubeserial, "test-ns", os.Stat)
-
-			monitor.UpdateDeviceState(ctx)
-
-			foundDevice, err := fakeClientsetKubeserial.AppV1alpha1().Devices("test-ns").Get(
-				ctx, device.Name, v1.GetOptions{})
-
-			assert.Equal(t, nil, err)
-			availableCondition := utils.GetCondition(foundDevice.Status.Conditions, v1alpha1.DeviceAvailable)
-			assert.Equal(t, v1.ConditionUnknown, availableCondition.Status)
-			assert.Equal(t, "testing", availableCondition.Reason)
+			assert.Equal(t, testCase.ResultAvailable, availableCondition.Status)
+			assert.Equal(t, testCase.ResultNode, foundDevice.Status.NodeName)
 		})
 	}
 	os.Unsetenv("NODE_NAME")

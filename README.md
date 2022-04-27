@@ -1,9 +1,9 @@
 # KubeSerial
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+![Release](https://badgen.net/github/release/janekbaraniewski/kubeserial)
+[![License](https://img.shields.io/github/license/janekbaraniewski/kubeserial.svg)](LICENSE)
 ![GH workflow](https://github.com/janekbaraniewski/kubeserial/actions/workflows/test.yml/badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/janekbaraniewski/kubeserial)](https://goreportcard.com/report/github.com/janekbaraniewski/kubeserial)
 [![codecov](https://codecov.io/gh/janekbaraniewski/kubeserial/branch/master/graph/badge.svg?token=Y95FB6H188)](https://codecov.io/gh/janekbaraniewski/kubeserial)
-
 ---
 
 KubeSerial monitors your cluster nodes for physical devices specified in spec. Once the device is connected, it creates gateway service that exposes it over the network and manager service with specified management software. When the device gets disconnected everything is cleaned up.

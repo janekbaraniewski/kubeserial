@@ -18,7 +18,6 @@ package controllers
 
 import (
 	"context"
-	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,7 +26,9 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
+	"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
 	kubeserialv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
 	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 )
@@ -65,8 +66,23 @@ func (r *DeviceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	}
 	log := devLog.WithValues("device", instance)
 
-	log.Info("Ensuring conditions exist")
-	// Ensure all conditions are available
+	err = r.EnsureConditions(ctx, instance)
+	if err != nil {
+		log.Error(err, "Failed ensuring conditions")
+		return ctrl.Result{}, err
+	}
+
+	err = r.ValidateDeviceReady(ctx, instance, req)
+	if err != nil {
+		log.Error(err, "Failed device validation")
+		return ctrl.Result{}, err
+	}
+
+	return ctrl.Result{}, nil
+}
+
+// EnsureConditions makes sure all conditions are available in resource
+func (r *DeviceReconciler) EnsureConditions(ctx context.Context, instance *kubeserialv1alpha1.Device) error {
 	for _, conditionType := range []kubeserialv1alpha1.DeviceConditionType{
 		kubeserialv1alpha1.DeviceAvailable,
 		kubeserialv1alpha1.DeviceReady,
@@ -80,37 +96,46 @@ func (r *DeviceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			})
 		}
 	}
-	log.Info("Updating device status")
 	if err := r.Client.Update(ctx, instance); err != nil {
-		log.Error(err, "Failed updating device status")
-		return ctrl.Result{}, err
+		return err
 	}
+	return nil
+}
 
+// ValidateDeviceReady validates if device config is ready to be used
+func (r *DeviceReconciler) ValidateDeviceReady(ctx context.Context, instance *kubeserialv1alpha1.Device, req reconcile.Request) error {
+	readyCondition := utils.GetCondition(instance.Status.Conditions, v1alpha1.DeviceReady)
+	if readyCondition.Status != v1.ConditionTrue {
+		err := r.ValidateDeviceManager(ctx, instance, req)
+		if err != nil {
+			return err
+		}
+		log.Info("All checks passed, device ready")
+		utils.SetDeviceCondition(&instance.Status.Conditions, kubeserialv1alpha1.DeviceCondition{
+			Type:   kubeserialv1alpha1.DeviceReady,
+			Status: v1.ConditionTrue,
+			Reason: "AllChecksPassed",
+		})
+		if err := r.Client.Update(ctx, instance); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// ValidateDeviceManager validates if device manaager config is valid and upadates device state in case it's not
+func (r *DeviceReconciler) ValidateDeviceManager(ctx context.Context, instance *kubeserialv1alpha1.Device, req reconcile.Request) error {
 	if !r.ManagerIsAvailable(ctx, instance, req) {
-		log.Info("Manager for device is unavailable. Will try again in 1 minute.")
 		utils.SetDeviceCondition(&instance.Status.Conditions, kubeserialv1alpha1.DeviceCondition{
 			Type:   kubeserialv1alpha1.DeviceReady,
 			Status: v1.ConditionFalse,
 			Reason: "ManagerNotAvailable",
 		})
 		if err := r.Client.Update(ctx, instance); err != nil {
-			log.Error(err, "Failed updating device status")
+			return err
 		}
-		return ctrl.Result{
-			RequeueAfter: 1 * time.Minute,
-		}, nil
 	}
-
-	log.Info("All checks passed, device ready")
-	utils.SetDeviceCondition(&instance.Status.Conditions, kubeserialv1alpha1.DeviceCondition{
-		Type:   kubeserialv1alpha1.DeviceReady,
-		Status: v1.ConditionTrue,
-		Reason: "AllChecksPassed",
-	})
-	if err := r.Client.Update(ctx, instance); err != nil {
-		log.Error(err, "Failed updating device status")
-	}
-	return ctrl.Result{}, nil
+	return nil
 }
 
 // ManagerIsAvailable checks if Manager object referenced by Device is available in the cluster

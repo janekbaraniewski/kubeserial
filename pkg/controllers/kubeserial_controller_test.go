@@ -130,26 +130,54 @@ func TestGetDeviceState(t *testing.T) {
 }
 
 func TestReconcile(t *testing.T) {
-	scheme := runtime.NewScheme()
-	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-	utilruntime.Must(kubeserialv1alpha1.AddToScheme(scheme))
-	fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).Build()
+	{
+		t.Run("object-not-found", func(t *testing.T) {
+			scheme := runtime.NewScheme()
+			utilruntime.Must(clientgoscheme.AddToScheme(scheme))
+			utilruntime.Must(kubeserialv1alpha1.AddToScheme(scheme))
+			fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).Build()
 
-	reconciler := KubeSerialReconciler{
-		Client: fakeClient,
-		Scheme: scheme,
+			reconciler := KubeSerialReconciler{
+				Client: fakeClient,
+				Scheme: scheme,
+			}
+
+			reconcileReq := reconcile.Request{
+				NamespacedName: types.NamespacedName{
+					Namespace: "test-namespace",
+					Name:      "kubeserialtest",
+				},
+			}
+
+			result, err := reconciler.Reconcile(context.TODO(), reconcileReq)
+			assert.Equal(t, nil, err)
+			assert.Equal(t, reconcile.Result{}, result)
+		})
 	}
+	{
+		t.Run("object-found", func(t *testing.T) {
+			scheme := runtime.NewScheme()
+			utilruntime.Must(clientgoscheme.AddToScheme(scheme))
+			utilruntime.Must(kubeserialv1alpha1.AddToScheme(scheme))
+			fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).Build()
+			cr := getCR()
+			reconciler := KubeSerialReconciler{
+				Client: fakeClient,
+				Scheme: scheme,
+			}
 
-	reconcileReq := reconcile.Request{
-		NamespacedName: types.NamespacedName{
-			Namespace: "test-namespace",
-			Name:      "kubeserialtest",
-		},
+			reconcileReq := reconcile.Request{
+				NamespacedName: types.NamespacedName{
+					Namespace: "test-namespace",
+					Name:      "kubeserialtest",
+				},
+			}
+			fakeClient.Create(context.TODO(), cr)
+			result, err := reconciler.Reconcile(context.TODO(), reconcileReq)
+			assert.Equal(t, nil, err)
+			assert.Equal(t, reconcile.Result{}, result)
+		})
 	}
-
-	result, err := reconciler.Reconcile(context.TODO(), reconcileReq)
-	assert.Equal(t, nil, err)
-	assert.Equal(t, reconcile.Result{}, result)
 }
 
 func TestReconcileManagers(t *testing.T) {

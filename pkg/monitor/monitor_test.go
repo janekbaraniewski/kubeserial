@@ -58,7 +58,6 @@ func TestUpdateDeviceState_Device(t *testing.T) {
 					Status: v1.ConditionFalse,
 				},
 			},
-			NodeName: "test-node",
 		},
 	}
 	os.Setenv("NODE_NAME", "test-node")
@@ -77,11 +76,14 @@ func TestUpdateDeviceState_Device(t *testing.T) {
 
 			assert.Equal(t, nil, err)
 			assert.Equal(t, v1.ConditionTrue, foundDevice.Status.Conditions[0].Status)
+			assert.Equal(t, "DeviceAvailable", foundDevice.Status.Conditions[0].Reason)
+			assert.Equal(t, "test-node", foundDevice.Status.NodeName)
 		})
 	}
 	{
 		t.Run("test-update-available-condition-when-unavailable", func(t *testing.T) {
 			device.Status.Conditions[0].Status = v1.ConditionTrue
+			device.Status.NodeName = "test-node"
 			fakeClientset := testclient.NewSimpleClientset()
 			fakeClientsetKubeserial := fake.NewSimpleClientset(device)
 			fs := afero.NewMemMapFs()
@@ -94,6 +96,8 @@ func TestUpdateDeviceState_Device(t *testing.T) {
 
 			assert.Equal(t, nil, err)
 			assert.Equal(t, v1.ConditionFalse, foundDevice.Status.Conditions[0].Status)
+			assert.Equal(t, "DeviceUnavailable", foundDevice.Status.Conditions[0].Reason)
+			assert.Equal(t, "", foundDevice.Status.NodeName)
 		})
 	}
 	os.Unsetenv("NODE_NAME")

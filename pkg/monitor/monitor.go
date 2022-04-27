@@ -12,7 +12,6 @@ import (
 	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/fields"
 	client "k8s.io/client-go/kubernetes"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/util/retry"
@@ -93,12 +92,7 @@ func (m *Monitor) updateCMBasedDevice(ctx context.Context) {
 }
 
 func (m *Monitor) updateCRDBasedDevice(ctx context.Context) {
-	devices, err := m.devicesClient.List(ctx, metav1.ListOptions{
-		FieldSelector: fields.SelectorFromSet(fields.Set{
-			"status.conditions[].type":   string(v1alpha1.DeviceReady),
-			"status.conditions[].status": string(corev1.ConditionTrue),
-		}).String(),
-	})
+	devices, err := m.devicesClient.List(ctx, metav1.ListOptions{})
 	if err != nil {
 		log.Error(err, "Failed listing Device CRs")
 	}
@@ -117,6 +111,7 @@ func (m *Monitor) updateCRDBasedDevice(ctx context.Context) {
 					Status: metav1.ConditionTrue,
 					Reason: "DeviceAvailable",
 				})
+				device.Status.NodeName = os.Getenv("NODE_NAME")
 				_, err := m.devicesClient.UpdateStatus(ctx, &device, metav1.UpdateOptions{})
 				if err != nil {
 					log.Error(err, "Failed device status update")

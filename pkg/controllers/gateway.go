@@ -9,7 +9,7 @@ import (
 )
 
 func (r *KubeSerialReconciler) ReconcileGateway(ctx context.Context, cr *appv1alpha1.KubeSerial, api api.API) error {
-	logger := log.WithName("ReconcileGateway")
+	logger := ksLog.WithName("ReconcileGateway")
 	for _, device := range cr.Spec.Devices {
 		logger.Info("Reconciling " + device.Name)
 
@@ -55,7 +55,7 @@ func (r *KubeSerialReconciler) scheduleGateway(ctx context.Context, cr *appv1alp
 }
 
 func (r *KubeSerialReconciler) deleteGateway(ctx context.Context, cr *appv1alpha1.KubeSerial, p *appv1alpha1.Device_2, api api.API) error {
-	logger := log.WithName("deleteGateway")
+	logger := ksLog.WithName("deleteGateway")
 
 	logger.Info("Device " + p.Name)
 

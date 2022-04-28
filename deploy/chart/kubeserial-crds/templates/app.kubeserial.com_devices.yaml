@@ -99,7 +99,7 @@ spec:
                   - type
                   type: object
                 type: array
-              nodename:
+              nodeName:
                 type: string
             required:
             - conditions

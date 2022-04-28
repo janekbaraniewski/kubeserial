@@ -55,13 +55,13 @@ spec:
                 - repository
                 - tag
                 type: object
-              runcmd:
+              runCmd:
                 type: string
             required:
             - config
             - configPath
             - image
-            - runcmd
+            - runCmd
             type: object
           status:
             description: ManagerStatus defines the observed state of Manager

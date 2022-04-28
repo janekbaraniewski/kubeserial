@@ -19,11 +19,11 @@ import (
 var log = logf.Log.WithName("ApiClient")
 
 type API interface {
-	EnsureConfigMap(ctx context.Context, cr *appv1alpha1.KubeSerial, cm *corev1.ConfigMap) error
-	EnsureService(ctx context.Context, cr *appv1alpha1.KubeSerial, svc *corev1.Service) error
-	EnsureIngress(ctx context.Context, cr *appv1alpha1.KubeSerial, ingress *networkingv1.Ingress) error
-	EnsureDeployment(ctx context.Context, cr *appv1alpha1.KubeSerial, deployment *appsv1.Deployment) error
-	EnsureDaemonSet(ctx context.Context, cr *appv1alpha1.KubeSerial, ds *appsv1.DaemonSet) error
+	EnsureConfigMap(ctx context.Context, cr metav1.Object, cm *corev1.ConfigMap) error
+	EnsureService(ctx context.Context, cr metav1.Object, svc *corev1.Service) error
+	EnsureIngress(ctx context.Context, cr metav1.Object, ingress *networkingv1.Ingress) error
+	EnsureDeployment(ctx context.Context, cr metav1.Object, deployment *appsv1.Deployment) error
+	EnsureDaemonSet(ctx context.Context, cr metav1.Object, ds *appsv1.DaemonSet) error
 	DeleteDeployment(ctx context.Context, cr *appv1alpha1.KubeSerial, name string) error
 	DeleteConfigMap(ctx context.Context, cr *appv1alpha1.KubeSerial, name string) error
 	DeleteService(ctx context.Context, cr *appv1alpha1.KubeSerial, name string) error
@@ -34,8 +34,8 @@ type ApiClient struct {
 	Scheme *runtime.Scheme
 }
 
-func (c *ApiClient) EnsureConfigMap(ctx context.Context, cr *appv1alpha1.KubeSerial, cm *corev1.ConfigMap) error {
-	logger := log.WithValues("KubeSerial.Namespace", cr.Namespace, "KubeSerial.Name", cr.Name)
+func (c *ApiClient) EnsureConfigMap(ctx context.Context, cr metav1.Object, cm *corev1.ConfigMap) error {
+	logger := log.WithValues("KubeSerial.Namespace", cr.GetNamespace(), "KubeSerial.Name", cr.GetName())
 
 	if err := controllerutil.SetControllerReference(cr, cm, c.Scheme); err != nil {
 		logger.Info("Can't set reference")
@@ -59,8 +59,8 @@ func (c *ApiClient) EnsureConfigMap(ctx context.Context, cr *appv1alpha1.KubeSer
 	return nil
 }
 
-func (r *ApiClient) EnsureService(ctx context.Context, cr *appv1alpha1.KubeSerial, svc *corev1.Service) error {
-	logger := log.WithValues("KubeSerial.Namespace", cr.Namespace, "KubeSerial.Name", cr.Name)
+func (r *ApiClient) EnsureService(ctx context.Context, cr metav1.Object, svc *corev1.Service) error {
+	logger := log.WithValues("KubeSerial.Namespace", cr.GetNamespace(), "KubeSerial.Name", cr.GetName())
 
 	if err := controllerutil.SetControllerReference(cr, svc, r.Scheme); err != nil {
 		logger.Info("Can't set reference")
@@ -84,8 +84,8 @@ func (r *ApiClient) EnsureService(ctx context.Context, cr *appv1alpha1.KubeSeria
 	return nil
 }
 
-func (r *ApiClient) EnsureIngress(ctx context.Context, cr *appv1alpha1.KubeSerial, ingress *networkingv1.Ingress) error {
-	logger := log.WithValues("KubeSerial.Namespace", cr.Namespace, "KubeSerial.Name", cr.Name)
+func (r *ApiClient) EnsureIngress(ctx context.Context, cr metav1.Object, ingress *networkingv1.Ingress) error {
+	logger := log.WithValues("KubeSerial.Namespace", cr.GetNamespace(), "KubeSerial.Name", cr.GetName())
 
 	if err := controllerutil.SetControllerReference(cr, ingress, r.Scheme); err != nil {
 		logger.Info("Can't set reference")
@@ -109,8 +109,8 @@ func (r *ApiClient) EnsureIngress(ctx context.Context, cr *appv1alpha1.KubeSeria
 	return nil
 }
 
-func (r *ApiClient) EnsureDeployment(ctx context.Context, cr *appv1alpha1.KubeSerial, deployment *appsv1.Deployment) error {
-	logger := log.WithValues("KubeSerial.Namespace", cr.Namespace, "KubeSerial.Name", cr.Name)
+func (r *ApiClient) EnsureDeployment(ctx context.Context, cr metav1.Object, deployment *appsv1.Deployment) error {
+	logger := log.WithValues("KubeSerial.Namespace", cr.GetNamespace(), "KubeSerial.Name", cr.GetName())
 
 	if err := controllerutil.SetControllerReference(cr, deployment, r.Scheme); err != nil {
 		logger.Info("Can't set reference")
@@ -134,7 +134,7 @@ func (r *ApiClient) EnsureDeployment(ctx context.Context, cr *appv1alpha1.KubeSe
 	return nil
 }
 
-func (r *ApiClient) EnsureDaemonSet(ctx context.Context, cr *appv1alpha1.KubeSerial, ds *appsv1.DaemonSet) error {
+func (r *ApiClient) EnsureDaemonSet(ctx context.Context, cr metav1.Object, ds *appsv1.DaemonSet) error {
 	if err := controllerutil.SetControllerReference(cr, ds, r.Scheme); err != nil {
 		return err
 	}

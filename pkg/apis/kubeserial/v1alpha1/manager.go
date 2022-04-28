@@ -30,7 +30,7 @@ type Image struct {
 // ManagerSpec defines the desired state of Manager
 type ManagerSpec struct {
 	Image      Image  `json:"image"`
-	RunCmd     string `json:"runcmd"`
+	RunCmd     string `json:"runCmd"`
 	Config     string `json:"config"`
 	ConfigPath string `json:"configPath"`
 }

@@ -20,7 +20,17 @@ spec:
     singular: managerschedulerequest
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.device
+      name: Device
+      type: string
+    - jsonPath: .spec.manager
+      name: Manager
+      type: string
+    - jsonPath: .status.fulfilled
+      name: Fulfilled
+      type: boolean
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: ManagerScheduleRequest is the Schema for the managerschedulerequests
@@ -41,12 +51,23 @@ spec:
           spec:
             description: ManagerScheduleRequestSpec defines the desired state of ManagerScheduleRequest
             properties:
-              foo:
+              device:
                 type: string
+              manager:
+                type: string
+            required:
+            - device
+            - manager
             type: object
           status:
             description: ManagerScheduleRequestStatus defines the observed state of
               ManagerScheduleRequest
+            properties:
+              fulfilled:
+                default: false
+                type: boolean
+            required:
+            - fulfilled
             type: object
         type: object
     served: true

@@ -112,7 +112,7 @@ func schema_pkg_apis_kubeserial_v1alpha1_DeviceStatus(ref common.ReferenceCallba
 							},
 						},
 					},
-					"nodename": {
+					"nodeName": {
 						SchemaProps: spec.SchemaProps{
 							Type:   []string{"string"},
 							Format: "",
@@ -319,13 +319,22 @@ func schema_pkg_apis_kubeserial_v1alpha1_ManagerScheduleRequestSpec(ref common.R
 				Description: "ManagerScheduleRequestSpec defines the desired state of ManagerScheduleRequest",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"foo": {
+					"device": {
 						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"manager": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
 						},
 					},
 				},
+				Required: []string{"device", "manager"},
 			},
 		},
 	}
@@ -337,6 +346,16 @@ func schema_pkg_apis_kubeserial_v1alpha1_ManagerScheduleRequestStatus(ref common
 			SchemaProps: spec.SchemaProps{
 				Description: "ManagerScheduleRequestStatus defines the observed state of ManagerScheduleRequest",
 				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"fulfilled": {
+						SchemaProps: spec.SchemaProps{
+							Default: false,
+							Type:    []string{"boolean"},
+							Format:  "",
+						},
+					},
+				},
+				Required: []string{"fulfilled"},
 			},
 		},
 	}
@@ -355,7 +374,7 @@ func schema_pkg_apis_kubeserial_v1alpha1_ManagerSpec(ref common.ReferenceCallbac
 							Ref:     ref("github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.Image"),
 						},
 					},
-					"runcmd": {
+					"runCmd": {
 						SchemaProps: spec.SchemaProps{
 							Default: "",
 							Type:    []string{"string"},
@@ -377,7 +396,7 @@ func schema_pkg_apis_kubeserial_v1alpha1_ManagerSpec(ref common.ReferenceCallbac
 						},
 					},
 				},
-				Required: []string{"image", "runcmd", "config", "configPath"},
+				Required: []string{"image", "runCmd", "config", "configPath"},
 			},
 		},
 		Dependencies: []string{

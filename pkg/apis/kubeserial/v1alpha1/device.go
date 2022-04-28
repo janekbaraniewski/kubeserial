@@ -75,7 +75,7 @@ type DeviceCondition struct {
 // DeviceStatus defines the observed state of Device
 type DeviceStatus struct {
 	Conditions []DeviceCondition `json:"conditions"`
-	NodeName   string            `json:"nodename,omitempty"`
+	NodeName   string            `json:"nodeName,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

@@ -46,6 +46,7 @@ type ManagerScheduleRequestReconciler struct {
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 func (r *ManagerScheduleRequestReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+	logger := msrcLog.WithName("Reconcile")
 	instance := &kubeserialv1alpha1.ManagerScheduleRequest{}
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
@@ -60,7 +61,7 @@ func (r *ManagerScheduleRequestReconciler) Reconcile(ctx context.Context, req ct
 			Requeue: true,
 		}, nil
 	}
-	logWithRequest := msrcLog.WithValues("request", instance)
+	logger = logger.WithValues("request", instance)
 
 	manager := &kubeserialv1alpha1.Manager{}
 	err = r.Client.Get(ctx, types.NamespacedName{
@@ -71,8 +72,8 @@ func (r *ManagerScheduleRequestReconciler) Reconcile(ctx context.Context, req ct
 		// TODO: handle missing manager spec
 		return ctrl.Result{}, nil
 	}
-	_ = logWithRequest.WithValues("manager", manager)
-
+	logger = logger.WithValues("manager", manager)
+	logger.Info("Got manager, starting ReconcileManager")
 	r.ReconcileManager(ctx, instance, manager, req)
 
 	return ctrl.Result{}, nil

@@ -48,33 +48,34 @@ type DeviceReconciler struct {
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 func (r *DeviceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	devLog.Info("Starting device reconcile", "req", req)
+	logger := devLog.WithName("Reconcile")
+	logger.Info("Starting device reconcile", "req", req)
 
 	instance := &kubeserialv1alpha1.Device{}
 	err := r.Client.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			devLog.Error(err, "Device not found", "req", req)
+			logger.Error(err, "Device not found", "req", req)
 			return ctrl.Result{
 				Requeue: false,
 			}, nil
 		}
-		devLog.Error(err, "Failed getting device instance, will try again")
+		logger.Error(err, "Failed getting device instance, will try again")
 		return ctrl.Result{
 			Requeue: true,
 		}, nil
 	}
-	log := devLog.WithValues("device", instance)
+	logger = logger.WithValues("device", instance)
 
 	err = r.EnsureConditions(ctx, instance)
 	if err != nil {
-		log.Error(err, "Failed ensuring conditions")
+		logger.Error(err, "Failed ensuring conditions")
 		return ctrl.Result{}, err
 	}
 
 	err = r.ValidateDeviceReady(ctx, instance, req)
 	if err != nil {
-		log.Error(err, "Failed device validation")
+		logger.Error(err, "Failed device validation")
 		return ctrl.Result{}, err
 	}
 
@@ -90,12 +91,13 @@ func (r *DeviceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 // EnsureConditions makes sure all conditions are available in resource
 func (r *DeviceReconciler) EnsureConditions(ctx context.Context, instance *kubeserialv1alpha1.Device) error {
+	logger := devLog.WithName("EnsureConditions")
 	for _, conditionType := range []kubeserialv1alpha1.DeviceConditionType{
 		kubeserialv1alpha1.DeviceAvailable,
 		kubeserialv1alpha1.DeviceReady,
 	} {
 		if utils.GetCondition(instance.Status.Conditions, conditionType) == nil {
-			log.Info("Condition didn't exist, creating", "conditionType", conditionType)
+			logger.Info("Condition didn't exist, creating", "conditionType", conditionType)
 			utils.SetDeviceCondition(&instance.Status.Conditions, kubeserialv1alpha1.DeviceCondition{
 				Type:   conditionType,
 				Status: v1.ConditionUnknown,
@@ -111,6 +113,7 @@ func (r *DeviceReconciler) EnsureConditions(ctx context.Context, instance *kubes
 
 // ValidateDeviceReady validates if device config is ready to be used
 func (r *DeviceReconciler) ValidateDeviceReady(ctx context.Context, instance *kubeserialv1alpha1.Device, req reconcile.Request) error {
+	logger := devLog.WithName("ValidateDeviceReady")
 	readyCondition := utils.GetCondition(instance.Status.Conditions, v1alpha1.DeviceReady)
 	if readyCondition.Status != v1.ConditionTrue {
 		valid, err := r.ValidateDeviceManager(ctx, instance, req)
@@ -120,7 +123,7 @@ func (r *DeviceReconciler) ValidateDeviceReady(ctx context.Context, instance *ku
 		if !valid {
 			return nil
 		}
-		log.Info("All checks passed, device ready")
+		logger.Info("All checks passed, device ready")
 		utils.SetDeviceCondition(&instance.Status.Conditions, kubeserialv1alpha1.DeviceCondition{
 			Type:   kubeserialv1alpha1.DeviceReady,
 			Status: v1.ConditionTrue,
@@ -151,7 +154,7 @@ func (r *DeviceReconciler) ValidateDeviceManager(ctx context.Context, instance *
 
 // ManagerIsAvailable checks if Manager object referenced by Device is available in the cluster
 func (r *DeviceReconciler) ManagerIsAvailable(ctx context.Context, device *kubeserialv1alpha1.Device, req ctrl.Request) bool {
-	log := devLog.WithName("ManagerIsAvailable")
+	logger := devLog.WithName("ManagerIsAvailable")
 	manager := &kubeserialv1alpha1.Manager{}
 
 	err := r.Client.Get(ctx, types.NamespacedName{
@@ -163,7 +166,7 @@ func (r *DeviceReconciler) ManagerIsAvailable(ctx context.Context, device *kubes
 		if errors.IsNotFound(err) {
 			return false
 		}
-		log.Error(err, "Unknown error")
+		logger.Error(err, "Unknown error")
 	}
 
 	return true

@@ -37,7 +37,7 @@ import (
 	"github.com/janekbaraniewski/kubeserial/pkg/monitor"
 )
 
-var log = logf.Log.WithName("KubeSerialController")
+var ksLog = logf.Log.WithName("KubeSerialController")
 
 // KubeSerialReconciler reconciles a KubeSerial object
 type KubeSerialReconciler struct {
@@ -50,7 +50,7 @@ type KubeSerialReconciler struct {
 //+kubebuilder:rbac:groups=app.kubeserial.com,resources=kubeserials/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=app.kubeserial.com,resources=kubeserials/finalizers,verbs=update
 func (r *KubeSerialReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	reqLogger := log.WithName("Reconcile")
+	reqLogger := ksLog.WithName("Reconcile")
 
 	reqLogger.Info("Reconciling KubeSerial")
 
@@ -127,7 +127,7 @@ func (r *KubeSerialReconciler) ReconcileMonitor(ctx context.Context, cr *appv1al
 }
 
 func (r *KubeSerialReconciler) reconcileDevicesConfig(ctx context.Context, cr *appv1alpha1.KubeSerial, api api.API) error {
-	logger := log.WithName("reconcileDevicesConfig")
+	logger := ksLog.WithName("reconcileDevicesConfig")
 	deviceConfs := CreateDeviceConfig(cr)
 
 	for _, deviceConf := range deviceConfs {
@@ -147,7 +147,7 @@ func (r *KubeSerialReconciler) reconcileDevicesConfig(ctx context.Context, cr *a
 }
 
 func (r *KubeSerialReconciler) GetDeviceState(ctx context.Context, p *appv1alpha1.Device_2, cr *appv1alpha1.KubeSerial) (*corev1.ConfigMap, error) {
-	logger := log.WithName("GetDevicesState")
+	logger := ksLog.WithName("GetDevicesState")
 
 	found := &corev1.ConfigMap{}
 	err := r.Client.Get(ctx, types.NamespacedName{Name: strings.ToLower(cr.Name + "-" + p.Name), Namespace: cr.Namespace}, found)

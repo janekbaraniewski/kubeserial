@@ -3,12 +3,12 @@ package managers
 import (
 	"path/filepath"
 
-	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
-func (m *Manager) CreateConfigMap(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device_2) *corev1.ConfigMap {
+func (m *Manager) CreateConfigMap(cr types.NamespacedName, device types.NamespacedName) *corev1.ConfigMap {
 	labels := map[string]string{
 		"app": m.GetName(cr.Name, device.Name),
 	}

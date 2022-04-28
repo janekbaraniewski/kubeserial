@@ -58,7 +58,7 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 	fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).Build()
 
 	{
-		t.Run("device-when-manager-not-available", func(t *testing.T) {
+		t.Run("device-new-manager-not-available", func(t *testing.T) {
 			fakeClient.Create(context.TODO(), device)
 
 			deviceReconciler := DeviceReconciler{
@@ -87,7 +87,7 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 		})
 	}
 	{
-		t.Run("device-and-manager-available", func(t *testing.T) {
+		t.Run("device-new-manager-available", func(t *testing.T) {
 			fakeClient.Create(context.TODO(), device)
 			fakeClient.Create(context.TODO(), manager)
 
@@ -111,6 +111,39 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			readyCondition := utils.GetCondition(foundDevice.Status.Conditions, v1alpha1.DeviceReady)
 			assert.Equal(t, v1.ConditionTrue, readyCondition.Status)
 			assert.Equal(t, "AllChecksPassed", readyCondition.Reason)
+		})
+	}
+	{
+		t.Run("device-available-manager-available", func(t *testing.T) {
+			device.Status.Conditions = append(device.Status.Conditions, v1alpha1.DeviceCondition{
+				Type:   v1alpha1.DeviceAvailable,
+				Status: v1.ConditionTrue,
+			})
+			fakeClient.Create(context.TODO(), device)
+			fakeClient.Create(context.TODO(), manager)
+
+			deviceReconciler := DeviceReconciler{
+				Client: fakeClient,
+				Scheme: scheme,
+			}
+
+			result, err := deviceReconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
+
+			assert.Equal(t, nil, err)
+			assert.Equal(t, false, result.Requeue)
+
+			foundDevice := &v1alpha1.Device{}
+			fakeClient.Get(context.TODO(), deviceName, foundDevice)
+
+			availableCondition := utils.GetCondition(foundDevice.Status.Conditions, v1alpha1.DeviceAvailable)
+			assert.Equal(t, v1.ConditionUnknown, availableCondition.Status)
+			assert.Equal(t, "NotValidated", availableCondition.Reason)
+
+			readyCondition := utils.GetCondition(foundDevice.Status.Conditions, v1alpha1.DeviceReady)
+			assert.Equal(t, v1.ConditionTrue, readyCondition.Status)
+			assert.Equal(t, "AllChecksPassed", readyCondition.Reason)
+
+			// TODO: Get schedule request and assert
 		})
 	}
 }

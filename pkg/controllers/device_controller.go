@@ -81,6 +81,8 @@ func (r *DeviceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	availableCondition := utils.GetCondition(instance.Status.Conditions, v1alpha1.DeviceAvailable)
 	if availableCondition.Status == v1.ConditionTrue {
 		r.RequestManager(ctx, instance)
+	} else {
+		r.EnsureNoManagerRequested(ctx, instance)
 	}
 
 	return ctrl.Result{}, nil
@@ -168,8 +170,40 @@ func (r *DeviceReconciler) ManagerIsAvailable(ctx context.Context, device *kubes
 }
 
 // RequestManager create ManagerScheduleRequest for device
-func (r *DeviceReconciler) RequestManager(ctx context.Context, device *kubeserialv1alpha1.Device) {
-	// TODO: implement
+func (r *DeviceReconciler) RequestManager(ctx context.Context, device *kubeserialv1alpha1.Device) error {
+	request := &kubeserialv1alpha1.ManagerScheduleRequest{
+		ObjectMeta: v1.ObjectMeta{
+			Name:      device.Name + "-" + device.Spec.Manager,
+			Namespace: device.Namespace,
+		},
+		Spec: kubeserialv1alpha1.ManagerScheduleRequestSpec{
+			Device:  device.Name,
+			Manager: device.Spec.Manager,
+		},
+	}
+	err := r.Client.Create(ctx, request)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// EnsureNoManagerRequested makes sure there is no ManagerScheduleRequest for device
+func (r *DeviceReconciler) EnsureNoManagerRequested(ctx context.Context, device *kubeserialv1alpha1.Device) error {
+	request := &kubeserialv1alpha1.ManagerScheduleRequest{}
+	if err := r.Client.Get(ctx, types.NamespacedName{
+		Name:      device.Name + "-" + device.Spec.Manager,
+		Namespace: device.Namespace,
+	}, request); err != nil {
+		if errors.IsNotFound(err) {
+			return nil
+		}
+		return err
+	}
+	if err := r.Client.Delete(ctx, request); err != nil {
+		return err
+	}
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

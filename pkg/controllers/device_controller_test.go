@@ -143,7 +143,13 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			assert.Equal(t, v1.ConditionTrue, readyCondition.Status)
 			assert.Equal(t, "AllChecksPassed", readyCondition.Reason)
 
-			// TODO: Get schedule request and assert
+			foundRequest := v1alpha1.ManagerScheduleRequest{}
+			fakeClient.Get(context.TODO(), types.NamespacedName{
+				Name:      device.Name + "-" + device.Spec.Manager,
+				Namespace: device.Name,
+			}, &foundRequest)
+
+			assert.Equal(t, false, foundRequest.Status.Fulfilled)
 		})
 	}
 }

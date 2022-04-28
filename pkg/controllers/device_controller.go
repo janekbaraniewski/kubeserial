@@ -78,6 +78,11 @@ func (r *DeviceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, err
 	}
 
+	availableCondition := utils.GetCondition(instance.Status.Conditions, v1alpha1.DeviceAvailable)
+	if availableCondition.Status == v1.ConditionTrue {
+		r.RequestManager(ctx, instance)
+	}
+
 	return ctrl.Result{}, nil
 }
 
@@ -96,7 +101,7 @@ func (r *DeviceReconciler) EnsureConditions(ctx context.Context, instance *kubes
 			})
 		}
 	}
-	if err := r.Client.Update(ctx, instance); err != nil {
+	if err := r.Client.Status().Update(ctx, instance); err != nil {
 		return err
 	}
 	return nil
@@ -106,9 +111,12 @@ func (r *DeviceReconciler) EnsureConditions(ctx context.Context, instance *kubes
 func (r *DeviceReconciler) ValidateDeviceReady(ctx context.Context, instance *kubeserialv1alpha1.Device, req reconcile.Request) error {
 	readyCondition := utils.GetCondition(instance.Status.Conditions, v1alpha1.DeviceReady)
 	if readyCondition.Status != v1.ConditionTrue {
-		err := r.ValidateDeviceManager(ctx, instance, req)
+		valid, err := r.ValidateDeviceManager(ctx, instance, req)
 		if err != nil {
 			return err
+		}
+		if !valid {
+			return nil
 		}
 		log.Info("All checks passed, device ready")
 		utils.SetDeviceCondition(&instance.Status.Conditions, kubeserialv1alpha1.DeviceCondition{
@@ -116,7 +124,7 @@ func (r *DeviceReconciler) ValidateDeviceReady(ctx context.Context, instance *ku
 			Status: v1.ConditionTrue,
 			Reason: "AllChecksPassed",
 		})
-		if err := r.Client.Update(ctx, instance); err != nil {
+		if err := r.Client.Status().Update(ctx, instance); err != nil {
 			return err
 		}
 	}
@@ -124,18 +132,19 @@ func (r *DeviceReconciler) ValidateDeviceReady(ctx context.Context, instance *ku
 }
 
 // ValidateDeviceManager validates if device manaager config is valid and upadates device state in case it's not
-func (r *DeviceReconciler) ValidateDeviceManager(ctx context.Context, instance *kubeserialv1alpha1.Device, req reconcile.Request) error {
+func (r *DeviceReconciler) ValidateDeviceManager(ctx context.Context, instance *kubeserialv1alpha1.Device, req reconcile.Request) (bool, error) {
 	if !r.ManagerIsAvailable(ctx, instance, req) {
 		utils.SetDeviceCondition(&instance.Status.Conditions, kubeserialv1alpha1.DeviceCondition{
 			Type:   kubeserialv1alpha1.DeviceReady,
 			Status: v1.ConditionFalse,
 			Reason: "ManagerNotAvailable",
 		})
-		if err := r.Client.Update(ctx, instance); err != nil {
-			return err
+		if err := r.Client.Status().Update(ctx, instance); err != nil {
+			return false, err
 		}
+		return false, nil
 	}
-	return nil
+	return true, nil
 }
 
 // ManagerIsAvailable checks if Manager object referenced by Device is available in the cluster
@@ -156,6 +165,11 @@ func (r *DeviceReconciler) ManagerIsAvailable(ctx context.Context, device *kubes
 	}
 
 	return true
+}
+
+// RequestManager create ManagerScheduleRequest for device
+func (r *DeviceReconciler) RequestManager(ctx context.Context, device *kubeserialv1alpha1.Device) {
+	// TODO: implement
 }
 
 // SetupWithManager sets up the controller with the Manager.

@@ -7,7 +7,7 @@ DOCKERBUILD_PLATFORM_OPT=--platform
 KUBESERIAL_BUILD_OUTPUT_PATH ?= build/_output/bin/kubeserial
 DEVICE_MONITOR_BUILD_OUTPUT_PATH ?= build/_output/bin/device-monitor
 RELEASE_NAME ?= kubeserial
-ENVTEST_K8S_VERSION = 1.23
+ENVTEST_K8S_VERSION = 1.23.3
 MINIKUBE_PROFILE=kubeserial
 
 SHELL = /usr/bin/env bash -o pipefail
@@ -42,6 +42,7 @@ code-gen: code-gen-script
 check-code-gen: COPY_OR_DIFF=diff
 check-code-gen: code-gen-script
 
+.PHONY: code-gen-script
 code-gen-script:
 	@COPY_OR_DIFF=${COPY_OR_DIFF} ./hack/code-gen.sh
 
@@ -60,8 +61,13 @@ vet: ## Run go vet against code.
 	go vet ./...
 
 .PHONY: test
-test: fmt vet ## Run tests.
+test: fmt vet envtest-render-crds ## Run tests.
 	go test ./... -coverprofile coverage.txt -covermode atomic
+
+.PHONY: envtest-render-crds
+envtest-render-crds:
+	@rm -rf build/_output/kubeserial-crds || echo ""
+	@helm template deploy/chart/kubeserial-crds --name-template kubeserial --output-dir build/_output
 
 # ENVTEST = $(shell pwd)/bin/setup-envtest
 # .PHONY: envtest
@@ -76,91 +82,91 @@ run: generate fmt vet ## Run codegen and start controller from your host.
 
 ##@ Docker
 
-PHONY: .kubeserial-docker-local
+.PHONY: kubeserial-docker-local
 kubeserial-docker-local: PLATFORMS=
 kubeserial-docker-local: DOCKERBUILD_PLATFORM_OPT=
 kubeserial-docker-local: DOCKERBUILD_ACTION=--load
 kubeserial-docker-local: VERSION ?= local
 kubeserial-docker-local: kubeserial-docker ## Build image for local development, tag local, supports only builder platform
 
-PHONY: .kubeserial-docker-all
+.PHONY: kubeserial-docker-all
 kubeserial-docker-all: PLATFORMS=${TARGET_PLATFORMS}
 kubeserial-docker-all: DOCKERBUILD_ACTION=--push
 kubeserial-docker-all: kubeserial-docker ## Build and push image for all target platforms
 
-PHONY: .kubeserial-docker
+.PHONY: kubeserial-docker
 kubeserial-docker: DOCKERFILE=Dockerfile
 kubeserial-docker: REGISTRY=${KUBESERIAL_REGISTRY}
 kubeserial-docker: docker-build
 
-PHONY: .device-monitor-docker-local
+.PHONY: device-monitor-docker-local
 device-monitor-docker-local: PLATFORMS=
 device-monitor-docker-local: DOCKERBUILD_PLATFORM_OPT=
 device-monitor-docker-local: DOCKERBUILD_ACTION=--load
 device-monitor-docker-local: VERSION ?= local
 device-monitor-docker-local: device-monitor-docker ## Build image for local development, tag local, supports only builder platform
 
-PHONY: .device-monitor-docker-all
+.PHONY: device-monitor-docker-all
 device-monitor-docker-all: PLATFORMS=$(TARGET_PLATFORMS)
 device-monitor-docker-all: DOCKERBUILD_ACTION=--push
 device-monitor-docker-all: device-monitor-docker ## Build and push image for all target platforms
 
-PHONY: .device-monitor-docker
+.PHONY: device-monitor-docker
 device-monitor-docker: DOCKERFILE=Dockerfile.monitor
 device-monitor-docker: REGISTRY=${DEVICE_MONITOR_REGISTRY}
 device-monitor-docker: docker-build
 
-PHONY: .docker-build
+.PHONY: docker-build
 docker-build:
 	docker buildx build . -f ${DOCKERFILE} ${DOCKERBUILD_EXTRA_OPTS} ${DOCKERBUILD_PLATFORM_OPT} ${PLATFORMS} -t $(REGISTRY):$(VERSION) ${DOCKERBUILD_ACTION}
 
 ##@ Helm
 
-PHONY: .update-kubeserial-chart-version
+.PHONY: update-kubeserial-chart-version
 update-kubeserial-chart-version: CHART_PATH=./deploy/chart/kubeserial
 update-kubeserial-chart-version: ## Update version used in chart. Requires VERSION var to be set
 	@CHART_PATH=${CHART_PATH} VERSION=${VERSION} ./hack/update-chart-version.sh
 
-PHONY: .update-kubeserial-crds-chart-version
+.PHONY: update-kubeserial-crds-chart-version
 update-kubeserial-crds-chart-version: CHART_PATH=./deploy/chart/kubeserial-crds
 update-kubeserial-crds-chart-version: ## Update version used in chart. Requires VERSION var to be set
 	@CHART_PATH=${CHART_PATH} VERSION=${VERSION} ./hack/update-chart-version.sh
 
-PHONY: .helm-lint
+.PHONY: helm-lint
 helm-lint: ## Run chart-testing to lint kubeserial chart.
 	@ct lint --chart-dirs deploy/chart/ --check-version-increment=false
 
-PHONY: .update-crds-labels
+.PHONY: update-crds-labels
 update-crds-labels:
 	@python3 ./hack/update-crd-metadata.py deploy/chart/kubeserial-crds/templates/app.kubeserial.com_kubeserials.yaml hack/crd_metadata_template.yaml
 
-PHONY: .update-version
+.PHONY: update-version
 update-version: update-kubeserial-crds-chart-version update-kubeserial-chart-version
 
 ##@ Minikube
 
-.PHONY: .minikube
+.PHONY: minikube
 minikube: minikube-start minikube-build-controller-image minikube-build-monitor-image update-version minikube-deploy ## Start local cluster, build image and deploy
 
-.PHONY: .minikube-start
+.PHONY: minikube-start
 minikube-start: ## Start minikube cluster
 	@minikube -p ${MINIKUBE_PROFILE}  start
 
-.PHONY: .minikube-set-context
+.PHONY: minikube-set-context
 minikube-set-context: ## Set context to use minikube cluster
 	@minikube -p ${MINIKUBE_PROFILE} update-context
 
-.PHONY: .minikube-build-controller-image
+.PHONY: minikube-build-controller-image
 minikube-build-controller-image: DOCKERFILE=Dockerfile
 minikube-build-controller-image: REGISTRY=${KUBESERIAL_REGISTRY}
 minikube-build-controller-image: minikube-build-image
 
-.PHONY: .minikube-build-monitor-image
+.PHONY: minikube-build-monitor-image
 minikube-build-monitor-image: DOCKERFILE=Dockerfile.monitor
 minikube-build-monitor-image: REGISTRY=${DEVICE_MONITOR_REGISTRY}
 minikube-build-monitor-image: minikube-build-image
 
-.PHONY: .minikube-build-image
+.PHONY: minikube-build-image
 minikube-build-image: DOCKERBUILD_EXTRA_OPTS=--load
 minikube-build-image:
 	@eval $$(minikube -p ${MINIKUBE_PROFILE} docker-env) ;\
@@ -170,7 +176,7 @@ minikube-build-image:
 	@eval $$(minikube -p ${MINIKUBE_PROFILE} docker-env) ;\
 	docker images
 
-.PHONY: .minikube-deploy
+.PHONY: minikube-deploy
 minikube-deploy: update-version deploy-dev ## Deploy the app to local minikube
 
 ##@ Deployment
@@ -179,22 +185,7 @@ minikube-deploy: update-version deploy-dev ## Deploy the app to local minikube
 uninstall: ## Uninstall release.
 	helm uninstall ${RELEASE_NAME}
 
-.PHONY: .deploy-dev
+.PHONY: deploy-dev
 deploy-dev: manifests-gen update-kubeserial-chart-version update-kubeserial-crds-chart-version ## Install dev release in current context/namespace.
 	helm upgrade --install ${RELEASE_NAME}-crds ./deploy/chart/kubeserial-crds
 	helm upgrade --install ${RELEASE_NAME} ./deploy/chart/kubeserial -f ./deploy/chart/kubeserial/values-local.yaml
-
-
-# # go-get-tool will 'go get' any package $2 and install it to $1.
-# PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
-# define go-get-tool
-# @[ -f $(1) ] || { \
-# set -e ;\
-# TMP_DIR=$$(mktemp -d) ;\
-# cd $$TMP_DIR ;\
-# go mod init tmp ;\
-# echo "Downloading $(2)" ;\
-# GOBIN=$(PROJECT_DIR)/bin go get $(2) ;\
-# rm -rf $$TMP_DIR ;\
-# }
-# endef

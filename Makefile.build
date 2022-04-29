@@ -1,20 +1,26 @@
 ##@ Build
 
-PHONY: .kubeserial
+.PHONY: kubeserial
 kubeserial: ## Build manager binary.
 kubeserial: BUILD_PATH=cmd/manager/main.go
 kubeserial: OUTPUT_PATH=${KUBESERIAL_BUILD_OUTPUT_PATH}
 kubeserial: go-build
 
-PHONY: .device-monitor
+.PHONY: device-monitor
 device-monitor: ## Build device monitor binary
 device-monitor: BUILD_PATH=cmd/device-monitor/main.go
 device-monitor: OUTPUT_PATH=${DEVICE_MONITOR_BUILD_OUTPUT_PATH}
 device-monitor: go-build
 
-PHONY: .go-build
+.PHONY: go-build
 go-build:
 	go build ${BUILD_EXTRA_OPTS} -o ${OUTPUT_PATH} ${BUILD_PATH}
 
 .PHONY: all
 all: device-monitor kubeserial ## Run codegen and build all components.
+
+.PHONY: clean
+clean: KUBESERIAL_PATH=${KUBESERIAL_BUILD_OUTPUT_PATH}
+clean: MONITOR_PATH=${DEVICE_MONITOR_BUILD_OUTPUT_PATH}
+clean:
+	rm ${KUBESERIAL_PATH} ${MONITOR_PATH}

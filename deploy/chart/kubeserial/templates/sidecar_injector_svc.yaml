@@ -6,7 +6,7 @@ metadata:
     {{- include "kubeserial.injectorLabels" . | nindent 4 }}
 spec:
   ports:
-  - port: 8443
+  - port: 443
     targetPort: 8443
     name: webhook
   - port: 8080

@@ -7,8 +7,8 @@ metadata:
 spec:
   secretName: {{ include "kubeserial.injectorFullname" . }}-certs
   dnsNames:
-    - sidecar-injector-service.default.svc
-    - sidecar-injector-service.default.svc.cluster.local
+    - {{ include "kubeserial.injectorFullname" . }}.{{ .Release.Namespace }}.svc
+    - {{ include "kubeserial.injectorFullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
   issuerRef:
     name: {{ .Values.certManagerIssuer.name }}
     kind: {{ .Values.certManagerIssuer.kind }}

@@ -3,7 +3,7 @@ metadata:
   labels: '{{ include "kubeserial.injectorLabels" . | nindent 4 }}'
   name: '{{ include "kubeserial.injectorFullname" . }}'
   annotations:
-    cert-manager.io/inject-ca-from:  '{{ .Release.Namespace }}/{{ include "kubeserial.injectorFullname" . }}-certs\'
+    cert-manager.io/inject-ca-from:  '{{ .Release.Namespace }}/{{ include "kubeserial.injectorFullname" . }}'
 clientConfig:
   service:
     name: '{{ include "kubeserial.injectorFullname" . }}'

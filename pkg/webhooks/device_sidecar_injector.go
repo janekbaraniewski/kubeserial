@@ -42,7 +42,7 @@ func shoudInject(pod *corev1.Pod) bool {
 		}
 	}
 
-	log.Info("Should Inject: ", shouldInjectSidecar)
+	log.Info("Should Inject", "shoulInjectSidecar", shouldInjectSidecar)
 
 	return shouldInjectSidecar
 }
@@ -70,7 +70,7 @@ func (si *SidecarInjector) Handle(ctx context.Context, req admission.Request) ad
 
 		pod.Annotations["logging-sidecar-added"] = "true"
 
-		log.Info("Sidecar ", si.Name, " injected.")
+		log.Info("Sidecar injected", "sidecar name", si.Name)
 	} else {
 		log.Info("Inject not needed.")
 	}

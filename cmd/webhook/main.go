@@ -87,7 +87,7 @@ func main() {
 	hookServer.CertDir = params.certDir
 
 	entryLog.Info("registering webhooks to the webhook server")
-	hookServer.Register("/mutate", &webhook.Admission{Handler: &webhooks.SidecarInjector{Name: "Logger", Client: mgr.GetClient(), SidecarConfig: config}})
+	hookServer.Register("/mutate-add-sidecar", &webhook.Admission{Handler: &webhooks.SidecarInjector{Name: "Logger", Client: mgr.GetClient(), SidecarConfig: config}})
 
 	entryLog.Info("starting manager")
 	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {

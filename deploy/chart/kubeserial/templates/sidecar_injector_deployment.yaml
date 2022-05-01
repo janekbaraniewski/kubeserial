@@ -14,6 +14,7 @@ spec:
       labels:
       {{- include "kubeserial.injectorSelectorLabels" . | nindent 8 }}
     spec:
+      serviceAccountName: {{ include "kubeserial.serviceAccountName" . }}
       containers:
         - name: sidecar-injector
           image: {{ .Values.webhook.image.repository }}:{{ .Values.webhook.image.tag }}

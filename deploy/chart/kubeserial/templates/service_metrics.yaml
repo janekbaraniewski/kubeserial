@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "kubeserial.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.service.type }}
+  type: ClusterIP
   ports:
     - port: 8080
       targetPort: metrics

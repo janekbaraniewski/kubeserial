@@ -1,11 +1,10 @@
 KUBESERIAL_REGISTRY=janekbaraniewski/kubeserial
 DEVICE_MONITOR_REGISTRY=janekbaraniewski/kubeserial-device-monitor
+INJECTOR_WEBHOOK_REGISTRY=janekbaraniewski/kubeserial-injector-webhook
 TARGET_PLATFORMS=$(shell cat TARGET_PLATFORMS)
 VERSION ?= 0.0.1-$(shell git rev-parse --short HEAD)
 DOCKERBUILD_EXTRA_OPTS ?=
 DOCKERBUILD_PLATFORM_OPT=--platform
-KUBESERIAL_BUILD_OUTPUT_PATH ?= build/_output/bin/kubeserial
-DEVICE_MONITOR_BUILD_OUTPUT_PATH ?= build/_output/bin/device-monitor
 RELEASE_NAME ?= kubeserial
 ENVTEST_K8S_VERSION = 1.23.3
 MINIKUBE_PROFILE=kubeserial
@@ -31,6 +30,7 @@ manifests-gen: manifests-gen-script
 check-manifests-gen: COPY_OR_DIFF=diff
 check-manifests-gen: manifests-gen-script
 
+.PHONY: manifests-gen-script
 manifests-gen-script:
 	@COPY_OR_DIFF=${COPY_OR_DIFF} ./hack/manifests-gen.sh
 
@@ -82,6 +82,9 @@ run: generate fmt vet ## Run codegen and start controller from your host.
 
 ##@ Docker
 
+.PHONY: docker-local
+docker-local: kubeserial-docker-local device-monitor-docker-local injector-webhook-docker-local
+
 .PHONY: kubeserial-docker-local
 kubeserial-docker-local: PLATFORMS=
 kubeserial-docker-local: DOCKERBUILD_PLATFORM_OPT=
@@ -97,7 +100,8 @@ kubeserial-docker-all: kubeserial-docker ## Build and push image for all target 
 .PHONY: kubeserial-docker
 kubeserial-docker: DOCKERFILE=Dockerfile
 kubeserial-docker: REGISTRY=${KUBESERIAL_REGISTRY}
-kubeserial-docker: docker-build
+kubeserial-docker:
+	docker buildx build . -f ${DOCKERFILE} ${DOCKERBUILD_EXTRA_OPTS} ${DOCKERBUILD_PLATFORM_OPT} ${PLATFORMS} -t $(REGISTRY):$(VERSION) ${DOCKERBUILD_ACTION}
 
 .PHONY: device-monitor-docker-local
 device-monitor-docker-local: PLATFORMS=
@@ -114,10 +118,25 @@ device-monitor-docker-all: device-monitor-docker ## Build and push image for all
 .PHONY: device-monitor-docker
 device-monitor-docker: DOCKERFILE=Dockerfile.monitor
 device-monitor-docker: REGISTRY=${DEVICE_MONITOR_REGISTRY}
-device-monitor-docker: docker-build
+device-monitor-docker:
+	docker buildx build . -f ${DOCKERFILE} ${DOCKERBUILD_EXTRA_OPTS} ${DOCKERBUILD_PLATFORM_OPT} ${PLATFORMS} -t $(REGISTRY):$(VERSION) ${DOCKERBUILD_ACTION}
 
-.PHONY: docker-build
-docker-build:
+.PHONY: injector-webhook-docker-local
+injector-webhook-docker-local: PLATFORMS=
+injector-webhook-docker-local: DOCKERBUILD_PLATFORM_OPT=
+injector-webhook-docker-local: DOCKERBUILD_ACTION=--load
+injector-webhook-docker-local: VERSION ?= local
+injector-webhook-docker-local: injector-webhook-docker ## Build image for local development, tag local, supports only builder platform
+
+.PHONY: injector-webhook-docker-all
+injector-webhook-docker-all: PLATFORMS=$(TARGET_PLATFORMS)
+injector-webhook-docker-all: DOCKERBUILD_ACTION=--push
+injector-webhook-docker-all: injector-webhook-docker ## Build and push image for all target platforms
+
+.PHONY: injector-webhook-docker
+injector-webhook-docker: DOCKERFILE=Dockerfile.webhook
+injector-webhook-docker: REGISTRY=${INJECTOR_WEBHOOK_REGISTRY}
+injector-webhook-docker:
 	docker buildx build . -f ${DOCKERFILE} ${DOCKERBUILD_EXTRA_OPTS} ${DOCKERBUILD_PLATFORM_OPT} ${PLATFORMS} -t $(REGISTRY):$(VERSION) ${DOCKERBUILD_ACTION}
 
 ##@ Helm
@@ -140,8 +159,28 @@ helm-lint: ## Run chart-testing to lint kubeserial chart.
 update-crds-labels:
 	@python3 ./hack/update-crd-metadata.py deploy/chart/kubeserial-crds/templates/app.kubeserial.com_kubeserials.yaml hack/crd_metadata_template.yaml
 
+.PHONY: update-webhook-template
+update-webhook-template:
+	@python3 ./hack/update-webhook-template.py deploy/chart/kubeserial/templates/webhooks.yaml hack/webhook_template.yaml
+
 .PHONY: update-version
 update-version: update-kubeserial-crds-chart-version update-kubeserial-chart-version
+
+##@ Kind
+
+.PHONY: kind
+kind: kind-create kind-install-certmanager kind-load-images
+
+kind-create:
+	kind create cluster --name kubeserial
+
+kind-install-certmanager:
+	helm install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --version v1.8.0 --set installCRDs=true
+
+kind-load-images:
+	kind load docker-image --name kubeserial janekbaraniewski/kubeserial:${VERSION}
+	kind load docker-image --name kubeserial janekbaraniewski/kubeserial-device-monitor:${VERSION}
+	kind load docker-image --name kubeserial janekbaraniewski/kubeserial-injector-webhook:${VERSION}
 
 ##@ Minikube
 

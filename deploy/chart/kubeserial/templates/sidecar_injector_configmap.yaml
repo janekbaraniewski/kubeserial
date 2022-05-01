@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "kubeserial.injectorFullname" . }}
+  labels:
+    {{- include "kubeserial.injectorLabels" . | nindent 4 }}
+data:
+  sidecarconfig.yaml: |
+    containers:
+    - name: device-injector
+      image: janekbaraniewski/device-mounter:TODO
+      imagePullPolicy: IfNotPresent
+      env:
+        - name: LOGGER_PORT
+          value: "8082"

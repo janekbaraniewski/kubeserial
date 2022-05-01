@@ -3,13 +3,20 @@ replicaCount: 1
 kubeserial:
   devices: []
 
+certManagerIssuer:
+  name:
+  kind: Issuer
+
+webhook:
+  image:
+    repository: janekbaraniewski/kubeserial-injector-webhook
+    pullPolicy: IfNotPresent
+    tag: "APP_VERSION"
+
 image:
   repository: janekbaraniewski/kubeserial
   pullPolicy: IfNotPresent
   tag: "APP_VERSION"
-
-service:
-  type: ClusterIP
 
 imagePullSecrets: []
 nameOverride: ""

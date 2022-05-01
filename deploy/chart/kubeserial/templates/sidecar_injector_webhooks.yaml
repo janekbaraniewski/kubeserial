@@ -1,0 +1,30 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  annotations:
+    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "kubeserial.injectorFullname" . }}-certs
+  creationTimestamp: null
+  labels: {{ include "kubeserial.injectorLabels" . | nindent 4 }}
+  name: {{ include "kubeserial.injectorFullname" . }}
+webhooks:
+- admissionReviewVersions:
+  - v1
+  - v1beta1
+  clientConfig:
+    service:
+      name: {{ include "kubeserial.injectorFullname" . }}
+      namespace: {{ .Release.Namespace }}
+      path: /mutate-add-sidecar
+  failurePolicy: Fail
+  name: injector.kubeserial.com
+  rules:
+  - apiGroups:
+    - ''
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - pods
+  sideEffects: None

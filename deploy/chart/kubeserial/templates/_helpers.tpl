@@ -60,3 +60,31 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Webhook fullname
+*/}}
+{{- define "kubeserial.injectorFullname" -}}
+{{ include "kubeserial.fullname" .}}-sidecar-injector
+{{- end }}
+
+
+{{/*
+Webhook common labels
+*/}}
+{{- define "kubeserial.injectorLabels" -}}
+helm.sh/chart: {{ include "kubeserial.chart" . }}
+{{ include "kubeserial.injectorSelectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Webhook selector labels
+*/}}
+{{- define "kubeserial.injectorSelectorLabels" -}}
+app.kubernetes.io/name: {{ include "kubeserial.name" . }}-sidecar-injector
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}

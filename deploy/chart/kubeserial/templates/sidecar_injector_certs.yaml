@@ -1,0 +1,14 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "kubeserial.injectorFullname" . }}
+  labels:
+    {{- include "kubeserial.injectorLabels" . | nindent 4 }}
+spec:
+  secretName: {{ include "kubeserial.injectorFullname" . }}-certs
+  dnsNames:
+    - sidecar-injector-service.default.svc
+    - sidecar-injector-service.default.svc.cluster.local
+  issuerRef:
+    name: {{ .Values.certManagerIssuer.name }}
+    kind: {{ .Values.certManagerIssuer.kind }}

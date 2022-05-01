@@ -1,6 +1,1 @@
-labels:
-  helm.sh/chart: '{{ include "kubeserial-crds.chart" . }}'
-  app.kubernetes.io/name: '{{ include "kubeserial-crds.name" . }}'
-  app.kubernetes.io/instance: "{{ .Release.Name }}"
-  app.kubernetes.io/version: "{{ .Chart.AppVersion }}"
-  app.kubernetes.io/managed-by: "{{ .Release.Service }}"
+labels: '{{ include "kubeserial-crds.labels" . | nindent 4 }}'

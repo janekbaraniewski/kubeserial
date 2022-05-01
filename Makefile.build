@@ -1,3 +1,7 @@
+KUBESERIAL_BUILD_OUTPUT_PATH ?= build/_output/bin/kubeserial
+DEVICE_MONITOR_BUILD_OUTPUT_PATH ?= build/_output/bin/device-monitor
+INJECTOR_WEBHOOK_BUILD_OUTPUT_PATH ?= build/_output/bin/injector-webhook
+
 ##@ Build
 
 .PHONY: kubeserial
@@ -12,15 +16,22 @@ device-monitor: BUILD_PATH=cmd/device-monitor/main.go
 device-monitor: OUTPUT_PATH=${DEVICE_MONITOR_BUILD_OUTPUT_PATH}
 device-monitor: go-build
 
+.PHONY: injector-webhook
+injector-webhook: ## Build sidecar injector webhook binary binary
+injector-webhook: BUILD_PATH=cmd/webhook/main.go
+injector-webhook: OUTPUT_PATH=${INJECTOR_WEBHOOK_BUILD_OUTPUT_PATH}
+injector-webhook: go-build
+
 .PHONY: go-build
 go-build:
 	go build ${BUILD_EXTRA_OPTS} -o ${OUTPUT_PATH} ${BUILD_PATH}
 
 .PHONY: all
-all: device-monitor kubeserial ## Run codegen and build all components.
+all: device-monitor injector-webhook kubeserial ## Run codegen and build all components.
 
 .PHONY: clean
 clean: KUBESERIAL_PATH=${KUBESERIAL_BUILD_OUTPUT_PATH}
 clean: MONITOR_PATH=${DEVICE_MONITOR_BUILD_OUTPUT_PATH}
+clean: INJECTOR_WEBHOOK_PATH=${INJECTOR_WEBHOOK_BUILD_OUTPUT_PATH}
 clean:
-	rm ${KUBESERIAL_PATH} ${MONITOR_PATH}
+	rm ${KUBESERIAL_PATH} ${MONITOR_PATH} ${INJECTOR_WEBHOOK_PATH}

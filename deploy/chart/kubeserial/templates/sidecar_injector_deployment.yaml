@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "kubeserial.injectorFullname" . }}
+  labels:
+    {{- include "kubeserial.injectorLabels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "kubeserial.injectorSelectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+      {{- include "kubeserial.injectorSelectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: sidecar-injector
+          image: {{ .Values.webhook.image.repository }}:{{ .Values.webhook.image.tag }}
+          imagePullPolicy: IfNotPresent
+          args:
+            - -certDir=/etc/webhook/certs
+            - -sidecarConfig=/etc/webhook/config/sidecarconfig.yaml
+            - -port=8443
+          volumeMounts:
+            - name: webhook-certs
+              mountPath: /etc/webhook/certs
+              readOnly: true
+            - name: webhook-config
+              mountPath: /etc/webhook/config
+      volumes:
+        - name: webhook-certs
+          secret:
+            secretName: {{ include "kubeserial.injectorFullname" . }}-certs
+        - name: webhook-config
+          configMap:
+            name: {{ include "kubeserial.injectorFullname" . }}

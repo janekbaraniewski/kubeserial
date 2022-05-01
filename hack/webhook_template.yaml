@@ -1,0 +1,11 @@
+metadata:
+  creationTimestamp: null
+  labels: '{{ include "kubeserial.injectorLabels" . | nindent 4 }}'
+  name: '{{ include "kubeserial.injectorFullname" . }}'
+  annotations:
+    cert-manager.io/inject-ca-from:  '{{ .Release.Namespace }}/{{ include "kubeserial.injectorFullname" . }}-certs\'
+clientConfig:
+  service:
+    name: '{{ include "kubeserial.injectorFullname" . }}'
+    namespace: '{{ .Release.Namespace }}'
+    path: /mutate-add-sidecar

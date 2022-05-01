@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "kubeserial.injectorFullname" . }}
+  labels:
+    {{- include "kubeserial.injectorLabels" . | nindent 4 }}
+spec:
+  ports:
+  - port: 8443
+    targetPort: 8443
+    name: webhook
+  - port: 8080
+    targetPort: 8080
+    name: metrics
+  selector:
+    {{- include "kubeserial.injectorSelectorLabels" . | nindent 4 }}

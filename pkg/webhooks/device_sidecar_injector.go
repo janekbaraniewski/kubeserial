@@ -16,35 +16,40 @@ import (
 
 var log = logf.Log.WithName("DeviceSidecarInjecttor")
 
+const (
+	requestDeviceSidecarAnnotation   = "app.kubeserial.com/inject-device"
+	sidecarAlreadyInjectedAnnotation = "app.kubeserial.com/device-injected"
+)
+
 type SidecarInjector struct {
-	Name          string
-	Client        client.Client
-	decoder       *admission.Decoder
-	SidecarConfig *Config
+	Name    string
+	Client  client.Client
+	decoder *admission.Decoder
+	Config  *Config
 }
 
 type Config struct {
-	Containers []corev1.Container `yaml:"containers"`
+	Containers  []corev1.Container `yaml:"containers"`
+	Volume      corev1.Volume      `yaml:"volume"`
+	VolumeMount corev1.VolumeMount `yaml:"volumeMount"`
 }
 
-func shoudInject(pod *corev1.Pod) bool {
-	shouldInjectSidecar, err := strconv.ParseBool(pod.Annotations["inject-logging-sidecar"])
+func shoudInject(pod *corev1.Pod) string {
+	deviceToInject := pod.Annotations[requestDeviceSidecarAnnotation]
 
-	if err != nil {
-		shouldInjectSidecar = false
+	if deviceToInject == "" {
+		return deviceToInject
 	}
 
-	if shouldInjectSidecar {
-		alreadyUpdated, err := strconv.ParseBool(pod.Annotations["logging-sidecar-added"])
+	alreadyUpdated, err := strconv.ParseBool(pod.Annotations[sidecarAlreadyInjectedAnnotation])
 
-		if err == nil && alreadyUpdated {
-			shouldInjectSidecar = false
-		}
+	if err == nil && alreadyUpdated {
+		return ""
 	}
 
-	log.Info("Should Inject", "shoulInjectSidecar", shouldInjectSidecar)
+	log.Info("Should Inject", "device to inject", deviceToInject)
 
-	return shouldInjectSidecar
+	return deviceToInject
 }
 
 // SidecarInjector adds an annotation to every incoming pods.
@@ -61,14 +66,21 @@ func (si *SidecarInjector) Handle(ctx context.Context, req admission.Request) ad
 		pod.Annotations = map[string]string{}
 	}
 
-	shoudInjectSidecar := shoudInject(pod)
+	deviceToInject := shoudInject(pod)
 
-	if shoudInjectSidecar {
-		log.Info("Injecting sidecar...")
-
-		pod.Spec.Containers = append(pod.Spec.Containers, si.SidecarConfig.Containers...)
-
-		pod.Annotations["logging-sidecar-added"] = "true"
+	if deviceToInject != "" {
+		log.Info("Injecting volume...", "volumeConfig", si.Config.Volume)
+		pod.Spec.Volumes = append(pod.Spec.Volumes, si.Config.Volume)
+		log.Info("Injecting sidecar...", "sidecarConfig", si.Config.Containers)
+		pod.Spec.Containers = append(pod.Spec.Containers, si.Config.Containers...)
+		containers := []corev1.Container{}
+		for _, container := range pod.Spec.Containers {
+			container.VolumeMounts = append(container.VolumeMounts, si.Config.VolumeMount)
+			log.Info("Attached volume mounts", "volumeMounta", container.VolumeMounts)
+			containers = append(containers, container)
+		}
+		pod.Spec.Containers = containers
+		pod.Annotations[sidecarAlreadyInjectedAnnotation] = "true"
 
 		log.Info("Sidecar injected", "sidecar name", si.Name)
 	} else {

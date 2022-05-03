@@ -113,3 +113,8 @@ type DeviceList struct {
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []Device `json:"items"`
 }
+
+// NeedsManager checks if device needs Manager
+func (d *Device) NeedsManager() bool {
+	return d.Spec.Manager != ""
+}

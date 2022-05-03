@@ -17,7 +17,7 @@ RUN GOOS=$TARGETOS GOARCH=$TARGETARCH \
     DEVICE_MONITOR_BUILD_OUTPUT_PATH=/build/bin/device-monitor \
     make device-monitor
 
-FROM golang:1.18-buster
+FROM debian:buster-slim
 
 ENV container docker
 ENV LC_ALL C

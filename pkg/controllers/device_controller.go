@@ -96,14 +96,26 @@ func (r *DeviceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 // EnsureConditions makes sure all conditions are available in resource
 func (r *DeviceReconciler) EnsureConditions(ctx context.Context, device *kubeserialv1alpha1.Device) error {
 	logger := devLog.WithName("EnsureConditions")
-	for _, conditionType := range []kubeserialv1alpha1.DeviceConditionType{
-		kubeserialv1alpha1.DeviceAvailable,
-		kubeserialv1alpha1.DeviceReady,
+	for _, condition := range []struct {
+		Type     kubeserialv1alpha1.DeviceConditionType
+		IsNeeded func() bool
+	}{
+		{
+			Type:     kubeserialv1alpha1.DeviceAvailable,
+			IsNeeded: func() bool { return true },
+		},
+		{
+			Type:     kubeserialv1alpha1.DeviceReady,
+			IsNeeded: device.NeedsManager,
+		},
 	} {
-		if utils.GetCondition(device.Status.Conditions, conditionType) == nil {
-			logger.Info("Condition didn't exist, creating", "conditionType", conditionType)
+		if !condition.IsNeeded() {
+			continue
+		}
+		if utils.GetCondition(device.Status.Conditions, condition.Type) == nil {
+			logger.Info("Condition didn't exist, creating", "conditionType", condition.Type)
 			utils.SetDeviceCondition(&device.Status.Conditions, kubeserialv1alpha1.DeviceCondition{
-				Type:   conditionType,
+				Type:   condition.Type,
 				Status: v1.ConditionUnknown,
 				Reason: "NotValidated",
 			})

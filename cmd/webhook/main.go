@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"gopkg.in/yaml.v2"
+	corev1 "k8s.io/api/core/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
@@ -41,12 +42,16 @@ func loadConfig(configFile string) (*webhooks.Config, error) {
 		return nil, err
 	}
 	setupLog.Info("New configuration", "sha256sum", sha256.Sum256(data))
-
-	var cfg webhooks.Config
+	setupLog.Info("Config dump", "config", string(data))
+	cfg := webhooks.Config{}
+	cfg.VolumeMount = corev1.VolumeMount{}
 	if err := yaml.Unmarshal(data, &cfg); err != nil {
 		return nil, err
 	}
-
+	setupLog.Info("Unmarshaled", "config", cfg)
+	cfg.VolumeMount.MountPath = "/dev/devices" // TODO: fix this, why doesnt it load from config?
+	cfg.Volume.EmptyDir = &corev1.EmptyDirVolumeSource{}
+	setupLog.Info("After fixing", "config", cfg)
 	return &cfg, nil
 }
 
@@ -87,7 +92,7 @@ func main() {
 	hookServer.CertDir = params.certDir
 
 	entryLog.Info("registering webhooks to the webhook server")
-	hookServer.Register("/mutate-add-sidecar", &webhook.Admission{Handler: &webhooks.SidecarInjector{Name: "Logger", Client: mgr.GetClient(), SidecarConfig: config}})
+	hookServer.Register("/mutate-add-sidecar", &webhook.Admission{Handler: &webhooks.SidecarInjector{Name: "Logger", Client: mgr.GetClient(), Config: config}})
 
 	entryLog.Info("starting manager")
 	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {

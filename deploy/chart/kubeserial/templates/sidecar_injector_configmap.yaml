@@ -8,8 +8,14 @@ data:
   sidecarconfig.yaml: |
     containers:
     - name: device-injector
-      image: janekbaraniewski/device-mounter:TODO
+      image: busybox
       imagePullPolicy: IfNotPresent
-      env:
-        - name: LOGGER_PORT
-          value: "8082"
+      command: [ "/bin/sh", "-c", "--" ]
+      args: [ "sleep infinity" ]
+    volume:
+      name: devices
+      emptyDir:
+        medium: Memory
+    volumeMount:
+      mountPath: "/dev/devices"
+      name: devices

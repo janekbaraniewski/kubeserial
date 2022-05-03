@@ -169,7 +169,7 @@ func schema_pkg_apis_kubeserial_v1alpha1_Device_2(ref common.ReferenceCallback) 
 						},
 					},
 				},
-				Required: []string{"name", "idVendor", "idProduct", "manager", "subsystem"},
+				Required: []string{"name", "idVendor", "idProduct", "subsystem"},
 			},
 		},
 	}

@@ -23,10 +23,20 @@ import (
 // Device defines monitored device
 // +k8s:openapi-gen=true
 type Device_2 struct {
-	Name      string `json:"name"`
-	IdVendor  string `json:"idVendor"`
+	// +required
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// +required
+	// +kubebuilder:validation:Required
+	IdVendor string `json:"idVendor"`
+	// +required
+	// +kubebuilder:validation:Required
 	IdProduct string `json:"idProduct"`
-	Manager   string `json:"manager"`
+	// +optional
+	// +kubebuilder:validation:Optional
+	Manager string `json:"manager"`
+	// +required
+	// +kubebuilder:validation:Required
 	Subsystem string `json:"subsystem"`
 }
 

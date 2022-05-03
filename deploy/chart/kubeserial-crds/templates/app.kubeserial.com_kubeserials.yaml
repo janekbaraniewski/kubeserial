@@ -48,7 +48,6 @@ spec:
                   required:
                   - idProduct
                   - idVendor
-                  - manager
                   - name
                   - subsystem
                   type: object

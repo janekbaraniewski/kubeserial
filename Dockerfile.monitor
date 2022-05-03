@@ -6,7 +6,7 @@ RUN go mod download
 
 # Copy the go source
 COPY Makefile.build Makefile
-COPY cmd cmd
+COPY cmd/device-monitor cmd/device-monitor
 COPY pkg pkg
 
 

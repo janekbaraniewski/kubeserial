@@ -8,7 +8,7 @@ RUN go mod download
 
 # Copy the go source
 COPY Makefile.build Makefile
-COPY cmd cmd
+COPY cmd/webhook cmd/webhook
 COPY pkg pkg
 
 ARG TARGETOS TARGETARCH TARGETVARIANT

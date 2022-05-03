@@ -30,10 +30,20 @@ const (
 // +k8s:openapi-gen=true
 // DeviceSpec defines the desired state of Device
 type DeviceSpec struct {
-	Name      string `json:"name"`
-	IdVendor  string `json:"idVendor"`
+	// +required
+	// +kubebuilder:validation:Required
+	Name string `json:"name"`
+	// +required
+	// +kubebuilder:validation:Required
+	IdVendor string `json:"idVendor"`
+	// +required
+	// +kubebuilder:validation:Required
 	IdProduct string `json:"idProduct"`
-	Manager   string `json:"manager"`
+	// +optional
+	// +kubebuilder:validation:Optional
+	Manager string `json:"manager,omitempty"`
+	// +required
+	// +kubebuilder:validation:Required
 	Subsystem string `json:"subsystem"`
 }
 

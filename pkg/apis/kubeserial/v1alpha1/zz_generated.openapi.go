@@ -73,9 +73,8 @@ func schema_pkg_apis_kubeserial_v1alpha1_DeviceSpec(ref common.ReferenceCallback
 					},
 					"manager": {
 						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
+							Type:   []string{"string"},
+							Format: "",
 						},
 					},
 					"subsystem": {
@@ -86,7 +85,7 @@ func schema_pkg_apis_kubeserial_v1alpha1_DeviceSpec(ref common.ReferenceCallback
 						},
 					},
 				},
-				Required: []string{"name", "idVendor", "idProduct", "manager", "subsystem"},
+				Required: []string{"name", "idVendor", "idProduct", "subsystem"},
 			},
 		},
 	}

@@ -62,7 +62,7 @@ func ScheduleFromCRD(ctx context.Context, request *appv1alpha1.ManagerScheduleRe
 		Namespace: request.Namespace,
 	}
 	device := types.NamespacedName{
-		Name:      mgr.Name,
+		Name:      request.Spec.Device,
 		Namespace: mgr.Namespace,
 	}
 	cm := manager.CreateConfigMap(cr, device)

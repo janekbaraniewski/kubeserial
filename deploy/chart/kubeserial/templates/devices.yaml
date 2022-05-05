@@ -1,0 +1,15 @@
+{{- range .Values.kubeserial.devices }}
+apiVersion: app.kubeserial.com/v1alpha1
+kind: Device
+metadata:
+  name: {{ .name }}
+  labels:
+    {{- include "kubeserial.labels" $ | nindent 4 }}
+spec:
+    idProduct: {{ .idProduct | quote }}
+    idVendor: {{ .idVendor | quote }}
+    subsystem: {{ .subsystem | quote }}
+    name: {{ .name | quote }}
+    manager: {{ .manager | quote }}
+---
+{{- end }}

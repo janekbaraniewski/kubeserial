@@ -146,7 +146,7 @@ func (m *Monitor) updateCRDBasedDevice(ctx context.Context) {
 
 func (m *Monitor) isDeviceAvailable(name string) bool {
 	logger := log.WithName("isDeviceAvailable").WithValues("Device", name)
-	if _, err := m.statFile("/dev/tty" + name); os.IsNotExist(err) {
+	if _, err := m.statFile("/dev/" + name); os.IsNotExist(err) {
 		logger.Info("Device not available")
 		return false
 	}

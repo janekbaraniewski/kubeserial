@@ -226,5 +226,5 @@ uninstall: ## Uninstall release.
 
 .PHONY: deploy-dev
 deploy-dev: manifests-gen update-kubeserial-chart-version update-kubeserial-crds-chart-version ## Install dev release in current context/namespace.
-	helm upgrade --install ${RELEASE_NAME}-crds ./deploy/chart/kubeserial-crds
-	helm upgrade --install ${RELEASE_NAME} ./deploy/chart/kubeserial -f ./deploy/chart/kubeserial/values-local.yaml
+	helm upgrade --create-namespace --namespace kubeserial --install ${RELEASE_NAME}-crds ./deploy/chart/kubeserial-crds
+	helm upgrade --create-namespace --namespace kubeserial --install ${RELEASE_NAME} ./deploy/chart/kubeserial -f ./deploy/chart/kubeserial/values-local.yaml

@@ -53,7 +53,7 @@ func (m *Monitor) RunUpdateLoop(ctx context.Context) {
 
 func (m *Monitor) UpdateDeviceState(ctx context.Context) {
 	logger := log.WithName("UpdateDeviceState")
-	logger.Info("Updating device state")
+	logger.V(2).Info("Updating device state")
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
@@ -100,6 +100,7 @@ func (m *Monitor) updateCMBasedDevice(ctx context.Context) {
 }
 
 func (m *Monitor) updateCRDBasedDevice(ctx context.Context) {
+	logger := log.WithName("updateCRDBasedDevice")
 	devices, err := m.devicesClient.List(ctx, metav1.ListOptions{})
 	readyDevices := []v1alpha1.Device{}
 	for _, device := range devices.Items {
@@ -112,7 +113,8 @@ func (m *Monitor) updateCRDBasedDevice(ctx context.Context) {
 		log.Error(err, "Failed listing Device CRs")
 	}
 	for _, device := range readyDevices {
-		log.V(2).Info("Got device!", "device", device)
+		logger.V(2).Info("Got device!", "device", device)
+		logger = logger.WithValues("Device", device.Name)
 		deviceCondition := utils.GetCondition(device.Status.Conditions, v1alpha1.DeviceAvailable)
 		if deviceCondition == nil {
 			log.Error(err, "Can't find device condition")
@@ -127,6 +129,7 @@ func (m *Monitor) updateCRDBasedDevice(ctx context.Context) {
 					Reason: "DeviceAvailable",
 				})
 				device.Status.NodeName = os.Getenv("NODE_NAME")
+				logger.WithValues("Node", device.Status.NodeName).Info("Setting device state to available")
 				_, err := m.devicesClient.UpdateStatus(ctx, &device, metav1.UpdateOptions{})
 				if err != nil {
 					log.Error(err, "Failed device status update")
@@ -140,6 +143,7 @@ func (m *Monitor) updateCRDBasedDevice(ctx context.Context) {
 				Reason: "DeviceUnavailable",
 			})
 			device.Status.NodeName = ""
+			logger.Info("Setting device state to unavailable")
 			_, err := m.devicesClient.UpdateStatus(ctx, &device, metav1.UpdateOptions{})
 			if err != nil {
 				log.Error(err, "Failed device status update")
@@ -151,14 +155,15 @@ func (m *Monitor) updateCRDBasedDevice(ctx context.Context) {
 func (m *Monitor) isDeviceAvailable(name string) bool {
 	logger := log.WithName("isDeviceAvailable").WithValues("Device", name)
 	if _, err := m.statFile("/dev/" + name); os.IsNotExist(err) {
-		logger.Info("Device not available")
+		logger.V(2).Info("Device not available")
 		return false
 	}
-	logger.Info("Device available")
+	logger.V(2).Info("Device available")
 	return true
 }
 
 func (m *Monitor) clearState(ctx context.Context, c *corev1.ConfigMap) error {
+	log.WithName("setActiveState").WithValues("Device", c.Labels["device"]).Info("[Legacy mode] Clearing device state to active")
 	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		c.Data["available"] = "false"
 		c.Data["node"] = ""
@@ -168,6 +173,7 @@ func (m *Monitor) clearState(ctx context.Context, c *corev1.ConfigMap) error {
 }
 
 func (m *Monitor) setActiveState(ctx context.Context, c *corev1.ConfigMap) error {
+	log.WithName("setActiveState").WithValues("Device", c.Labels["device"]).Info("[Legacy mode] Setting device state to active")
 	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		c.Data["available"] = "true"
 		c.Data["node"] = os.Getenv("NODE_NAME")

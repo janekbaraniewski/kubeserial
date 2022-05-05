@@ -18,6 +18,10 @@ image:
   pullPolicy: IfNotPresent
   tag: "APP_VERSION"
 
+monitoring:
+  prometheusMonitors:
+    enabled: false
+
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""

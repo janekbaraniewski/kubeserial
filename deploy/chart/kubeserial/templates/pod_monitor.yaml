@@ -1,0 +1,14 @@
+{{- if .Values.monitoring.prometheusMonitors.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ include "kubeserial.monitorFullname" . }}
+  labels:
+    {{- include "kubeserial.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels: {{ include "kubeserial.monitorSelectorLabels" . | nindent 6 }}
+  podMetricsEndpoints:
+  - port: metrics
+    path: /metrics
+{{- end }}

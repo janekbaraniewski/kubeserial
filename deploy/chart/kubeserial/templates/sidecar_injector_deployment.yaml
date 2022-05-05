@@ -18,7 +18,7 @@ spec:
       containers:
         - name: sidecar-injector
           image: {{ .Values.webhook.image.repository }}:{{ .Values.webhook.image.tag }}
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: {{ .Values.webhook.image.pullPolicy }}
           args:
             - -certDir=/etc/webhook/certs
             - -sidecarConfig=/etc/webhook/config/sidecarconfig.yaml

@@ -85,7 +85,7 @@ func (r *ManagerScheduleRequestReconciler) ReconcileManager(ctx context.Context,
 		Client: r.Client,
 		Scheme: r.Scheme,
 	}
-	if err := managers.ScheduleFromCRD(ctx, instance, mgr, &apiClient); err != nil {
+	if err := managers.Schedule(ctx, instance, mgr, &apiClient); err != nil {
 		return err
 	}
 	return nil

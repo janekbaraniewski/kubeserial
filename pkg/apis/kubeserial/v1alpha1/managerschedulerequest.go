@@ -33,7 +33,7 @@ type ManagerScheduleRequestSpec struct {
 // ManagerScheduleRequestStatus defines the observed state of ManagerScheduleRequest
 type ManagerScheduleRequestStatus struct {
 	// +kubebuilder:default:=false
-	Fulfilled bool `json:"fulfilled"`
+	Fulfilled bool `json:"fulfilled"` // TODO: this is still empty when created
 }
 
 // +genclient

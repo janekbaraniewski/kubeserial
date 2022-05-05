@@ -15,42 +15,7 @@ type Manager struct {
 	ConfigPath string
 }
 
-func (m *Manager) Schedule(ctx context.Context, cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device_2, api api.API) error {
-	crNN := types.NamespacedName{
-		Name:      cr.GetName(),
-		Namespace: cr.GetNamespace(),
-	}
-	deviceNN := types.NamespacedName{
-		Name:      device.Name,
-		Namespace: cr.GetNamespace(),
-	}
-	cm := m.CreateConfigMap(crNN, deviceNN)
-	deploy := m.CreateDeployment(crNN, deviceNN)
-	svc := m.CreateService(crNN, deviceNN)
-
-	if err := api.EnsureConfigMap(ctx, cr, cm); err != nil {
-		return err
-	}
-
-	if err := api.EnsureDeployment(ctx, cr, deploy); err != nil {
-		return err
-	}
-
-	if err := api.EnsureService(ctx, cr, svc); err != nil {
-		return err
-	}
-
-	if cr.Spec.Ingress.Enabled {
-		ingress := m.CreateIngress(cr, device, cr.Spec.Ingress.Domain)
-		if err := api.EnsureIngress(ctx, cr, ingress); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func ScheduleFromCRD(ctx context.Context, request *appv1alpha1.ManagerScheduleRequest, mgr *appv1alpha1.Manager, api api.API) error {
+func Schedule(ctx context.Context, request *appv1alpha1.ManagerScheduleRequest, mgr *appv1alpha1.Manager, api api.API) error {
 	manager := &Manager{
 		Image:      mgr.Spec.Image.Repository + ":" + mgr.Spec.Image.Tag,
 		RunCmnd:    mgr.Spec.RunCmd,

@@ -1,0 +1,14 @@
+{{- if .Values.monitoring.prometheusMonitors.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "kubeserial.fullname" . }}
+  labels:
+    {{- include "kubeserial.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels: {{ include "kubeserial.selectorLabels" . | nindent 6 }}
+  endpoints:
+  - port: metrics
+    path: /metrics
+{{- end }}

@@ -86,9 +86,9 @@ run: generate fmt vet ## Run codegen and start controller from your host.
 docker-local: kubeserial-docker-local device-monitor-docker-local injector-webhook-docker-local
 
 .PHONY: kubeserial-docker-local
-kubeserial-docker-local: PLATFORMS=
-kubeserial-docker-local: DOCKERBUILD_PLATFORM_OPT=
-kubeserial-docker-local: DOCKERBUILD_ACTION=--load
+kubeserial-docker-local: PLATFORMS?=
+kubeserial-docker-local: DOCKERBUILD_PLATFORM_OPT?=
+kubeserial-docker-local: DOCKERBUILD_ACTION?=--load
 kubeserial-docker-local: VERSION ?= local
 kubeserial-docker-local: kubeserial-docker ## Build image for local development, tag local, supports only builder platform
 
@@ -104,9 +104,9 @@ kubeserial-docker:
 	docker buildx build . -f ${DOCKERFILE} ${DOCKERBUILD_EXTRA_OPTS} ${DOCKERBUILD_PLATFORM_OPT} ${PLATFORMS} -t $(REGISTRY):$(VERSION) ${DOCKERBUILD_ACTION}
 
 .PHONY: device-monitor-docker-local
-device-monitor-docker-local: PLATFORMS=
-device-monitor-docker-local: DOCKERBUILD_PLATFORM_OPT=
-device-monitor-docker-local: DOCKERBUILD_ACTION=--load
+device-monitor-docker-local: PLATFORMS?=
+device-monitor-docker-local: DOCKERBUILD_PLATFORM_OPT?=
+device-monitor-docker-local: DOCKERBUILD_ACTION?=--load
 device-monitor-docker-local: VERSION ?= local
 device-monitor-docker-local: device-monitor-docker ## Build image for local development, tag local, supports only builder platform
 
@@ -122,9 +122,9 @@ device-monitor-docker:
 	docker buildx build . -f ${DOCKERFILE} ${DOCKERBUILD_EXTRA_OPTS} ${DOCKERBUILD_PLATFORM_OPT} ${PLATFORMS} -t $(REGISTRY):$(VERSION) ${DOCKERBUILD_ACTION}
 
 .PHONY: injector-webhook-docker-local
-injector-webhook-docker-local: PLATFORMS=
-injector-webhook-docker-local: DOCKERBUILD_PLATFORM_OPT=
-injector-webhook-docker-local: DOCKERBUILD_ACTION=--load
+injector-webhook-docker-local: PLATFORMS?=
+injector-webhook-docker-local: DOCKERBUILD_PLATFORM_OPT?=
+injector-webhook-docker-local: DOCKERBUILD_ACTION?=--load
 injector-webhook-docker-local: VERSION ?= local
 injector-webhook-docker-local: injector-webhook-docker ## Build image for local development, tag local, supports only builder platform
 

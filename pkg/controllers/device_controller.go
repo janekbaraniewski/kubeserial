@@ -28,9 +28,9 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
 	kubeserialv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
-	"github.com/janekbaraniewski/kubeserial/pkg/utils"
+	"github.com/janekbaraniewski/kubeserial/pkg/controllers/api"
+	"github.com/janekbaraniewski/kubeserial/pkg/gateway"
 )
 
 var devLog = logf.Log.WithName("DeviceController")
@@ -79,18 +79,66 @@ func (r *DeviceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, err
 	}
 
-	if !device.NeedsManager() {
-		return ctrl.Result{}, nil
-	}
-
-	availableCondition := utils.GetCondition(device.Status.Conditions, v1alpha1.DeviceAvailable)
-	if availableCondition.Status == v1.ConditionTrue {
-		r.RequestManager(ctx, device)
+	if device.IsAvailable() {
+		r.RequestGateway(ctx, device)
+		if device.NeedsManager() {
+			r.RequestManager(ctx, device)
+		}
 	} else {
-		r.EnsureNoManagerRequested(ctx, device)
+		r.EnsureNoGatewayRunning(ctx, device)
+		if device.NeedsManager() {
+			r.EnsureNoManagerRequested(ctx, device)
+		}
 	}
 
 	return ctrl.Result{}, nil
+}
+
+func (r *DeviceReconciler) RequestGateway(ctx context.Context, device *kubeserialv1alpha1.Device) error {
+	apiClient := api.ApiClient{
+		Client: r.Client,
+		Scheme: r.Scheme,
+	}
+
+	cm := gateway.CreateConfigMapNew(device)
+	deploy := gateway.CreateDeploymentNew(device)
+	svc := gateway.CreateServiceNew(device)
+
+	if err := apiClient.EnsureConfigMap(ctx, device, cm); err != nil {
+		return err
+	}
+
+	if err := apiClient.EnsureDeployment(ctx, device, deploy); err != nil {
+		return err
+	}
+
+	if err := apiClient.EnsureService(ctx, device, svc); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *DeviceReconciler) EnsureNoGatewayRunning(ctx context.Context, device *kubeserialv1alpha1.Device) error {
+	apiClient := api.ApiClient{
+		Client: r.Client,
+		Scheme: r.Scheme,
+	}
+
+	name := device.Name + "-gateway" // TODO: move name generation to some utils so it's in one place
+
+	if err := apiClient.DeleteDeployment(ctx, device, name); err != nil {
+		return err
+	}
+
+	if err := apiClient.DeleteConfigMap(ctx, device, name); err != nil {
+		return err
+	}
+
+	if err := apiClient.DeleteService(ctx, device, name); err != nil {
+		return err
+	}
+	return nil
 }
 
 // EnsureConditions makes sure all conditions are available in resource
@@ -100,9 +148,9 @@ func (r *DeviceReconciler) EnsureConditions(ctx context.Context, device *kubeser
 		kubeserialv1alpha1.DeviceAvailable,
 		kubeserialv1alpha1.DeviceReady,
 	} {
-		if utils.GetCondition(device.Status.Conditions, conditionType) == nil {
+		if device.GetCondition(conditionType) == nil {
 			logger.Info("Condition didn't exist, creating", "conditionType", conditionType)
-			utils.SetDeviceCondition(&device.Status.Conditions, kubeserialv1alpha1.DeviceCondition{
+			device.SetCondition(kubeserialv1alpha1.DeviceCondition{
 				Type:   conditionType,
 				Status: v1.ConditionUnknown,
 				Reason: "NotValidated",
@@ -118,8 +166,7 @@ func (r *DeviceReconciler) EnsureConditions(ctx context.Context, device *kubeser
 // ValidateDeviceReady validates if device config is ready to be used
 func (r *DeviceReconciler) ValidateDeviceReady(ctx context.Context, device *kubeserialv1alpha1.Device, req reconcile.Request) error {
 	logger := devLog.WithName("ValidateDeviceReady")
-	readyCondition := utils.GetCondition(device.Status.Conditions, v1alpha1.DeviceReady)
-	if readyCondition.Status != v1.ConditionTrue {
+	if !device.IsReady() {
 		valid, err := r.ValidateDeviceManager(ctx, device, req)
 		if err != nil {
 			return err
@@ -128,7 +175,7 @@ func (r *DeviceReconciler) ValidateDeviceReady(ctx context.Context, device *kube
 			return nil
 		}
 		logger.Info("All checks passed, device ready")
-		utils.SetDeviceCondition(&device.Status.Conditions, kubeserialv1alpha1.DeviceCondition{
+		device.SetCondition(kubeserialv1alpha1.DeviceCondition{
 			Type:   kubeserialv1alpha1.DeviceReady,
 			Status: v1.ConditionTrue,
 			Reason: "AllChecksPassed",
@@ -146,7 +193,7 @@ func (r *DeviceReconciler) ValidateDeviceManager(ctx context.Context, device *ku
 		return true, nil
 	}
 	if !r.ManagerIsAvailable(ctx, device, req) {
-		utils.SetDeviceCondition(&device.Status.Conditions, kubeserialv1alpha1.DeviceCondition{
+		device.SetCondition(kubeserialv1alpha1.DeviceCondition{
 			Type:   kubeserialv1alpha1.DeviceReady,
 			Status: v1.ConditionFalse,
 			Reason: "ManagerNotAvailable",
@@ -181,6 +228,9 @@ func (r *DeviceReconciler) ManagerIsAvailable(ctx context.Context, device *kubes
 
 // RequestManager create ManagerScheduleRequest for device
 func (r *DeviceReconciler) RequestManager(ctx context.Context, device *kubeserialv1alpha1.Device) error {
+	if !device.NeedsManager() {
+		return nil
+	}
 	request := &kubeserialv1alpha1.ManagerScheduleRequest{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      device.Name + "-" + device.Spec.Manager,
@@ -200,6 +250,9 @@ func (r *DeviceReconciler) RequestManager(ctx context.Context, device *kubeseria
 
 // EnsureNoManagerRequested makes sure there is no ManagerScheduleRequest for device
 func (r *DeviceReconciler) EnsureNoManagerRequested(ctx context.Context, device *kubeserialv1alpha1.Device) error {
+	if !device.NeedsManager() {
+		return nil
+	}
 	request := &kubeserialv1alpha1.ManagerScheduleRequest{}
 	if err := r.Client.Get(ctx, types.NamespacedName{
 		Name:      device.Name + "-" + device.Spec.Manager,

@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 
-	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
@@ -24,10 +23,10 @@ type API interface {
 	EnsureIngress(ctx context.Context, cr metav1.Object, ingress *networkingv1.Ingress) error
 	EnsureDeployment(ctx context.Context, cr metav1.Object, deployment *appsv1.Deployment) error
 	EnsureDaemonSet(ctx context.Context, cr metav1.Object, ds *appsv1.DaemonSet) error
-	DeleteDeployment(ctx context.Context, cr *appv1alpha1.KubeSerial, name string) error
-	DeleteConfigMap(ctx context.Context, cr *appv1alpha1.KubeSerial, name string) error
-	DeleteService(ctx context.Context, cr *appv1alpha1.KubeSerial, name string) error
-	DeleteIngress(ctx context.Context, cr *appv1alpha1.KubeSerial, name string) error
+	DeleteDeployment(ctx context.Context, cr metav1.Object, name string) error
+	DeleteConfigMap(ctx context.Context, cr metav1.Object, name string) error
+	DeleteService(ctx context.Context, cr metav1.Object, name string) error
+	DeleteIngress(ctx context.Context, cr metav1.Object, name string) error
 }
 type ApiClient struct {
 	Client client.Client
@@ -152,9 +151,9 @@ func (r *ApiClient) EnsureDaemonSet(ctx context.Context, cr metav1.Object, ds *a
 	return nil
 }
 
-func (r *ApiClient) DeleteDeployment(ctx context.Context, cr *appv1alpha1.KubeSerial, name string) error {
+func (r *ApiClient) DeleteDeployment(ctx context.Context, cr metav1.Object, name string) error {
 	d := &appsv1.Deployment{}
-	err := r.Client.Get(ctx, types.NamespacedName{Name: name, Namespace: cr.Namespace}, d)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: name, Namespace: cr.GetNamespace()}, d)
 	if err != nil && !errors.IsNotFound(err) {
 		return err
 	} else if err == nil {
@@ -163,9 +162,9 @@ func (r *ApiClient) DeleteDeployment(ctx context.Context, cr *appv1alpha1.KubeSe
 	return nil
 }
 
-func (r *ApiClient) DeleteConfigMap(ctx context.Context, cr *appv1alpha1.KubeSerial, name string) error {
+func (r *ApiClient) DeleteConfigMap(ctx context.Context, cr metav1.Object, name string) error {
 	cm := &corev1.ConfigMap{}
-	err := r.Client.Get(ctx, types.NamespacedName{Name: name, Namespace: cr.Namespace}, cm)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: name, Namespace: cr.GetNamespace()}, cm)
 	if err != nil && !errors.IsNotFound(err) {
 		return err
 	} else if err == nil {
@@ -174,9 +173,9 @@ func (r *ApiClient) DeleteConfigMap(ctx context.Context, cr *appv1alpha1.KubeSer
 	return nil
 }
 
-func (r *ApiClient) DeleteService(ctx context.Context, cr *appv1alpha1.KubeSerial, name string) error {
+func (r *ApiClient) DeleteService(ctx context.Context, cr metav1.Object, name string) error {
 	svc := &corev1.Service{}
-	err := r.Client.Get(ctx, types.NamespacedName{Name: name, Namespace: cr.Namespace}, svc)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: name, Namespace: cr.GetNamespace()}, svc)
 	if err != nil && !errors.IsNotFound(err) {
 		return err
 	} else if err == nil {
@@ -186,9 +185,9 @@ func (r *ApiClient) DeleteService(ctx context.Context, cr *appv1alpha1.KubeSeria
 
 }
 
-func (r *ApiClient) DeleteIngress(ctx context.Context, cr *appv1alpha1.KubeSerial, name string) error {
+func (r *ApiClient) DeleteIngress(ctx context.Context, cr metav1.Object, name string) error {
 	ingress := &networkingv1.Ingress{}
-	err := r.Client.Get(ctx, types.NamespacedName{Name: name, Namespace: cr.Namespace}, ingress)
+	err := r.Client.Get(ctx, types.NamespacedName{Name: name, Namespace: cr.GetNamespace()}, ingress)
 	if err != nil && !errors.IsNotFound(err) {
 		return err
 	} else if err == nil {

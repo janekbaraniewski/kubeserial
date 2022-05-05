@@ -358,7 +358,7 @@ func TestDelete(t *testing.T) {
 		ExpectedErr error
 		ObjName     string
 		PostSetup   PostValidationSetup
-		DeleteFunc  func(context.Context, *kubeserialv1alpha1.KubeSerial, string) error
+		DeleteFunc  func(context.Context, metav1.Object, string) error
 	}{
 		{
 			Name:        "test-delete-cm-doesnt-exist",

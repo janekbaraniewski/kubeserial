@@ -17,7 +17,6 @@ import (
 	"github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned"
 	v1alpha1client "github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned/typed/kubeserial/v1alpha1"
 	"github.com/janekbaraniewski/kubeserial/pkg/metrics"
-	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 )
 
 var log = logf.Log.WithName("DeviceMonitor")
@@ -104,7 +103,7 @@ func (m *Monitor) updateCRDBasedDevice(ctx context.Context) {
 	devices, err := m.devicesClient.List(ctx, metav1.ListOptions{})
 	readyDevices := []v1alpha1.Device{}
 	for _, device := range devices.Items {
-		readyCondition := utils.GetCondition(device.Status.Conditions, v1alpha1.DeviceReady)
+		readyCondition := device.GetCondition(v1alpha1.DeviceReady)
 		if readyCondition != nil && readyCondition.Status == metav1.ConditionTrue {
 			readyDevices = append(readyDevices, device)
 		}
@@ -115,7 +114,7 @@ func (m *Monitor) updateCRDBasedDevice(ctx context.Context) {
 	for _, device := range readyDevices {
 		logger.V(2).Info("Got device!", "device", device)
 		logger = logger.WithValues("Device", device.Name)
-		deviceCondition := utils.GetCondition(device.Status.Conditions, v1alpha1.DeviceAvailable)
+		deviceCondition := device.GetCondition(v1alpha1.DeviceAvailable)
 		if deviceCondition == nil {
 			log.Error(err, "Can't find device condition")
 			continue
@@ -123,7 +122,7 @@ func (m *Monitor) updateCRDBasedDevice(ctx context.Context) {
 		if deviceCondition.Status != metav1.ConditionTrue {
 			if m.isDeviceAvailable(device.Name) {
 				log.Info("Device available, updating state.")
-				utils.SetDeviceCondition(&device.Status.Conditions, v1alpha1.DeviceCondition{
+				device.SetCondition(v1alpha1.DeviceCondition{
 					Type:   v1alpha1.DeviceAvailable,
 					Status: metav1.ConditionTrue,
 					Reason: "DeviceAvailable",
@@ -137,7 +136,7 @@ func (m *Monitor) updateCRDBasedDevice(ctx context.Context) {
 			}
 		} else if device.Status.NodeName == os.Getenv("NODE_NAME") && !m.isDeviceAvailable(device.Name) {
 			log.Info("Device unavailable, updating state.")
-			utils.SetDeviceCondition(&device.Status.Conditions, v1alpha1.DeviceCondition{
+			device.SetCondition(v1alpha1.DeviceCondition{
 				Type:   v1alpha1.DeviceAvailable,
 				Status: metav1.ConditionFalse,
 				Reason: "DeviceUnavailable",

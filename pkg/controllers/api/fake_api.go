@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 
-	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
@@ -40,19 +39,19 @@ func (a *FakeApiClient) EnsureDaemonSet(ctx context.Context, cr metav1.Object, d
 	a.Operations = append(a.Operations, "EnsureDaemonSet")
 	return nil
 }
-func (a *FakeApiClient) DeleteDeployment(ctx context.Context, cr *appv1alpha1.KubeSerial, name string) error {
+func (a *FakeApiClient) DeleteDeployment(ctx context.Context, cr metav1.Object, name string) error {
 	a.Operations = append(a.Operations, "DeleteDeployment")
 	return nil
 }
-func (a *FakeApiClient) DeleteConfigMap(ctx context.Context, cr *appv1alpha1.KubeSerial, name string) error {
+func (a *FakeApiClient) DeleteConfigMap(ctx context.Context, cr metav1.Object, name string) error {
 	a.Operations = append(a.Operations, "DeleteConfigMap")
 	return nil
 }
-func (a *FakeApiClient) DeleteService(ctx context.Context, cr *appv1alpha1.KubeSerial, name string) error {
+func (a *FakeApiClient) DeleteService(ctx context.Context, cr metav1.Object, name string) error {
 	a.Operations = append(a.Operations, "DeleteService")
 	return nil
 }
-func (a *FakeApiClient) DeleteIngress(ctx context.Context, cr *appv1alpha1.KubeSerial, name string) error {
+func (a *FakeApiClient) DeleteIngress(ctx context.Context, cr metav1.Object, name string) error {
 	a.Operations = append(a.Operations, "DeleteIngress")
 	return nil
 }

@@ -13,6 +13,7 @@ func (m *Manager) CreateIngress(cr *appv1alpha1.KubeSerial, device *appv1alpha1.
 	labels := map[string]string{
 		"app": name,
 	}
+	typePrefix := networkingv1.PathTypePrefix
 	return &networkingv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        name,
@@ -28,7 +29,8 @@ func (m *Manager) CreateIngress(cr *appv1alpha1.KubeSerial, device *appv1alpha1.
 						HTTP: &networkingv1.HTTPIngressRuleValue{
 							Paths: []networkingv1.HTTPIngressPath{
 								{
-									Path: "/",
+									Path:     "/",
+									PathType: &typePrefix,
 									Backend: networkingv1.IngressBackend{
 										Service: &networkingv1.IngressServiceBackend{
 											Name: m.GetName(cr.Name, device.Name),

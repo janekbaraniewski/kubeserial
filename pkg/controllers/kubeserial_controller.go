@@ -19,6 +19,7 @@ package controllers
 import (
 	"context"
 	"strings"
+	"time"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -88,7 +89,9 @@ func (r *KubeSerialReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		return reconcile.Result{}, err
 	}
 
-	return reconcile.Result{}, nil
+	return reconcile.Result{
+		RequeueAfter: time.Second * 5,
+	}, nil
 }
 
 func (r *KubeSerialReconciler) ReconcileManagers(ctx context.Context, cr *appv1alpha1.KubeSerial, api api.API) error {
@@ -147,8 +150,8 @@ func (r *KubeSerialReconciler) reconcileDevicesConfig(ctx context.Context, cr *a
 }
 
 func (r *KubeSerialReconciler) GetDeviceState(ctx context.Context, p *appv1alpha1.Device_2, cr *appv1alpha1.KubeSerial) (*corev1.ConfigMap, error) {
-	logger := ksLog.WithName("GetDevicesState")
-
+	logger := ksLog.WithName("GetDevicesState").WithValues("Device", p.Name)
+	logger.Info("Fetching device state")
 	found := &corev1.ConfigMap{}
 	err := r.Client.Get(ctx, types.NamespacedName{Name: strings.ToLower(cr.Name + "-" + p.Name), Namespace: cr.Namespace}, found)
 	if err != nil && errors.IsNotFound(err) {
@@ -157,6 +160,7 @@ func (r *KubeSerialReconciler) GetDeviceState(ctx context.Context, p *appv1alpha
 	} else if err != nil {
 		return nil, err
 	}
+	logger.Info("Got state CM", "ConfigMap", found.Data)
 	return found, nil
 }
 

@@ -24,7 +24,7 @@ func (r *KubeSerialReconciler) ReconcileGateway(ctx context.Context, cr *appv1al
 				return err
 			}
 		} else {
-			logger.Info("unavailable", "DeviceName", device.Name)
+			logger.Info("unavailable", "DeviceName", device.Name, "stateCMData", stateCM.Data)
 			if err := r.deleteGateway(ctx, cr, &device, api); err != nil {
 				return err
 			}

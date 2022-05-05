@@ -6,16 +6,18 @@ import (
 	"sync"
 	"time"
 
-	"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
-	"github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned"
-	v1alpha1client "github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned/typed/kubeserial/v1alpha1"
-	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	client "k8s.io/client-go/kubernetes"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/util/retry"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
+
+	"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
+	"github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned"
+	v1alpha1client "github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned/typed/kubeserial/v1alpha1"
+	"github.com/janekbaraniewski/kubeserial/pkg/metrics"
+	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 )
 
 var log = logf.Log.WithName("DeviceMonitor")
@@ -79,6 +81,7 @@ func (m *Monitor) updateCMBasedDevice(ctx context.Context) {
 		if conf.Data["node"] == os.Getenv("NODE_NAME") {
 			if !m.isDeviceAvailable(conf.Labels["device"]) {
 				log.Info("Device unavailable, cleaning state.")
+				metrics.AvailableDevices.Dec()
 				if err := m.clearState(ctx, &conf); err != nil {
 					log.Error(err, "Update failed to clear state!")
 				}
@@ -86,6 +89,7 @@ func (m *Monitor) updateCMBasedDevice(ctx context.Context) {
 		} else if conf.Data["available"] == "false" {
 			if m.isDeviceAvailable(conf.Labels["device"]) {
 				log.Info("Device available, updating state.")
+				metrics.AvailableDevices.Inc()
 				if err := m.setActiveState(ctx, &conf); err != nil {
 					log.Error(err, "Update failed to make device available!")
 				}

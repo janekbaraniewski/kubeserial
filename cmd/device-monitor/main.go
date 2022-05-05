@@ -3,12 +3,14 @@ package main
 import (
 	"os"
 
-	"github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned"
-	"github.com/janekbaraniewski/kubeserial/pkg/monitor"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	metrics "sigs.k8s.io/controller-runtime/pkg/metrics"
+
+	"github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned"
+	"github.com/janekbaraniewski/kubeserial/pkg/monitor"
 )
 
 func main() {
@@ -19,6 +21,12 @@ func main() {
 	log := ctrl.Log.WithName("monitor")
 
 	log.Info("Start setup")
+
+	_, err := metrics.NewListener(":8080")
+
+	if err != nil {
+		log.Info("Failed setting up metrics listener")
+	}
 
 	config, err := rest.InClusterConfig()
 	if err != nil {

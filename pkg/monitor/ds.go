@@ -58,8 +58,9 @@ func CreateDaemonSet(cr *appv1alpha1.KubeSerial, monitorVersion string) *appsv1.
 					},
 					Containers: []corev1.Container{
 						{
-							Name:  "udev-monitor",
-							Image: fmt.Sprintf("janekbaraniewski/kubeserial-device-monitor:%s", monitorVersion),
+							Name:            "udev-monitor",
+							Image:           fmt.Sprintf("janekbaraniewski/kubeserial-device-monitor:%s", monitorVersion),
+							ImagePullPolicy: "Always",
 							SecurityContext: &corev1.SecurityContext{
 								Privileged: &[]bool{true}[0],
 							},
@@ -78,9 +79,10 @@ func CreateDaemonSet(cr *appv1alpha1.KubeSerial, monitorVersion string) *appsv1.
 							},
 						},
 						{
-							Name:    "device-monitor",
-							Image:   fmt.Sprintf("janekbaraniewski/kubeserial-device-monitor:%s", monitorVersion),
-							Command: []string{"/bin/sh"},
+							Name:            "device-monitor",
+							Image:           fmt.Sprintf("janekbaraniewski/kubeserial-device-monitor:%s", monitorVersion),
+							ImagePullPolicy: "Always",
+							Command:         []string{"/bin/sh"},
 							Args: []string{
 								"-c",
 								"./go/bin/device-monitor",

@@ -18,7 +18,7 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-var log = logf.Log.WithName("ApiClient")
+var log = logf.Log.WithName("DeviceMonitor")
 
 type Monitor struct {
 	cmClient      v1.ConfigMapInterface
@@ -37,17 +37,21 @@ func NewMonitor(clientSet client.Interface, clientsetKubeserial versioned.Interf
 }
 
 func (m *Monitor) RunUpdateLoop(ctx context.Context) {
+	log.Info("Starting update loop")
 	for {
 		select {
 		case <-time.After(1 * time.Second):
 			m.UpdateDeviceState(ctx)
 		case <-ctx.Done():
+			log.Info("Stopping update loop")
 			return
 		}
 	}
 }
 
 func (m *Monitor) UpdateDeviceState(ctx context.Context) {
+	logger := log.WithName("UpdateDeviceState")
+	logger.Info("Updating device state")
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go func() {
@@ -141,9 +145,12 @@ func (m *Monitor) updateCRDBasedDevice(ctx context.Context) {
 }
 
 func (m *Monitor) isDeviceAvailable(name string) bool {
+	logger := log.WithName("isDeviceAvailable").WithValues("Device", name)
 	if _, err := m.statFile("/dev/tty" + name); os.IsNotExist(err) {
+		logger.Info("Device not available")
 		return false
 	}
+	logger.Info("Device available")
 	return true
 }
 

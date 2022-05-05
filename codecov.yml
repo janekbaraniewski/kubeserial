@@ -3,12 +3,12 @@ coverage:
     patch:
       default:
         target: 0% # FIXME: This should be auto
-        threshold: 5%
+        threshold: 100% # FIXME: this should be as small as possible
         base: auto
     project:
       default:
         target: auto
-        threshold: 5%
+        threshold: 100%
         base: auto
         paths:
           - "pkg"

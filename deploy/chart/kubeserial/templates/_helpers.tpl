@@ -88,3 +88,30 @@ Webhook selector labels
 app.kubernetes.io/name: {{ include "kubeserial.name" . }}-sidecar-injector
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+
+{{/*
+Device Monitor fullname
+*/}}
+{{- define "kubeserial.monitorFullname" -}}
+{{ include "kubeserial.fullname" .}}-monitor
+{{- end }}
+
+{{/*
+Device Monitor common labels
+*/}}
+{{- define "kubeserial.monitorLabels" -}}
+helm.sh/chart: {{ include "kubeserial.chart" . }}
+{{ include "kubeserial.monitorSelectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Device Monitor selector labels
+*/}}
+{{- define "kubeserial.monitorSelectorLabels" -}}
+app.kubernetes.io/name: {{ include "kubeserial.monitorFullname" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}

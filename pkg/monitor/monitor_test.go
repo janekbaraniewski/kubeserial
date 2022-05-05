@@ -113,7 +113,7 @@ func TestUpdateDeviceState_Device(t *testing.T) {
 			fakeClientsetKubeserial := fake.NewSimpleClientset(device)
 			fs := afero.NewMemMapFs()
 			if testCase.CreateDevice {
-				fs.Create("/dev/tty" + device.Name)
+				fs.Create("/dev/" + device.Name)
 			}
 			monitor := NewMonitor(fakeClientset, fakeClientsetKubeserial, "test-ns", fs.Stat)
 

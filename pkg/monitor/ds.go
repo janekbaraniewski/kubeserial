@@ -99,6 +99,12 @@ func CreateDaemonSet(cr *appv1alpha1.KubeSerial, monitorVersion string) *appsv1.
 									},
 								},
 							},
+							Ports: []corev1.ContainerPort{
+								{
+									Name:          "metrics",
+									ContainerPort: 8080,
+								},
+							},
 							SecurityContext: &corev1.SecurityContext{
 								Privileged: &[]bool{true}[0],
 							},

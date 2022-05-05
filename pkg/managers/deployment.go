@@ -56,7 +56,7 @@ func (m *Manager) CreateDeployment(cr types.NamespacedName, device types.Namespa
 							Command: []string{"/bin/sh"},
 							Args: []string{
 								"-c",
-								"socat -d -d pty,raw,echo=0,b115200,link=/dev/device,perm=0660,group=tty tcp:" + strings.ToLower(cr.Name+"-"+device.Name+"-gateway") + ":3333 & " + m.RunCmnd, // TODO: make init container
+								"socat -d -d pty,raw,echo=0,b115200,link=/dev/device,perm=0660,group=tty tcp:" + strings.ToLower(device.Name+"-gateway") + ":3333 & " + m.RunCmnd, // TODO: make init container
 							},
 							Ports: []corev1.ContainerPort{
 								{

@@ -14,40 +14,40 @@ spec:
         accessControl:
           enabled: false
         plugins:
-        announcements:
+          announcements:
             _config_version: 1
             channels:
-            _blog:
+              _blog:
                 read_until: 1573642500
-            _important:
+              _important:
                 read_until: 1521111600
-            _octopi:
+              _octopi:
                 read_until: 1573722900
-            _plugins:
+              _plugins:
                 read_until: 1573862400
-            _releases:
+              _releases:
                 read_until: 1574699400
-        discovery:
+          discovery:
             upnpUuid: ef35acc7-a859-4947-980d-d5edb10508e4
-        softwareupdate:
+          softwareupdate:
             _config_version: 6
-        tracking:
+          tracking:
             enabled: false
         deviceProfiles:
-        default: _default
+          default: _default
         serial:
-        additionalPorts:
-        - /dev/device
-        autoconnect: true
-        baudrate: 0
-        port: /dev/device
+          additionalPorts:
+          - /dev/device
+          autoconnect: true
+          baudrate: 0
+          port: /dev/device
         server:
-        firstRun: false
-        onlineCheck:
+          firstRun: false
+          onlineCheck:
             enabled: true
-        pluginBlacklist:
+          pluginBlacklist:
             enabled: false
-        seenWizards:
+          seenWizards:
             corewizard: 3
             cura: null
             tracking: null`

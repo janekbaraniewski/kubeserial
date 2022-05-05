@@ -37,3 +37,32 @@ func CreateService(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device_2) *co
 	}
 
 }
+
+func CreateServiceNew(device *appv1alpha1.Device) *corev1.Service {
+	labels := map[string]string{
+		"app": device.Name + "-gateway",
+	}
+	name := strings.ToLower(device.Name + "-gateway")
+	return &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: device.Namespace,
+			Labels:    labels,
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
+				{
+					Name:       "ser2net",
+					Protocol:   corev1.ProtocolTCP,
+					Port:       3333,
+					TargetPort: intstr.FromInt(3333),
+				},
+			},
+			Selector: map[string]string{
+				"app": name,
+			},
+			Type: corev1.ServiceTypeClusterIP,
+		},
+	}
+
+}

@@ -7,7 +7,6 @@ import (
 
 	"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
 	"github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned/fake"
-	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
@@ -123,7 +122,7 @@ func TestUpdateDeviceState_Device(t *testing.T) {
 				ctx, device.Name, v1.GetOptions{})
 
 			assert.Equal(t, nil, err)
-			availableCondition := utils.GetCondition(foundDevice.Status.Conditions, v1alpha1.DeviceAvailable)
+			availableCondition := foundDevice.GetCondition(v1alpha1.DeviceAvailable)
 			assert.Equal(t, testCase.ResultAvailable, availableCondition.Status)
 			assert.Equal(t, testCase.ResultNode, foundDevice.Status.NodeName)
 		})

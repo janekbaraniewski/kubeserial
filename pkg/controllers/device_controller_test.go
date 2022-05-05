@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
-	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -77,11 +76,11 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			assert.Equal(t, nil, err)
 			assert.Equal(t, 2, len(foundDevice.Status.Conditions))
 
-			availableCondition := utils.GetCondition(foundDevice.Status.Conditions, v1alpha1.DeviceAvailable)
+			availableCondition := foundDevice.GetCondition(v1alpha1.DeviceAvailable)
 			assert.Equal(t, v1.ConditionUnknown, availableCondition.Status)
 			assert.Equal(t, "NotValidated", availableCondition.Reason)
 
-			readyCondition := utils.GetCondition(foundDevice.Status.Conditions, v1alpha1.DeviceReady)
+			readyCondition := foundDevice.GetCondition(v1alpha1.DeviceReady)
 			assert.Equal(t, v1.ConditionFalse, readyCondition.Status)
 			assert.Equal(t, "ManagerNotAvailable", readyCondition.Reason)
 		})
@@ -104,11 +103,11 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			foundDevice := &v1alpha1.Device{}
 			fakeClient.Get(context.TODO(), deviceName, foundDevice)
 
-			availableCondition := utils.GetCondition(foundDevice.Status.Conditions, v1alpha1.DeviceAvailable)
+			availableCondition := foundDevice.GetCondition(v1alpha1.DeviceAvailable)
 			assert.Equal(t, v1.ConditionUnknown, availableCondition.Status)
 			assert.Equal(t, "NotValidated", availableCondition.Reason)
 
-			readyCondition := utils.GetCondition(foundDevice.Status.Conditions, v1alpha1.DeviceReady)
+			readyCondition := foundDevice.GetCondition(v1alpha1.DeviceReady)
 			assert.Equal(t, v1.ConditionTrue, readyCondition.Status)
 			assert.Equal(t, "AllChecksPassed", readyCondition.Reason)
 		})
@@ -135,11 +134,11 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			foundDevice := &v1alpha1.Device{}
 			fakeClient.Get(context.TODO(), deviceName, foundDevice)
 
-			availableCondition := utils.GetCondition(foundDevice.Status.Conditions, v1alpha1.DeviceAvailable)
+			availableCondition := foundDevice.GetCondition(v1alpha1.DeviceAvailable)
 			assert.Equal(t, v1.ConditionUnknown, availableCondition.Status)
 			assert.Equal(t, "NotValidated", availableCondition.Reason)
 
-			readyCondition := utils.GetCondition(foundDevice.Status.Conditions, v1alpha1.DeviceReady)
+			readyCondition := foundDevice.GetCondition(v1alpha1.DeviceReady)
 			assert.Equal(t, v1.ConditionTrue, readyCondition.Status)
 			assert.Equal(t, "AllChecksPassed", readyCondition.Reason)
 

@@ -5,5 +5,7 @@ metadata:
   labels:
     {{- include "kubeserial.labels" . | nindent 4 }}
 data:
-  monitorLabels: {{ include "kubeserial.monitorLabels" . | nindent 4 }}
-  monitorSelectorLabels: {{ include "kubeserial.monitorSelectorLabels" . | nindent 4 }}
+  monitorLabels: |
+    {{- include "kubeserial.monitorLabels" . | nindent 4 }}
+  monitorSelectorLabels: |
+    {{- include "kubeserial.monitorSelectorLabels" . | nindent 4 }}

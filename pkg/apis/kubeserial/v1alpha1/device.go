@@ -17,7 +17,10 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"time"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type DeviceConditionType string
@@ -117,4 +120,50 @@ type DeviceList struct {
 // NeedsManager checks if device needs Manager
 func (d *Device) NeedsManager() bool {
 	return d.Spec.Manager != ""
+}
+
+func (d *Device) IsAvailable() bool {
+	availableCondition := d.GetCondition(DeviceAvailable)
+	return availableCondition.Status == metav1.ConditionTrue
+}
+
+func (d *Device) IsReady() bool {
+	readyCondition := d.GetCondition(DeviceReady)
+	return readyCondition.Status == metav1.ConditionTrue
+}
+
+func (d *Device) GetCondition(conditionType DeviceConditionType) *DeviceCondition {
+	for i := range d.Status.Conditions {
+		if d.Status.Conditions[i].Type == conditionType {
+			return &d.Status.Conditions[i]
+		}
+	}
+	return nil
+}
+
+func (d *Device) SetCondition(newCondition DeviceCondition) {
+	existing := d.GetCondition(newCondition.Type)
+
+	if existing == nil {
+		if newCondition.LastTransitionTime.IsZero() {
+			newCondition.LastTransitionTime = v1.NewTime(time.Now())
+		}
+		newCondition.LastHeartbeatTime = v1.NewTime(time.Now())
+		d.Status.Conditions = append(d.Status.Conditions, newCondition)
+		return
+	}
+
+	if existing.Status != newCondition.Status {
+		existing.Status = newCondition.Status
+		if !newCondition.LastTransitionTime.IsZero() {
+			existing.LastTransitionTime = newCondition.LastTransitionTime
+		} else {
+			existing.LastTransitionTime = v1.NewTime(time.Now())
+		}
+	}
+
+	existing.Reason = newCondition.Reason
+	existing.Message = newCondition.Message
+	existing.ObservedGeneration = newCondition.ObservedGeneration
+	existing.LastHeartbeatTime = v1.NewTime(time.Now())
 }

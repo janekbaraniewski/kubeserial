@@ -2,19 +2,20 @@ package managers
 
 import (
 	"path/filepath"
-	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+
+	"github.com/janekbaraniewski/kubeserial/pkg/injector"
 )
 
 func (m *Manager) CreateDeployment(cr types.NamespacedName, device types.NamespacedName) *appsv1.Deployment {
 	labels := map[string]string{
 		"app": m.GetName(cr.Name, device.Name),
 	}
-	return &appsv1.Deployment{
+	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      m.GetName(cr.Name, device.Name),
 			Namespace: cr.Namespace,
@@ -56,7 +57,7 @@ func (m *Manager) CreateDeployment(cr types.NamespacedName, device types.Namespa
 							Command: []string{"/bin/sh"},
 							Args: []string{
 								"-c",
-								"socat -d -d pty,raw,echo=0,b115200,link=/dev/device,perm=0660,group=tty tcp:" + strings.ToLower(device.Name+"-gateway") + ":3333 & " + m.RunCmnd, // TODO: make init container
+								m.RunCmnd,
 							},
 							Ports: []corev1.ContainerPort{
 								{
@@ -79,4 +80,6 @@ func (m *Manager) CreateDeployment(cr types.NamespacedName, device types.Namespa
 			},
 		},
 	}
+	injector.AddDeviceInjector(&deployment.Spec.Template.Spec, device.Name)
+	return deployment
 }

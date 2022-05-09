@@ -10,6 +10,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
+
+	"github.com/janekbaraniewski/kubeserial/pkg/injector"
 )
 
 // +kubebuilder:webhook:path=/mutate-add-sidecar,mutating=true,failurePolicy=fail,groups="",resources=pods,verbs=create;update,versions=v1,name=injector.kubeserial.com,admissionReviewVersions={v1, v1beta1},sideEffects=None
@@ -69,17 +71,7 @@ func (si *SidecarInjector) Handle(ctx context.Context, req admission.Request) ad
 	deviceToInject := shoudInject(pod)
 
 	if deviceToInject != "" {
-		log.Info("Injecting volume...", "volumeConfig", si.Config.Volume)
-		pod.Spec.Volumes = append(pod.Spec.Volumes, si.Config.Volume)
-		log.Info("Injecting sidecar...", "sidecarConfig", si.Config.Containers)
-		pod.Spec.Containers = append(pod.Spec.Containers, si.Config.Containers...)
-		containers := []corev1.Container{}
-		for _, container := range pod.Spec.Containers {
-			container.VolumeMounts = append(container.VolumeMounts, si.Config.VolumeMount)
-			log.Info("Attached volume mounts", "volumeMounta", container.VolumeMounts)
-			containers = append(containers, container)
-		}
-		pod.Spec.Containers = containers
+		injector.AddDeviceInjector(&pod.Spec, deviceToInject)
 		pod.Annotations[sidecarAlreadyInjectedAnnotation] = "true"
 
 		log.Info("Sidecar injected", "sidecar name", si.Name)

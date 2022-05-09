@@ -11,15 +11,12 @@ import (
 func TestCreateConfigMap(t *testing.T) {
 	// TODO: improve this test
 	cm := CreateConfigMap(
-		&v1alpha1.KubeSerial{
+		&v1alpha1.Device{
 			ObjectMeta: v1.ObjectMeta{
-				Name: "test-cr",
+				Name: "test-device",
 			},
-		},
-		&v1alpha1.Device_2{
-			Name: "test-device",
 		},
 	)
 
-	assert.Equal(t, "test-cr-test-device-gateway", cm.ObjectMeta.Name)
+	assert.Equal(t, "test-device-gateway", cm.ObjectMeta.Name)
 }

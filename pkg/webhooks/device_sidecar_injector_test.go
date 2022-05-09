@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -85,7 +86,7 @@ func TestHandle(t *testing.T) {
 	json.Unmarshal(resp.Patch, resultPod)
 
 	assert.Equal(t, true, resp.Allowed)
-	assert.Equal(t, patches(), resp.Patches)
+	assert.Equal(t, true, reflect.DeepEqual(resp.Patches, patches()))
 }
 
 func patches() []jsonpatch.Operation {

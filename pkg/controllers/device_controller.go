@@ -100,9 +100,9 @@ func (r *DeviceReconciler) RequestGateway(ctx context.Context, device *kubeseria
 		Scheme: r.Scheme,
 	}
 
-	cm := gateway.CreateConfigMapNew(device)
-	deploy := gateway.CreateDeploymentNew(device)
-	svc := gateway.CreateServiceNew(device)
+	cm := gateway.CreateConfigMap(device)
+	deploy := gateway.CreateDeployment(device)
+	svc := gateway.CreateService(device)
 
 	if err := apiClient.EnsureConfigMap(ctx, device, cm); err != nil {
 		return err

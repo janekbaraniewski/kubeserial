@@ -151,4 +151,16 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			assert.Equal(t, false, foundRequest.Status.Fulfilled)
 		})
 	}
+	{
+		t.Run("device-not-found", func(t *testing.T) {
+			deviceReconciler := DeviceReconciler{
+				Client: fakeClient,
+				Scheme: scheme,
+			}
+
+			result, err := deviceReconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
+			assert.Equal(t, nil, err)
+			assert.Equal(t, false, result.Requeue)
+		})
+	}
 }

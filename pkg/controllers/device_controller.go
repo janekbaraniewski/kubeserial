@@ -25,6 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
@@ -228,7 +229,9 @@ func (r *DeviceReconciler) ManagerIsAvailable(ctx context.Context, device *kubes
 
 // RequestManager create ManagerScheduleRequest for device
 func (r *DeviceReconciler) RequestManager(ctx context.Context, device *kubeserialv1alpha1.Device) error {
+	logger := devLog.WithName("RequestManager")
 	if !device.NeedsManager() {
+		logger.V(3).Info("Device doesn't need manager, returning")
 		return nil
 	}
 	request := &kubeserialv1alpha1.ManagerScheduleRequest{
@@ -240,6 +243,10 @@ func (r *DeviceReconciler) RequestManager(ctx context.Context, device *kubeseria
 			Device:  device.Name,
 			Manager: device.Spec.Manager,
 		},
+	}
+	if err := controllerutil.SetControllerReference(device, request, r.Scheme); err != nil {
+		logger.Info("Can't set reference")
+		return err
 	}
 	err := r.Client.Create(ctx, request)
 	if err != nil {

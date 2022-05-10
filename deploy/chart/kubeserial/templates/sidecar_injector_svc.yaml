@@ -7,10 +7,10 @@ metadata:
 spec:
   ports:
   - port: 443
-    targetPort: 8443
+    targetPort: webhook
     name: webhook
   - port: 8080
-    targetPort: 8080
+    targetPort: metrics
     name: metrics
   selector:
     {{- include "kubeserial.injectorSelectorLabels" . | nindent 4 }}

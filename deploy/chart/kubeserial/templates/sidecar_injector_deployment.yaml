@@ -22,14 +22,19 @@ spec:
           args:
             - -certDir=/etc/webhook/certs
             - -kubeSerialNamespace={{ .Release.Namespace }}
-            - -metricsPort=":8080"
-            - -port=8443
+            - -metricsPort=:{{ .Values.webhook.metricsPort }}
+            - -port={{ .Values.webhook.port }}
           volumeMounts:
             - name: webhook-certs
               mountPath: /etc/webhook/certs
               readOnly: true
             - name: webhook-config
               mountPath: /etc/webhook/config
+          ports:
+            - name: metrics
+              containerPort: {{ .Values.webhook.metricsPort }}
+            - name: webhook
+              containerPort: {{ .Values.webhook.port }}
       volumes:
         - name: webhook-certs
           secret:

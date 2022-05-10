@@ -1,6 +1,7 @@
 package managers
 
 import (
+	"fmt"
 	"path/filepath"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -80,6 +81,10 @@ func (m *Manager) CreateDeployment(cr types.NamespacedName, device types.Namespa
 			},
 		},
 	}
-	injector.AddDeviceInjector(&deployment.Spec.Template.Spec, device.Name)
+	deviceGateway := types.NamespacedName{ // TODO: fix this, gateway name should be stored in CRD?
+		Name:      fmt.Sprintf("%v-gateway", device.Name),
+		Namespace: cr.Namespace,
+	}
+	injector.AddDeviceInjector(&deployment.Spec.Template.Spec, deviceGateway)
 	return deployment
 }

@@ -2,13 +2,13 @@ package injector
 
 import (
 	"fmt"
-	"strings"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
-func AddDeviceInjector(spec *corev1.PodSpec, device string) {
-	spec.Containers = append(spec.Containers, sidecarContainerSpec(device))
+func AddDeviceInjector(spec *corev1.PodSpec, deviceGateway types.NamespacedName) {
+	spec.Containers = append(spec.Containers, sidecarContainerSpec(deviceGateway))
 	spec.Volumes = append(spec.Volumes, podVolumeSpec())
 	containers := []corev1.Container{}
 	for _, container := range spec.Containers {
@@ -18,14 +18,14 @@ func AddDeviceInjector(spec *corev1.PodSpec, device string) {
 	spec.Containers = containers
 }
 
-func sidecarContainerSpec(device string) corev1.Container {
+func sidecarContainerSpec(deviceGateway types.NamespacedName) corev1.Container {
 	return corev1.Container{
 		Name:    "device-mounter",
 		Image:   "alpine/socat:1.7.4.3-r0",
 		Command: []string{"/bin/sh"},
 		Args: []string{
 			"-c",
-			fmt.Sprintf("sleep 5 && socat -d -d pty,raw,echo=0,b115200,link=/dev/devices/%v,perm=0660,group=tty tcp:%v:3333", device, strings.ToLower(device+"-gateway")),
+			fmt.Sprintf("sleep 5 && socat -d -d pty,raw,echo=0,b115200,link=/dev/devices/%v,perm=0660,group=tty tcp:%v.%v:3333", deviceGateway.Name, deviceGateway.Name, deviceGateway.Namespace),
 		},
 	}
 }

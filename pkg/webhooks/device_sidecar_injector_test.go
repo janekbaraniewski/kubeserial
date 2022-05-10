@@ -30,9 +30,9 @@ func TestHandle(t *testing.T) {
 	fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).Build()
 
 	si := SidecarInjector{
-		Name:   "TestDeviceSidecarInjector",
-		Client: fakeClient,
-		Config: &Config{},
+		Name:                "TestDeviceSidecarInjector",
+		Client:              fakeClient,
+		KubeSerialNamespace: "test-ns",
 	}
 
 	decoder, _ := admission.NewDecoder(scheme)
@@ -113,7 +113,7 @@ func patches() []jsonpatch.Operation {
 			Value: map[string]interface{}{
 				"args": []interface{}{
 					"-c",
-					"sleep 5 && socat -d -d pty,raw,echo=0,b115200,link=/dev/devices/test-device,perm=0660,group=tty tcp:test-device-gateway:3333",
+					"sleep 5 && socat -d -d pty,raw,echo=0,b115200,link=/dev/devices/test-device-gateway,perm=0660,group=tty tcp:test-device-gateway.test-ns:3333",
 				},
 				"command": []interface{}{
 					"/bin/sh",

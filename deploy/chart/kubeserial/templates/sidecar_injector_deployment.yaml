@@ -21,7 +21,8 @@ spec:
           imagePullPolicy: {{ .Values.webhook.image.pullPolicy }}
           args:
             - -certDir=/etc/webhook/certs
-            - -sidecarConfig=/etc/webhook/config/sidecarconfig.yaml
+            - -kubeSerialNamespace={{ .Release.Namespace }}
+            - -metricsPort=":8080"
             - -port=8443
           volumeMounts:
             - name: webhook-certs

@@ -5,12 +5,16 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
 )
 
 func TestAddDeviceInjector(t *testing.T) {
 	testPod := &corev1.Pod{}
 
-	AddDeviceInjector(&testPod.Spec, "test-device")
+	AddDeviceInjector(&testPod.Spec, types.NamespacedName{
+		Name:      "test-device-gateway",
+		Namespace: "test-ns",
+	})
 
 	assert.Equal(t, 1, len(testPod.Spec.Containers))
 	assert.Equal(t, corev1.Container{
@@ -21,7 +25,7 @@ func TestAddDeviceInjector(t *testing.T) {
 		},
 		Args: []string{
 			"-c",
-			"sleep 5 && socat -d -d pty,raw,echo=0,b115200,link=/dev/devices/test-device,perm=0660,group=tty tcp:test-device-gateway:3333",
+			"sleep 5 && socat -d -d pty,raw,echo=0,b115200,link=/dev/devices/test-device-gateway,perm=0660,group=tty tcp:test-device-gateway.test-ns:3333",
 		},
 		VolumeMounts: []corev1.VolumeMount{
 			{

@@ -3,10 +3,12 @@ package webhooks
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
@@ -24,16 +26,10 @@ const (
 )
 
 type SidecarInjector struct {
-	Name    string
-	Client  client.Client
-	decoder *admission.Decoder
-	Config  *Config
-}
-
-type Config struct {
-	Containers  []corev1.Container `yaml:"containers"`
-	Volume      corev1.Volume      `yaml:"volume"`
-	VolumeMount corev1.VolumeMount `yaml:"volumeMount"`
+	Name                string
+	Client              client.Client
+	decoder             *admission.Decoder
+	KubeSerialNamespace string
 }
 
 func shoudInject(pod *corev1.Pod) string {
@@ -71,9 +67,13 @@ func (si *SidecarInjector) Handle(ctx context.Context, req admission.Request) ad
 	deviceToInject := shoudInject(pod)
 
 	if deviceToInject != "" {
-		injector.AddDeviceInjector(&pod.Spec, deviceToInject)
+		deviceGateway := types.NamespacedName{
+			Name:      fmt.Sprintf("%v-gateway", deviceToInject),
+			Namespace: si.KubeSerialNamespace,
+		}
+		log.Info("Injecting device mounter connecting to gateway", "gateway", deviceGateway)
+		injector.AddDeviceInjector(&pod.Spec, deviceGateway)
 		pod.Annotations[sidecarAlreadyInjectedAnnotation] = "true"
-
 		log.Info("Sidecar injected", "sidecar name", si.Name)
 	} else {
 		log.Info("Inject not needed.")

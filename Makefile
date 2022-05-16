@@ -90,6 +90,7 @@ kubeserial-docker-local: PLATFORMS?=
 kubeserial-docker-local: DOCKERBUILD_PLATFORM_OPT?=
 kubeserial-docker-local: DOCKERBUILD_ACTION?=--load
 kubeserial-docker-local: VERSION ?= local
+kubeserial-docker-local: DOCKERBUILD_EXTRA_OPTS=--cache-to janekbaraniewski/kubeserial:cache --cache-from janekbaraniewski/kubeserial:cache
 kubeserial-docker-local: kubeserial-docker ## Build image for local development, tag local, supports only builder platform
 
 .PHONY: kubeserial-docker-all
@@ -108,6 +109,7 @@ device-monitor-docker-local: PLATFORMS?=
 device-monitor-docker-local: DOCKERBUILD_PLATFORM_OPT?=
 device-monitor-docker-local: DOCKERBUILD_ACTION?=--load
 device-monitor-docker-local: VERSION ?= local
+device-monitor-docker-local: DOCKERBUILD_EXTRA_OPTS=--cache-to janekbaraniewski/kubeserial-device-monitor:cache --cache-from janekbaraniewski/kubeserial-device-monitor:cache
 device-monitor-docker-local: device-monitor-docker ## Build image for local development, tag local, supports only builder platform
 
 .PHONY: device-monitor-docker-all
@@ -126,6 +128,7 @@ injector-webhook-docker-local: PLATFORMS?=
 injector-webhook-docker-local: DOCKERBUILD_PLATFORM_OPT?=
 injector-webhook-docker-local: DOCKERBUILD_ACTION?=--load
 injector-webhook-docker-local: VERSION ?= local
+injector-webhook-docker-local: DOCKERBUILD_EXTRA_OPTS=--cache-to janekbaraniewski/kubeserial-injector-webhook:cache --cache-from janekbaraniewski/kubeserial-injector-webhook:cache
 injector-webhook-docker-local: injector-webhook-docker ## Build image for local development, tag local, supports only builder platform
 
 .PHONY: injector-webhook-docker-all

@@ -8,7 +8,6 @@ metadata:
 spec:
     idProduct: {{ .idProduct | quote }}
     idVendor: {{ .idVendor | quote }}
-    subsystem: {{ .subsystem | quote }}
     name: {{ .name | quote }}
     manager: {{ .manager | quote }}
 ---

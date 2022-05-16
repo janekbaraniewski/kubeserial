@@ -45,9 +45,6 @@ type DeviceSpec struct {
 	// +optional
 	// +kubebuilder:validation:Optional
 	Manager string `json:"manager,omitempty"`
-	// +required
-	// +kubebuilder:validation:Required
-	Subsystem string `json:"subsystem"`
 }
 
 type DeviceCondition struct {
@@ -97,6 +94,9 @@ type DeviceStatus struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 // +kubebuilder:resource:path=devices,scope=Namespaced
+// +kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
+// +kubebuilder:printcolumn:name="Available",type=string,JSONPath=`.status.conditions[?(@.type=="Available")].status`
+// +kubebuilder:printcolumn:name="Device Node",type=string,JSONPath=`.status.nodeName`
 
 // Device is the Schema for the devices API
 type Device struct {

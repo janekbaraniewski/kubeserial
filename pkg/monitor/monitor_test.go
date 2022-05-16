@@ -49,7 +49,6 @@ func TestUpdateDeviceState_Device(t *testing.T) {
 				Name:      "test-device",
 				IdVendor:  "123",
 				IdProduct: "456",
-				Subsystem: "tty",
 				Manager:   "test-manager",
 			},
 			Status: v1alpha1.DeviceStatus{

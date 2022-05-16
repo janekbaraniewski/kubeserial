@@ -16,8 +16,7 @@ func CreateConfigMap(cr *appv1alpha1.KubeSerial) *corev1.ConfigMap {
 
 	for _, device := range cr.Spec.Devices {
 		rule += fmt.Sprintf(
-			"SUBSYSTEM==\"%v\", ATTRS{idVendor}==\"%s\", ATTRS{idProduct}==\"%s\", SYMLINK+=\"%s\"\n",
-			device.Subsystem,
+			"SUBSYSTEM==\"tty\", ATTRS{idVendor}==\"%s\", ATTRS{idProduct}==\"%s\", SYMLINK+=\"%s\"\n",
 			device.IdVendor,
 			device.IdProduct,
 			device.Name,

@@ -10,11 +10,11 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-func (m *Manager) CreateDeployment(cr types.NamespacedName, device types.NamespacedName) *appsv1.Deployment {
+func (m *Manager) CreateDeployment(cr types.NamespacedName, device types.NamespacedName, includeCM bool) *appsv1.Deployment {
 	labels := map[string]string{
 		"app": m.GetName(cr.Name, device.Name),
 	}
-	return &appsv1.Deployment{
+	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      m.GetName(cr.Name, device.Name),
 			Namespace: cr.Namespace,
@@ -31,24 +31,6 @@ func (m *Manager) CreateDeployment(cr types.NamespacedName, device types.Namespa
 					Labels:    labels,
 				},
 				Spec: corev1.PodSpec{
-					Volumes: []corev1.Volume{
-						{
-							Name: "config",
-							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: m.GetName(cr.Name, device.Name),
-									},
-									Items: []corev1.KeyToPath{
-										{
-											Key:  filepath.Base(m.ConfigPath),
-											Path: filepath.Base(m.ConfigPath),
-										},
-									},
-								},
-							},
-						},
-					},
 					Containers: []corev1.Container{
 						{
 							Name:    m.GetName(cr.Name, device.Name),
@@ -65,18 +47,41 @@ func (m *Manager) CreateDeployment(cr types.NamespacedName, device types.Namespa
 									ContainerPort: 80,
 								},
 							},
-							VolumeMounts: []corev1.VolumeMount{
-								{
-									Name:      "config",
-									ReadOnly:  false,
-									MountPath: m.ConfigPath,
-									SubPath:   filepath.Base(m.ConfigPath),
-								},
-							},
 						},
 					},
 				},
 			},
 		},
 	}
+	if includeCM {
+		deployment.Spec.Template.Spec.Volumes = append(deployment.Spec.Template.Spec.Volumes, corev1.Volume{
+			Name: "config",
+			VolumeSource: corev1.VolumeSource{
+				ConfigMap: &corev1.ConfigMapVolumeSource{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: m.GetName(cr.Name, device.Name),
+					},
+					Items: []corev1.KeyToPath{
+						{
+							Key:  filepath.Base(m.ConfigPath),
+							Path: filepath.Base(m.ConfigPath),
+						},
+					},
+				},
+			},
+		})
+
+		container := deployment.Spec.Template.Spec.Containers[0]
+		container.VolumeMounts = []corev1.VolumeMount{
+			{
+				Name:      "config",
+				ReadOnly:  false,
+				MountPath: m.ConfigPath,
+				SubPath:   filepath.Base(m.ConfigPath),
+			},
+		}
+
+		deployment.Spec.Template.Spec.Containers = []corev1.Container{container}
+	}
+	return deployment
 }

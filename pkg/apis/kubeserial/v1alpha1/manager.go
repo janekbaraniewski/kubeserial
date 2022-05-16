@@ -22,16 +22,28 @@ import (
 
 // Image is spec for image to be used by manager
 type Image struct {
+	// +required
+	// +kubebuilder:validation:Required
 	Repository string `json:"repository"`
-	Tag        string `json:"tag"`
+	// +required
+	// +kubebuilder:validation:Required
+	Tag string `json:"tag"`
 }
 
 // +k8s:openapi-gen=true
 // ManagerSpec defines the desired state of Manager
 type ManagerSpec struct {
-	Image      Image  `json:"image"`
-	RunCmd     string `json:"runCmd"`
-	Config     string `json:"config"`
+	// +required
+	// +kubebuilder:validation:Required
+	Image Image `json:"image"`
+	// +required
+	// +kubebuilder:validation:Required
+	RunCmd string `json:"runCmd"`
+	// +optional
+	// +kubebuilder:validation:Optional
+	Config string `json:"config"`
+	// +optional
+	// +kubebuilder:validation:Optional
 	ConfigPath string `json:"configPath"`
 }
 

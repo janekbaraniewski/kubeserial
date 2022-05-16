@@ -49,8 +49,6 @@ spec:
               runCmd:
                 type: string
             required:
-            - config
-            - configPath
             - image
             - runCmd
             type: object

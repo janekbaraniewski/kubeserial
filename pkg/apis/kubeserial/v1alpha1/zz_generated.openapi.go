@@ -388,7 +388,7 @@ func schema_pkg_apis_kubeserial_v1alpha1_ManagerSpec(ref common.ReferenceCallbac
 						},
 					},
 				},
-				Required: []string{"image", "runCmd", "config", "configPath"},
+				Required: []string{"image", "runCmd"},
 			},
 		},
 		Dependencies: []string{

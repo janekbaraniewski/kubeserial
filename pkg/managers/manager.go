@@ -30,13 +30,14 @@ func Schedule(ctx context.Context, request *appv1alpha1.ManagerScheduleRequest, 
 		Name:      request.Spec.Device,
 		Namespace: mgr.Namespace,
 	}
-	cm := manager.CreateConfigMap(cr, device)
-	deploy := manager.CreateDeployment(cr, device)
-	svc := manager.CreateService(cr, device)
-
-	if err := api.EnsureConfigMap(ctx, request, cm); err != nil {
-		return err
+	if mgr.Spec.Config != "" {
+		cm := manager.CreateConfigMap(cr, device)
+		if err := api.EnsureConfigMap(ctx, request, cm); err != nil {
+			return err
+		}
 	}
+	deploy := manager.CreateDeployment(cr, device, mgr.Spec.Config != "")
+	svc := manager.CreateService(cr, device)
 
 	if err := api.EnsureDeployment(ctx, request, deploy); err != nil {
 		return err

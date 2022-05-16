@@ -153,7 +153,7 @@ func (r *DeviceReconciler) EnsureConditions(ctx context.Context, device *kubeser
 			logger.Info("Condition didn't exist, creating", "conditionType", conditionType)
 			device.SetCondition(kubeserialv1alpha1.DeviceCondition{
 				Type:   conditionType,
-				Status: v1.ConditionUnknown,
+				Status: v1.ConditionFalse,
 				Reason: "NotValidated",
 			})
 		}

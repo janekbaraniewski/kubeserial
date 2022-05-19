@@ -10,7 +10,18 @@ title = "KubeSerial"
 [preprocessor.mermaid]
 command = "mdbook-mermaid"
 
+[preprocessor.open-on-gh]
+command = "mdbook-open-on-gh"
+renderer = ["html"]
+
+[preprocessor.toc]
+command = "mdbook-toc"
+renderer = ["html"]
+
 [output]
 
 [output.html]
 additional-js = ["mermaid.min.js", "mermaid-init.js"]
+git-repository-url = "https://github.com/janekbaraniewski/kubeserial"
+default-theme = "navy"
+site-url = "/kubeserial/"

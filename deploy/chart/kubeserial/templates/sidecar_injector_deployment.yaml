@@ -36,6 +36,14 @@ spec:
               containerPort: 8081
             - name: metrics
               containerPort: 8080
+          livenessProbe:
+            httpGet:
+              port: health
+              path: /healthz
+          readinessProbe:
+            httpGet:
+              port: health
+              path: /readyz
       volumes:
         - name: webhook-certs
           secret:

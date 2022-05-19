@@ -16,7 +16,7 @@ webhooks:
       namespace: {{ .Release.Namespace }}
       path: /mutate-add-sidecar
   failurePolicy: Fail
-  name: injector.kubeserial.com
+  name: device.kubeserial.com
   rules:
   - apiGroups:
     - ''

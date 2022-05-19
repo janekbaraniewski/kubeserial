@@ -12,7 +12,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
-// +kubebuilder:webhook:path=/mutate-add-sidecar,mutating=true,failurePolicy=fail,groups="",resources=pods,verbs=create;update,versions=v1,name=injector.kubeserial.com,admissionReviewVersions={v1, v1beta1},sideEffects=None
+// +kubebuilder:webhook:path=/mutate-mount-device,mutating=true,failurePolicy=fail,groups="",resources=pods,verbs=create;update,versions=v1,name=device.kubeserial.com,admissionReviewVersions={v1, v1beta1},sideEffects=None
 
 var log = logf.Log.WithName("DeviceSidecarInjecttor")
 
@@ -21,7 +21,7 @@ const (
 	sidecarAlreadyInjectedAnnotation = "app.kubeserial.com/device-injected"
 )
 
-type SidecarInjector struct {
+type DeviceInjector struct {
 	Name    string
 	Client  client.Client
 	decoder *admission.Decoder
@@ -52,8 +52,9 @@ func shoudInject(pod *corev1.Pod) string {
 	return deviceToInject
 }
 
-// SidecarInjector adds an annotation to every incoming pods.
-func (si *SidecarInjector) Handle(ctx context.Context, req admission.Request) admission.Response {
+// DeviceInjector mutates command and args to inject script that mounts selected device.
+// It checks if pod requested device and if requested device is available.
+func (si *DeviceInjector) Handle(ctx context.Context, req admission.Request) admission.Response {
 	pod := &corev1.Pod{}
 
 	err := si.decoder.Decode(req, pod)
@@ -97,11 +98,11 @@ func (si *SidecarInjector) Handle(ctx context.Context, req admission.Request) ad
 	return admission.PatchResponseFromRaw(req.Object.Raw, marshaledPod)
 }
 
-// SidecarInjector implements admission.DecoderInjector.
+// DeviceInjector implements admission.DecoderInjector.
 // A decoder will be automatically inj1ected.
 
 // InjectDecoder injects the decoder.
-func (si *SidecarInjector) InjectDecoder(d *admission.Decoder) error {
+func (si *DeviceInjector) InjectDecoder(d *admission.Decoder) error {
 	si.decoder = d
 	return nil
 }

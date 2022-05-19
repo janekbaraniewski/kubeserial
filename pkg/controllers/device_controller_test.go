@@ -30,7 +30,6 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			Manager:   "test-manager",
 			IdVendor:  "123",
 			IdProduct: "456",
-			Subsystem: "tty",
 			Name:      "test-device",
 		},
 	}
@@ -77,7 +76,7 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			assert.Equal(t, 2, len(foundDevice.Status.Conditions))
 
 			availableCondition := foundDevice.GetCondition(v1alpha1.DeviceAvailable)
-			assert.Equal(t, v1.ConditionUnknown, availableCondition.Status)
+			assert.Equal(t, v1.ConditionFalse, availableCondition.Status)
 			assert.Equal(t, "NotValidated", availableCondition.Reason)
 
 			readyCondition := foundDevice.GetCondition(v1alpha1.DeviceReady)
@@ -104,7 +103,7 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			fakeClient.Get(context.TODO(), deviceName, foundDevice)
 
 			availableCondition := foundDevice.GetCondition(v1alpha1.DeviceAvailable)
-			assert.Equal(t, v1.ConditionUnknown, availableCondition.Status)
+			assert.Equal(t, v1.ConditionFalse, availableCondition.Status)
 			assert.Equal(t, "NotValidated", availableCondition.Reason)
 
 			readyCondition := foundDevice.GetCondition(v1alpha1.DeviceReady)
@@ -135,7 +134,7 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			fakeClient.Get(context.TODO(), deviceName, foundDevice)
 
 			availableCondition := foundDevice.GetCondition(v1alpha1.DeviceAvailable)
-			assert.Equal(t, v1.ConditionUnknown, availableCondition.Status)
+			assert.Equal(t, v1.ConditionFalse, availableCondition.Status)
 			assert.Equal(t, "NotValidated", availableCondition.Reason)
 
 			readyCondition := foundDevice.GetCondition(v1alpha1.DeviceReady)

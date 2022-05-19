@@ -32,7 +32,7 @@ func CreateService(device *appv1alpha1.Device) *corev1.Service {
 			Selector: map[string]string{
 				"app": name,
 			},
-			Type: corev1.ServiceTypeClusterIP,
+			Type: corev1.ServiceTypeLoadBalancer,
 		},
 	}
 

@@ -4,6 +4,11 @@ on:
   push:
     branches: [ master ]
   pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - 'deploy/**'
+      - 'README.md'
+      - 'LICENSE'
 
 jobs:
   docker-controller:
@@ -89,30 +94,6 @@ jobs:
 
       - name: Check codegen
         run: make check-generated
-
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.17
-    - uses: actions/cache@v2
-      with:
-        # In order:
-        # * Module download cache
-        # * Build cache (Linux)
-        path: |
-          ~/go/pkg/mod
-          ~/.cache/go-build
-        key: ${{ runner.os }}-go-${{ hashFiles('go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-
-
-    - name: Build
-      run: make all
 
   tests:
     runs-on: ubuntu-latest

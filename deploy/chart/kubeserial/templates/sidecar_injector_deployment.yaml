@@ -28,6 +28,14 @@ spec:
               readOnly: true
             - name: webhook-config
               mountPath: /etc/webhook/config
+          ports:
+            - name: webhook
+              containerPort: 8443
+              protocol: TCP
+            - name: health
+              containerPort: 8081
+            - name: metrics
+              containerPort: 8080
       volumes:
         - name: webhook-certs
           secret:

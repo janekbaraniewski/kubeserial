@@ -43,15 +43,25 @@ type Device_2 struct {
 // IngressSpec defines the desired Ingress configuration
 // +k8s:openapi-gen=true
 type IngressSpec struct {
-	Enabled     bool              `json:"enabled"`
-	Domain      string            `json:"domain,omitempty"`
+	// +required
+	// +kubebuilder:validation:Required
+	Enabled bool `json:"enabled"`
+	// +optional
+	// +kubebuilder:validation:Optional
+	Domain string `json:"domain,omitempty"`
+	// +optional
+	// +kubebuilder:validation:Optional
 	Annotations map[string]string `json:"annotations,omitempty"`
 }
 
 // KubeSerialSpec defines the desired state of KubeSerial
 // +k8s:openapi-gen=true
 type KubeSerialSpec struct {
-	Devices []Device_2  `json:"devices"`
+	// +required
+	// +kubebuilder:validation:Required
+	Devices []Device_2 `json:"devices"`
+	// +required
+	// +kubebuilder:validation:Required
 	Ingress IngressSpec `json:"ingress"`
 }
 

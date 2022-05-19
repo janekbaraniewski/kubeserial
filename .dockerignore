@@ -2,3 +2,4 @@ Dockerfile
 Dockerfile.monitor
 deploy
 Makefile
+docs/

@@ -22,6 +22,9 @@ monitoring:
   prometheusMonitors:
     enabled: false
 
+ingress:
+  enabled: false
+
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""

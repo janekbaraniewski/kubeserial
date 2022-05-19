@@ -1,5 +1,15 @@
 # Controller
 
+<!-- toc -->
+
+# Controller Loops
+
+## KubeSerial Controller
+
+## Device Controller
+
+## ManagerScheduleRequest Controller
+
 ```mermaid
 graph TD;
     A-->B;

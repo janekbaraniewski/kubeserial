@@ -25,13 +25,6 @@ type DeviceInjector struct {
 	Name    string
 	Client  client.Client
 	decoder *admission.Decoder
-	Config  *Config
-}
-
-type Config struct {
-	Containers  []corev1.Container `yaml:"containers"`
-	Volume      corev1.Volume      `yaml:"volume"`
-	VolumeMount corev1.VolumeMount `yaml:"volumeMount"`
 }
 
 func shoudInject(pod *corev1.Pod) string {
@@ -70,20 +63,16 @@ func (si *DeviceInjector) Handle(ctx context.Context, req admission.Request) adm
 	deviceToInject := shoudInject(pod)
 
 	if deviceToInject != "" {
-		log.Info("Injecting volume...", "volumeConfig", si.Config.Volume)
-		pod.Spec.Volumes = append(pod.Spec.Volumes, si.Config.Volume)
-		log.Info("Injecting sidecar...", "sidecarConfig", si.Config.Containers)
-		pod.Spec.Containers = append(pod.Spec.Containers, si.Config.Containers...)
-		containers := []corev1.Container{}
-		for _, container := range pod.Spec.Containers {
-			container.VolumeMounts = append(container.VolumeMounts, si.Config.VolumeMount)
-			log.Info("Attached volume mounts", "volumeMounta", container.VolumeMounts)
-			containers = append(containers, container)
-		}
-		pod.Spec.Containers = containers
-		pod.Annotations[sidecarAlreadyInjectedAnnotation] = "true"
-
-		log.Info("Sidecar injected", "sidecar name", si.Name)
+		log.Info("Pod is requesting device, checking if available", "pod", pod.Name, "device", deviceToInject)
+		// TODO: check if device available, for now happy path
+		log.Info("FAKE device available")
+		log.Info(
+			"Manager container command and args",
+			"command", pod.Spec.Containers[0].Command,
+			"args", pod.Spec.Containers[0].Args,
+		)
+		//TODO: mutate command and args, maybe the best would be to mount entrypoint from some CM?
+		log.Info("Injected")
 	} else {
 		log.Info("Inject not needed.")
 	}

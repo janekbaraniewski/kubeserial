@@ -44,7 +44,7 @@ find /tmp/webhooks -name "*.yaml" | xargs -I % python3 ./hack/update-webhook-tem
 find /tmp/webhooks -name "*.yaml" | xargs ${sed} -i 's/\x27{{/{{/g'  # change '{{ -> {{
 find /tmp/webhooks -name "*.yaml" | xargs ${sed} -i 's/}}\x27/}}/g' # change }}' -> }}
 find /tmp/webhooks -name "*.yaml" | xargs ${sed} -i 's/\\\x27//g' # change \' -> '
-replace_or_compare /tmp/webhooks/manifests.yaml deploy/chart/kubeserial/templates/sidecar_injector_webhooks.yaml
+replace_or_compare /tmp/webhooks/manifests.yaml deploy/chart/kubeserial/templates/device_injector_webhook_webhooks.yaml
 rm -r /tmp/webhooks
 
 printf "Done!\n"

@@ -65,7 +65,7 @@ Create the name of the service account to use
 Webhook fullname
 */}}
 {{- define "kubeserial.injectorFullname" -}}
-{{ include "kubeserial.fullname" .}}-sidecar-injector
+{{ include "kubeserial.fullname" .}}-device-injector
 {{- end }}
 
 
@@ -85,7 +85,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 Webhook selector labels
 */}}
 {{- define "kubeserial.injectorSelectorLabels" -}}
-app.kubernetes.io/name: {{ include "kubeserial.name" . }}-sidecar-injector
+app.kubernetes.io/name: {{ include "kubeserial.name" . }}-device-injector
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 

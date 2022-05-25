@@ -3,6 +3,7 @@ package webhooks
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -64,35 +65,60 @@ func (si *DeviceInjector) Handle(ctx context.Context, req admission.Request) adm
 
 	deviceToInject := shoudInject(pod)
 
-	if deviceToInject != "" {
-		log.Info("Pod is requesting device, checking if available", "pod", pod.Name, "device", deviceToInject)
-		// TODO: check if device available, for now happy path
-		log.Info("FAKE device available")
-		log.Info(
-			"Manager pod command and args",
-			"command", pod.Spec.Containers[0].Command,
-			"args", pod.Spec.Containers[0].Args,
-		)
+	if deviceToInject == "" {
+		log.Info("Inject not needed.")
 
-		log.Info("Image", "image", pod.Spec.Containers[0].Image)
+		marshaledPod, err := json.Marshal(pod)
 
-		entrypoint, cmd, err := si.ConfigExtractor.GetEntrypointAndCMD(ctx, pod.Spec.Containers[0].Image)
+		if err != nil {
+			log.Info("Sdecar-Injector: cannot marshal")
+			return admission.Errored(http.StatusInternalServerError, err)
+		}
 
+		return admission.PatchResponseFromRaw(req.Object.Raw, marshaledPod)
+	}
+
+	log.Info("Pod is requesting device, checking if available", "pod", pod.Name, "device", deviceToInject)
+	log.Info("FAKE device available") // TODO: check if device available, for now happy path
+
+	container := &pod.Spec.Containers[0] // TODO: what if there are multiple containers? probably should introduce some annotation to select one
+
+	command, args := getContainerCommandArgs(container)
+	log.Info(
+		"Manager pod command and args",
+		"command", command,
+		"args", args,
+	)
+
+	if command == nil {
+		// TODO: implement overriding image entrypoint
+		log.Info("Image", "image", container.Image)
+
+		imageConfig, err := si.ConfigExtractor.GetImageConfig(ctx, container.Image)
 		if err != nil {
 			panic(err)
 		}
 
 		log.Info(
 			"Manager container entrypoint and cmd",
-			"entrypoint", entrypoint,
-			"cmd", cmd,
+			"entrypoint", imageConfig.Entrypoint,
+			"cmd", imageConfig.Cmd,
 		)
 
-		//TODO: mutate command and args, maybe the best would be to mount entrypoint from some CM?
-		log.Info("Injected")
-	} else {
-		log.Info("Inject not needed.")
+		command = imageConfig.Entrypoint
+		args = imageConfig.Cmd
 	}
+
+	newCommand, newArgs := concatCommandWithSocat(command, args, deviceToInject)
+
+	container.Command = newCommand
+	container.Args = newArgs
+	//TODO: mutate command and args, maybe the best would be to mount entrypoint from some CM?
+	log.Info(
+		"Injected",
+		"Container command", pod.Spec.Containers[0].Command,
+		"Container args", pod.Spec.Containers[0].Args,
+	)
 
 	marshaledPod, err := json.Marshal(pod)
 
@@ -102,6 +128,22 @@ func (si *DeviceInjector) Handle(ctx context.Context, req admission.Request) adm
 	}
 
 	return admission.PatchResponseFromRaw(req.Object.Raw, marshaledPod)
+}
+
+func concatCommandWithSocat(command []string, args []string, device string) (newCommand []string, newArgs []string) {
+
+	nCommand := []string{"/bin/sh"}
+	nArgs := []string{
+		"-c",
+		fmt.Sprintf("socat -d -d pty,raw,echo=0,b115200,link=/dev/device,perm=0660,group=tty tcp:%v-gateway:3333 & ", device),
+	}
+	nArgs = append(nArgs, command...)
+	nArgs = append(nArgs, args...)
+	return nCommand, nArgs
+}
+
+func getContainerCommandArgs(container *corev1.Container) (command []string, args []string) {
+	return container.Command, container.Args
 }
 
 // DeviceInjector implements admission.DecoderInjector.

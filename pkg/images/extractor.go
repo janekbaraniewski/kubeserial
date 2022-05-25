@@ -5,6 +5,7 @@ import (
 
 	"github.com/regclient/regclient/regclient"
 	"github.com/regclient/regclient/types/manifest"
+	v1 "github.com/regclient/regclient/types/oci/v1"
 	"github.com/regclient/regclient/types/ref"
 )
 
@@ -29,7 +30,7 @@ func (e *OCIConfigExtractor) getManifestFromList(ctx context.Context, man manife
 	return specMan, r, nil
 }
 
-func (e *OCIConfigExtractor) GetEntrypointAndCMD(ctx context.Context, image string) (entrypoint []string, cmd []string, err error) {
+func (e *OCIConfigExtractor) GetImageConfig(ctx context.Context, image string) (conf v1.ImageConfig, err error) {
 	referance, err := ref.New(image)
 
 	if err != nil {
@@ -41,7 +42,7 @@ func (e *OCIConfigExtractor) GetEntrypointAndCMD(ctx context.Context, image stri
 	if manifest.IsList() {
 		man, ref, err := e.getManifestFromList(ctx, manifest, referance)
 		if err != nil {
-			return nil, nil, err
+			return v1.ImageConfig{}, err
 		}
 		manifest = man
 		referance = ref
@@ -49,15 +50,14 @@ func (e *OCIConfigExtractor) GetEntrypointAndCMD(ctx context.Context, image stri
 
 	config, err := manifest.GetConfig()
 	if err != nil {
-		return nil, nil, err
+		return v1.ImageConfig{}, err
 	}
 
 	blobConfig, err := e.client.BlobGetOCIConfig(ctx, referance, config)
 	if err != nil {
-		return nil, nil, err
+		return v1.ImageConfig{}, err
 	}
-	conf := blobConfig.GetConfig().Config
-	return conf.Entrypoint, conf.Cmd, nil
+	return blobConfig.GetConfig().Config, nil
 }
 
 func NewOCIConfigExtractor() *OCIConfigExtractor {

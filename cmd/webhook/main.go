@@ -12,6 +12,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
+	"github.com/janekbaraniewski/kubeserial/pkg/images"
 	"github.com/janekbaraniewski/kubeserial/pkg/webhooks"
 )
 
@@ -63,8 +64,9 @@ func main() {
 		"/mutate-inject-device",
 		&webhook.Admission{
 			Handler: &webhooks.DeviceInjector{
-				Name:   "DeviceInjector",
-				Client: mgr.GetClient(),
+				Name:            "DeviceInjector",
+				Client:          mgr.GetClient(),
+				ConfigExtractor: images.NewOCIConfigExtractor(),
 			},
 		},
 	)

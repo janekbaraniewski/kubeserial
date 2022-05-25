@@ -27,6 +27,7 @@ type DeviceConditionType string
 
 const (
 	DeviceAvailable DeviceConditionType = "Available"
+	DeviceFree      DeviceConditionType = "Free"
 	DeviceReady     DeviceConditionType = "Ready"
 )
 
@@ -130,6 +131,11 @@ func (d *Device) IsAvailable() bool {
 func (d *Device) IsReady() bool {
 	readyCondition := d.GetCondition(DeviceReady)
 	return readyCondition.Status == metav1.ConditionTrue
+}
+
+func (d *Device) IsFree() bool {
+	freeCondition := d.GetCondition(DeviceFree)
+	return freeCondition.Status == metav1.ConditionTrue
 }
 
 func (d *Device) GetCondition(conditionType DeviceConditionType) *DeviceCondition {

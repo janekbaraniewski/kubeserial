@@ -8,4 +8,4 @@ clientConfig:
   service:
     name: '{{ include "kubeserial.injectorFullname" . }}'
     namespace: '{{ .Release.Namespace }}'
-    path: /mutate-add-sidecar
+    path: /mutate-inject-device

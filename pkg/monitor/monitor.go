@@ -75,6 +75,11 @@ func (m *Monitor) UpdateDeviceState(ctx context.Context) {
 					Status: metav1.ConditionTrue,
 					Reason: "DeviceAvailable",
 				})
+				device.SetCondition(v1alpha1.DeviceCondition{
+					Type:   v1alpha1.DeviceFree,
+					Status: metav1.ConditionTrue,
+					Reason: "DeviceFree",
+				})
 				device.Status.NodeName = os.Getenv("NODE_NAME")
 				logger.WithValues("Node", device.Status.NodeName).Info("Setting device state to available")
 				_, err := m.devicesClient.UpdateStatus(ctx, &device, metav1.UpdateOptions{})
@@ -87,6 +92,11 @@ func (m *Monitor) UpdateDeviceState(ctx context.Context) {
 			device.SetCondition(v1alpha1.DeviceCondition{
 				Type:   v1alpha1.DeviceAvailable,
 				Status: metav1.ConditionFalse,
+				Reason: "DeviceUnavailable",
+			})
+			device.SetCondition(v1alpha1.DeviceCondition{
+				Type:   v1alpha1.DeviceFree,
+				Status: metav1.ConditionUnknown,
 				Reason: "DeviceUnavailable",
 			})
 			device.Status.NodeName = ""

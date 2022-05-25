@@ -6,13 +6,15 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/regclient/regclient"
+	"github.com/regclient/regclient/types/ref"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
-// +kubebuilder:webhook:path=/mutate-mount-device,mutating=true,failurePolicy=fail,groups="",resources=pods,verbs=create;update,versions=v1,name=device.kubeserial.com,admissionReviewVersions={v1, v1beta1},sideEffects=None
+// +kubebuilder:webhook:path=/mutate-inject-device,mutating=true,failurePolicy=fail,groups="",resources=pods,verbs=create;update,versions=v1,name=device.kubeserial.com,admissionReviewVersions={v1, v1beta1},sideEffects=None
 
 var log = logf.Log.WithName("DeviceSidecarInjecttor")
 
@@ -67,10 +69,42 @@ func (si *DeviceInjector) Handle(ctx context.Context, req admission.Request) adm
 		// TODO: check if device available, for now happy path
 		log.Info("FAKE device available")
 		log.Info(
-			"Manager container command and args",
+			"Manager pod command and args",
 			"command", pod.Spec.Containers[0].Command,
 			"args", pod.Spec.Containers[0].Args,
 		)
+
+		client := regclient.New()
+		ref, err := ref.New(pod.Spec.Containers[0].Image)
+
+		if err != nil {
+			panic(err)
+		}
+
+		manifest, err := client.ManifestGet(ctx, ref)
+
+		if err != nil {
+			panic(err)
+		}
+
+		config, err := manifest.GetConfig()
+
+		if err != nil {
+			panic(err)
+		}
+
+		blobConfig, err := client.BlobGetOCIConfig(ctx, ref, config)
+
+		if err != nil {
+			panic(err)
+		}
+
+		log.Info(
+			"Manager container entrypoint and cmd",
+			"entrypoint", blobConfig.GetConfig().Config.Entrypoint,
+			"cmd", blobConfig.GetConfig().Config.Cmd,
+		)
+
 		//TODO: mutate command and args, maybe the best would be to mount entrypoint from some CM?
 		log.Info("Injected")
 	} else {

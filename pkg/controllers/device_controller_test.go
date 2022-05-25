@@ -73,7 +73,7 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			err = fakeClient.Get(context.TODO(), deviceName, foundDevice)
 
 			assert.Equal(t, nil, err)
-			assert.Equal(t, 2, len(foundDevice.Status.Conditions))
+			assert.Equal(t, 3, len(foundDevice.Status.Conditions))
 
 			availableCondition := foundDevice.GetCondition(v1alpha1.DeviceAvailable)
 			assert.Equal(t, v1.ConditionFalse, availableCondition.Status)

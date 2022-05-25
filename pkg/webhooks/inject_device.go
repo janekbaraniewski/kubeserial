@@ -6,8 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/regclient/regclient"
-	"github.com/regclient/regclient/types/ref"
+	"github.com/janekbaraniewski/kubeserial/pkg/images"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -74,26 +73,11 @@ func (si *DeviceInjector) Handle(ctx context.Context, req admission.Request) adm
 			"args", pod.Spec.Containers[0].Args,
 		)
 
-		client := regclient.New()
-		ref, err := ref.New(pod.Spec.Containers[0].Image)
+		log.Info("Image", "image", pod.Spec.Containers[0].Image)
 
-		if err != nil {
-			panic(err)
-		}
+		extractor := images.NewOCIConfigExtractor()
 
-		manifest, err := client.ManifestGet(ctx, ref)
-
-		if err != nil {
-			panic(err)
-		}
-
-		config, err := manifest.GetConfig()
-
-		if err != nil {
-			panic(err)
-		}
-
-		blobConfig, err := client.BlobGetOCIConfig(ctx, ref, config)
+		entrypoint, cmd, err := extractor.GetEntrypointAndCMD(ctx, pod.Spec.Containers[0].Image)
 
 		if err != nil {
 			panic(err)
@@ -101,8 +85,8 @@ func (si *DeviceInjector) Handle(ctx context.Context, req admission.Request) adm
 
 		log.Info(
 			"Manager container entrypoint and cmd",
-			"entrypoint", blobConfig.GetConfig().Config.Entrypoint,
-			"cmd", blobConfig.GetConfig().Config.Cmd,
+			"entrypoint", entrypoint,
+			"cmd", cmd,
 		)
 
 		//TODO: mutate command and args, maybe the best would be to mount entrypoint from some CM?

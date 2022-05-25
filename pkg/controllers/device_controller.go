@@ -148,6 +148,7 @@ func (r *DeviceReconciler) EnsureConditions(ctx context.Context, device *kubeser
 	for _, conditionType := range []kubeserialv1alpha1.DeviceConditionType{
 		kubeserialv1alpha1.DeviceAvailable,
 		kubeserialv1alpha1.DeviceReady,
+		kubeserialv1alpha1.DeviceFree,
 	} {
 		if device.GetCondition(conditionType) == nil {
 			logger.Info("Condition didn't exist, creating", "conditionType", conditionType)

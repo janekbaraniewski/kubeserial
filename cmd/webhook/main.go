@@ -60,7 +60,7 @@ func main() {
 
 	entryLog.Info("registering webhooks to the webhook server")
 	hookServer.Register(
-		"/mutate-mount-device",
+		"/mutate-inject-device",
 		&webhook.Admission{
 			Handler: &webhooks.DeviceInjector{
 				Name:   "DeviceInjector",

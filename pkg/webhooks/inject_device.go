@@ -8,8 +8,12 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
 	"github.com/janekbaraniewski/kubeserial/pkg/images"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
@@ -80,7 +84,41 @@ func (si *DeviceInjector) Handle(ctx context.Context, req admission.Request) adm
 	}
 
 	log.Info("Pod is requesting device, checking if available", "pod", pod.Name, "device", deviceToInject)
-	log.Info("FAKE device available") // TODO: check if device available, for now happy path
+	log.Info("Looking for device", "device", deviceToInject)
+	device := &v1alpha1.Device{}
+
+	err = si.Client.Get(ctx, types.NamespacedName{Name: deviceToInject, Namespace: pod.Namespace}, device)
+
+	if err != nil {
+		if errors.IsNotFound(err) {
+			log.Error(err, "Device not found!", "device", deviceToInject)
+		}
+		marshaledPod, err := json.Marshal(pod)
+
+		if err != nil {
+			log.Info("cannot marshal")
+			return admission.Errored(http.StatusInternalServerError, err)
+		}
+
+		return admission.PatchResponseFromRaw(req.Object.Raw, marshaledPod)
+	}
+	log.Info("Device found, checking if free", "device", device)
+
+	condition := device.GetCondition(v1alpha1.DeviceFree)
+
+	if condition.Status != metav1.ConditionTrue {
+		log.Info("Device is not free, not injecting", "device", device, "condition", condition)
+		marshaledPod, err := json.Marshal(pod)
+
+		if err != nil {
+			log.Info("cannot marshal")
+			return admission.Errored(http.StatusInternalServerError, err)
+		}
+
+		return admission.PatchResponseFromRaw(req.Object.Raw, marshaledPod)
+	}
+
+	log.Info("Device is free", "device", device, "condition", condition) // TODO: check if device available, for now happy path
 
 	container := &pod.Spec.Containers[0] // TODO: what if there are multiple containers? probably should introduce some annotation to select one
 
@@ -92,7 +130,6 @@ func (si *DeviceInjector) Handle(ctx context.Context, req admission.Request) adm
 	)
 
 	if command == nil {
-		// TODO: implement overriding image entrypoint
 		log.Info("Image", "image", container.Image)
 
 		imageConfig, err := si.ConfigExtractor.GetImageConfig(ctx, container.Image)

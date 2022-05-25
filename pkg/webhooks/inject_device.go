@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/janekbaraniewski/kubeserial/pkg/images"
 	corev1 "k8s.io/api/core/v1"
@@ -135,10 +136,8 @@ func concatCommandWithSocat(command []string, args []string, device string) (new
 	nCommand := []string{"/bin/sh"}
 	nArgs := []string{
 		"-c",
-		fmt.Sprintf("socat -d -d pty,raw,echo=0,b115200,link=/dev/device,perm=0660,group=tty tcp:%v-gateway:3333 & ", device),
+		fmt.Sprintf("socat -d -d pty,raw,echo=0,b115200,link=/dev/device,perm=0660,group=tty tcp:%v-gateway:3333 & %v", device, strings.Join(append(command, args...), " ")),
 	}
-	nArgs = append(nArgs, command...)
-	nArgs = append(nArgs, args...)
 	return nCommand, nArgs
 }
 

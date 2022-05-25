@@ -23,9 +23,10 @@ const (
 )
 
 type DeviceInjector struct {
-	Name    string
-	Client  client.Client
-	decoder *admission.Decoder
+	Name            string
+	Client          client.Client
+	ConfigExtractor *images.OCIConfigExtractor
+	decoder         *admission.Decoder
 }
 
 func shoudInject(pod *corev1.Pod) string {
@@ -75,9 +76,7 @@ func (si *DeviceInjector) Handle(ctx context.Context, req admission.Request) adm
 
 		log.Info("Image", "image", pod.Spec.Containers[0].Image)
 
-		extractor := images.NewOCIConfigExtractor()
-
-		entrypoint, cmd, err := extractor.GetEntrypointAndCMD(ctx, pod.Spec.Containers[0].Image)
+		entrypoint, cmd, err := si.ConfigExtractor.GetEntrypointAndCMD(ctx, pod.Spec.Containers[0].Image)
 
 		if err != nil {
 			panic(err)

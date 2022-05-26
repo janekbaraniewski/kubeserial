@@ -1,0 +1,32 @@
+---
+name: "pre-release"
+
+on:
+  push:
+    branches:
+      - "master"
+
+jobs:
+  pre-release:
+    name: "Pre Release"
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - name: "Test"
+        run: make test
+      - name: "Test code gen"
+        run: make check-generated
+      - name: "Build"
+        run: make all
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest"
+          prerelease: true
+          title: "Dev build"
+          files: |
+            LICENSE
+            build/_output/bin/kubeserial
+            build/_output/bin/device-monitor
+            build/_output/bin/injector-webhook
+            coverage.txt

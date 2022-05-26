@@ -30,3 +30,8 @@ jobs:
       run: |
         cd docs
         mdbook build .
+    - name: upload docs as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: docs-book
+        path: docs/book

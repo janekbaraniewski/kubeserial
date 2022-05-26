@@ -81,6 +81,7 @@ func getContainerCommandArgs(container *corev1.Container) (command []string, arg
 // DeviceInjector mutates command and args to inject script that mounts selected device.
 // It checks if pod requested device and if requested device is available.
 func (si *DeviceInjector) Handle(ctx context.Context, req admission.Request) admission.Response {
+	PodsHandled.Inc()
 	pod := &corev1.Pod{}
 
 	err := si.decoder.Decode(req, pod)
@@ -155,6 +156,7 @@ func (si *DeviceInjector) Handle(ctx context.Context, req admission.Request) adm
 
 	container.Command = newCommand
 	container.Args = newArgs
+	InjectedCommands.Inc()
 	//TODO: mutate command and args, maybe the best would be to mount entrypoint from some CM?
 	log.Info(
 		"Injected",

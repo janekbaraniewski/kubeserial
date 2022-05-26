@@ -22,6 +22,7 @@ spec:
           args:
             - -certDir=/etc/webhook/certs
             - -port=8443
+            - -namespace={{ .Release.Namespace }}
           volumeMounts:
             - name: webhook-certs
               mountPath: /etc/webhook/certs

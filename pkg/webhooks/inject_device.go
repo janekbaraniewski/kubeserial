@@ -9,12 +9,11 @@ import (
 	"strings"
 
 	"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
+	"github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned"
 	"github.com/janekbaraniewski/kubeserial/pkg/images"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
@@ -30,8 +29,9 @@ const (
 
 type DeviceInjector struct {
 	Name            string
-	Client          client.Client
+	Clientset       versioned.Interface
 	ConfigExtractor *images.OCIConfigExtractor
+	Namespace       string
 	decoder         *admission.Decoder
 }
 
@@ -53,6 +53,31 @@ func shoudInject(pod *corev1.Pod) string {
 	return deviceToInject
 }
 
+func returnProperResponse(pod *corev1.Pod, req admission.Request) admission.Response {
+	marshaledPod, err := json.Marshal(pod)
+
+	if err != nil {
+		log.Info("cannot marshal")
+		return admission.Errored(http.StatusInternalServerError, err)
+	}
+
+	return admission.PatchResponseFromRaw(req.Object.Raw, marshaledPod)
+}
+
+func concatCommandWithSocat(command []string, args []string, device string) (newCommand []string, newArgs []string) {
+
+	nCommand := []string{"/bin/sh"}
+	nArgs := []string{
+		"-c",
+		fmt.Sprintf("socat -d -d pty,raw,echo=0,b115200,link=/dev/device,perm=0660,group=tty tcp:%v-gateway:3333 & %v", device, strings.Join(append(command, args...), " ")),
+	}
+	return nCommand, nArgs
+}
+
+func getContainerCommandArgs(container *corev1.Container) (command []string, args []string) {
+	return container.Command, container.Args
+}
+
 // DeviceInjector mutates command and args to inject script that mounts selected device.
 // It checks if pod requested device and if requested device is available.
 func (si *DeviceInjector) Handle(ctx context.Context, req admission.Request) admission.Response {
@@ -72,35 +97,21 @@ func (si *DeviceInjector) Handle(ctx context.Context, req admission.Request) adm
 
 	if deviceToInject == "" {
 		log.Info("Inject not needed.")
-
-		marshaledPod, err := json.Marshal(pod)
-
-		if err != nil {
-			log.Info("Sdecar-Injector: cannot marshal")
-			return admission.Errored(http.StatusInternalServerError, err)
-		}
-
-		return admission.PatchResponseFromRaw(req.Object.Raw, marshaledPod)
+		return returnProperResponse(pod, req)
 	}
 
 	log.Info("Pod is requesting device, checking if available", "pod", pod.Name, "device", deviceToInject)
 	log.Info("Looking for device", "device", deviceToInject)
 	device := &v1alpha1.Device{}
 
-	err = si.Client.Get(ctx, types.NamespacedName{Name: deviceToInject, Namespace: pod.Namespace}, device)
+	device, err = si.Clientset.AppV1alpha1().Devices(si.Namespace).Get(ctx, deviceToInject, metav1.GetOptions{})
 
 	if err != nil {
 		if errors.IsNotFound(err) {
 			log.Error(err, "Device not found!", "device", deviceToInject)
 		}
-		marshaledPod, err := json.Marshal(pod)
-
-		if err != nil {
-			log.Info("cannot marshal")
-			return admission.Errored(http.StatusInternalServerError, err)
-		}
-
-		return admission.PatchResponseFromRaw(req.Object.Raw, marshaledPod)
+		log.Error(err, "Some error when looking for device", "device", deviceToInject)
+		return returnProperResponse(pod, req)
 	}
 	log.Info("Device found, checking if free", "device", device)
 
@@ -108,14 +119,7 @@ func (si *DeviceInjector) Handle(ctx context.Context, req admission.Request) adm
 
 	if condition.Status != metav1.ConditionTrue {
 		log.Info("Device is not free, not injecting", "device", device, "condition", condition)
-		marshaledPod, err := json.Marshal(pod)
-
-		if err != nil {
-			log.Info("cannot marshal")
-			return admission.Errored(http.StatusInternalServerError, err)
-		}
-
-		return admission.PatchResponseFromRaw(req.Object.Raw, marshaledPod)
+		return returnProperResponse(pod, req)
 	}
 
 	log.Info("Device is free", "device", device, "condition", condition) // TODO: check if device available, for now happy path
@@ -158,28 +162,7 @@ func (si *DeviceInjector) Handle(ctx context.Context, req admission.Request) adm
 		"Container args", pod.Spec.Containers[0].Args,
 	)
 
-	marshaledPod, err := json.Marshal(pod)
-
-	if err != nil {
-		log.Info("Sdecar-Injector: cannot marshal")
-		return admission.Errored(http.StatusInternalServerError, err)
-	}
-
-	return admission.PatchResponseFromRaw(req.Object.Raw, marshaledPod)
-}
-
-func concatCommandWithSocat(command []string, args []string, device string) (newCommand []string, newArgs []string) {
-
-	nCommand := []string{"/bin/sh"}
-	nArgs := []string{
-		"-c",
-		fmt.Sprintf("socat -d -d pty,raw,echo=0,b115200,link=/dev/device,perm=0660,group=tty tcp:%v-gateway:3333 & %v", device, strings.Join(append(command, args...), " ")),
-	}
-	return nCommand, nArgs
-}
-
-func getContainerCommandArgs(container *corev1.Container) (command []string, args []string) {
-	return container.Command, container.Args
+	return returnProperResponse(pod, req)
 }
 
 // DeviceInjector implements admission.DecoderInjector.

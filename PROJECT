@@ -20,7 +20,7 @@ resources:
   domain: app.kubeserial.com
   group: kubeserial
   kind: SerialDevice
-  path: github.com/janekbaraniewski/kubeserial/api/v1alpha1
+  path: github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1
   version: v1alpha1
 - api:
     crdVersion: v1
@@ -29,6 +29,6 @@ resources:
   domain: app.kubeserial.com
   group: kubeserial
   kind: ManagerScheduleRequest
-  path: github.com/janekbaraniewski/kubeserial/api/v1alpha1
+  path: github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1
   version: v1alpha1
 version: "3"

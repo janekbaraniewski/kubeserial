@@ -232,13 +232,12 @@ deploy-dev: manifests-gen update-kubeserial-chart-version update-kubeserial-crds
 	helm upgrade --create-namespace --namespace kubeserial --install ${RELEASE_NAME}-crds ./deploy/chart/kubeserial-crds
 	helm upgrade --create-namespace --namespace kubeserial --install ${RELEASE_NAME} ./deploy/chart/kubeserial -f ./deploy/chart/kubeserial/values-local.yaml
 
-
 ##@ Docs
 
-.PHONY: install-deps
-install-deps: ## Install mdbook (requires rust and cargo)
-	cargo install mdbook
+.PHONY: docs-install-deps
+docs-deps: ## Install mdbook (requires rust and cargo) + plugins
+	cargo install mdbook mdbook-mermaid mdbook-open-on-gh mdbook-toc
 
 .PHONY: serve-docs
-serve-docs: ## Build docs, start server and open in browser
+docs-serve: ## Build docs, start server and open in browser
 	cd docs && mdbook serve --open

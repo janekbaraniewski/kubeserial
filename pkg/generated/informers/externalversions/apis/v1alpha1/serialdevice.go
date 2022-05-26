@@ -21,10 +21,10 @@ import (
 	"context"
 	time "time"
 
-	kubeserialv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
+	apisv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	versioned "github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned"
 	internalinterfaces "github.com/janekbaraniewski/kubeserial/pkg/generated/informers/externalversions/internalinterfaces"
-	v1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/generated/listers/kubeserial/v1alpha1"
+	v1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/generated/listers/apis/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"
@@ -69,7 +69,7 @@ func NewFilteredSerialDeviceInformer(client versioned.Interface, resyncPeriod ti
 				return client.AppV1alpha1().SerialDevices().Watch(context.TODO(), options)
 			},
 		},
-		&kubeserialv1alpha1.SerialDevice{},
+		&apisv1alpha1.SerialDevice{},
 		resyncPeriod,
 		indexers,
 	)
@@ -80,7 +80,7 @@ func (f *serialDeviceInformer) defaultInformer(client versioned.Interface, resyn
 }
 
 func (f *serialDeviceInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&kubeserialv1alpha1.SerialDevice{}, f.defaultInformer)
+	return f.factory.InformerFor(&apisv1alpha1.SerialDevice{}, f.defaultInformer)
 }
 
 func (f *serialDeviceInformer) Lister() v1alpha1.SerialDeviceLister {

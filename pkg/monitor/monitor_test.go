@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
+	"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	"github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned/fake"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"

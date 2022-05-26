@@ -19,8 +19,8 @@ package fake
 
 import (
 	clientset "github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned"
-	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned/typed/kubeserial/v1alpha1"
-	fakeappv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned/typed/kubeserial/v1alpha1/fake"
+	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned/typed/apis/v1alpha1"
+	fakeappv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned/typed/apis/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"

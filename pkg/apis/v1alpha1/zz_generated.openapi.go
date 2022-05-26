@@ -29,21 +29,21 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.IngressSpec":                  schema_pkg_apis_kubeserial_v1alpha1_IngressSpec(ref),
-		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.KubeSerial":                   schema_pkg_apis_kubeserial_v1alpha1_KubeSerial(ref),
-		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.KubeSerialSpec":               schema_pkg_apis_kubeserial_v1alpha1_KubeSerialSpec(ref),
-		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.KubeSerialStatus":             schema_pkg_apis_kubeserial_v1alpha1_KubeSerialStatus(ref),
-		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.ManagerScheduleRequestSpec":   schema_pkg_apis_kubeserial_v1alpha1_ManagerScheduleRequestSpec(ref),
-		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.ManagerScheduleRequestStatus": schema_pkg_apis_kubeserial_v1alpha1_ManagerScheduleRequestStatus(ref),
-		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.ManagerSpec":                  schema_pkg_apis_kubeserial_v1alpha1_ManagerSpec(ref),
-		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.ManagerStatus":                schema_pkg_apis_kubeserial_v1alpha1_ManagerStatus(ref),
-		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.SerialDeviceSpec":             schema_pkg_apis_kubeserial_v1alpha1_SerialDeviceSpec(ref),
-		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.SerialDeviceStatus":           schema_pkg_apis_kubeserial_v1alpha1_SerialDeviceStatus(ref),
-		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.SerialDevice_2":               schema_pkg_apis_kubeserial_v1alpha1_SerialDevice_2(ref),
+		"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1.IngressSpec":                  schema_kubeserial_pkg_apis_v1alpha1_IngressSpec(ref),
+		"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1.KubeSerial":                   schema_kubeserial_pkg_apis_v1alpha1_KubeSerial(ref),
+		"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1.KubeSerialSpec":               schema_kubeserial_pkg_apis_v1alpha1_KubeSerialSpec(ref),
+		"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1.KubeSerialStatus":             schema_kubeserial_pkg_apis_v1alpha1_KubeSerialStatus(ref),
+		"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1.ManagerScheduleRequestSpec":   schema_kubeserial_pkg_apis_v1alpha1_ManagerScheduleRequestSpec(ref),
+		"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1.ManagerScheduleRequestStatus": schema_kubeserial_pkg_apis_v1alpha1_ManagerScheduleRequestStatus(ref),
+		"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1.ManagerSpec":                  schema_kubeserial_pkg_apis_v1alpha1_ManagerSpec(ref),
+		"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1.ManagerStatus":                schema_kubeserial_pkg_apis_v1alpha1_ManagerStatus(ref),
+		"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1.SerialDeviceSpec":             schema_kubeserial_pkg_apis_v1alpha1_SerialDeviceSpec(ref),
+		"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1.SerialDeviceStatus":           schema_kubeserial_pkg_apis_v1alpha1_SerialDeviceStatus(ref),
+		"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1.SerialDevice_2":               schema_kubeserial_pkg_apis_v1alpha1_SerialDevice_2(ref),
 	}
 }
 
-func schema_pkg_apis_kubeserial_v1alpha1_IngressSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_kubeserial_pkg_apis_v1alpha1_IngressSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -85,7 +85,7 @@ func schema_pkg_apis_kubeserial_v1alpha1_IngressSpec(ref common.ReferenceCallbac
 	}
 }
 
-func schema_pkg_apis_kubeserial_v1alpha1_KubeSerial(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_kubeserial_pkg_apis_v1alpha1_KubeSerial(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -115,13 +115,13 @@ func schema_pkg_apis_kubeserial_v1alpha1_KubeSerial(ref common.ReferenceCallback
 					"spec": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
-							Ref:     ref("github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.KubeSerialSpec"),
+							Ref:     ref("github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1.KubeSerialSpec"),
 						},
 					},
 					"status": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
-							Ref:     ref("github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.KubeSerialStatus"),
+							Ref:     ref("github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1.KubeSerialStatus"),
 						},
 					},
 				},
@@ -129,11 +129,11 @@ func schema_pkg_apis_kubeserial_v1alpha1_KubeSerial(ref common.ReferenceCallback
 			},
 		},
 		Dependencies: []string{
-			"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.KubeSerialSpec", "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.KubeSerialStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+			"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1.KubeSerialSpec", "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1.KubeSerialStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
 	}
 }
 
-func schema_pkg_apis_kubeserial_v1alpha1_KubeSerialSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_kubeserial_pkg_apis_v1alpha1_KubeSerialSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -147,7 +147,7 @@ func schema_pkg_apis_kubeserial_v1alpha1_KubeSerialSpec(ref common.ReferenceCall
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Default: map[string]interface{}{},
-										Ref:     ref("github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.SerialDevice_2"),
+										Ref:     ref("github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1.SerialDevice_2"),
 									},
 								},
 							},
@@ -156,7 +156,7 @@ func schema_pkg_apis_kubeserial_v1alpha1_KubeSerialSpec(ref common.ReferenceCall
 					"ingress": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
-							Ref:     ref("github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.IngressSpec"),
+							Ref:     ref("github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1.IngressSpec"),
 						},
 					},
 				},
@@ -164,11 +164,11 @@ func schema_pkg_apis_kubeserial_v1alpha1_KubeSerialSpec(ref common.ReferenceCall
 			},
 		},
 		Dependencies: []string{
-			"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.IngressSpec", "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.SerialDevice_2"},
+			"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1.IngressSpec", "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1.SerialDevice_2"},
 	}
 }
 
-func schema_pkg_apis_kubeserial_v1alpha1_KubeSerialStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_kubeserial_pkg_apis_v1alpha1_KubeSerialStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -179,7 +179,7 @@ func schema_pkg_apis_kubeserial_v1alpha1_KubeSerialStatus(ref common.ReferenceCa
 	}
 }
 
-func schema_pkg_apis_kubeserial_v1alpha1_ManagerScheduleRequestSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_kubeserial_pkg_apis_v1alpha1_ManagerScheduleRequestSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -207,7 +207,7 @@ func schema_pkg_apis_kubeserial_v1alpha1_ManagerScheduleRequestSpec(ref common.R
 	}
 }
 
-func schema_pkg_apis_kubeserial_v1alpha1_ManagerScheduleRequestStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_kubeserial_pkg_apis_v1alpha1_ManagerScheduleRequestStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -228,7 +228,7 @@ func schema_pkg_apis_kubeserial_v1alpha1_ManagerScheduleRequestStatus(ref common
 	}
 }
 
-func schema_pkg_apis_kubeserial_v1alpha1_ManagerSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_kubeserial_pkg_apis_v1alpha1_ManagerSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -238,7 +238,7 @@ func schema_pkg_apis_kubeserial_v1alpha1_ManagerSpec(ref common.ReferenceCallbac
 					"image": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
-							Ref:     ref("github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.Image"),
+							Ref:     ref("github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1.Image"),
 						},
 					},
 					"runCmd": {
@@ -267,11 +267,11 @@ func schema_pkg_apis_kubeserial_v1alpha1_ManagerSpec(ref common.ReferenceCallbac
 			},
 		},
 		Dependencies: []string{
-			"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.Image"},
+			"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1.Image"},
 	}
 }
 
-func schema_pkg_apis_kubeserial_v1alpha1_ManagerStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_kubeserial_pkg_apis_v1alpha1_ManagerStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -282,7 +282,7 @@ func schema_pkg_apis_kubeserial_v1alpha1_ManagerStatus(ref common.ReferenceCallb
 	}
 }
 
-func schema_pkg_apis_kubeserial_v1alpha1_SerialDeviceSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_kubeserial_pkg_apis_v1alpha1_SerialDeviceSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -323,7 +323,7 @@ func schema_pkg_apis_kubeserial_v1alpha1_SerialDeviceSpec(ref common.ReferenceCa
 	}
 }
 
-func schema_pkg_apis_kubeserial_v1alpha1_SerialDeviceStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_kubeserial_pkg_apis_v1alpha1_SerialDeviceStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -337,7 +337,7 @@ func schema_pkg_apis_kubeserial_v1alpha1_SerialDeviceStatus(ref common.Reference
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Default: map[string]interface{}{},
-										Ref:     ref("github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.SerialDeviceCondition"),
+										Ref:     ref("github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1.SerialDeviceCondition"),
 									},
 								},
 							},
@@ -354,11 +354,11 @@ func schema_pkg_apis_kubeserial_v1alpha1_SerialDeviceStatus(ref common.Reference
 			},
 		},
 		Dependencies: []string{
-			"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.SerialDeviceCondition"},
+			"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1.SerialDeviceCondition"},
 	}
 }
 
-func schema_pkg_apis_kubeserial_v1alpha1_SerialDevice_2(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_kubeserial_pkg_apis_v1alpha1_SerialDevice_2(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{

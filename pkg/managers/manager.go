@@ -3,7 +3,7 @@ package managers
 import (
 	"context"
 
-	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
+	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	"github.com/janekbaraniewski/kubeserial/pkg/controllers/api"
 	"k8s.io/apimachinery/pkg/types"
 )

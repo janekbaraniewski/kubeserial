@@ -21,7 +21,7 @@ import (
 	"context"
 	"time"
 
-	v1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
+	v1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	scheme "github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"

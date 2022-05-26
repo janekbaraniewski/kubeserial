@@ -36,8 +36,8 @@ import (
 
 var devLog = logf.Log.WithName("DeviceController")
 
-// DeviceReconciler reconciles a Device object
-type DeviceReconciler struct {
+// SerialDeviceReconciler reconciles a SerialDevice object
+type SerialDeviceReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
 }
@@ -48,11 +48,11 @@ type DeviceReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-func (r *DeviceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *SerialDeviceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := devLog.WithName("Reconcile")
 	logger.Info("Starting device reconcile", "req", req)
 
-	device := &kubeserialv1alpha1.Device{}
+	device := &kubeserialv1alpha1.SerialDevice{}
 	err := r.Client.Get(ctx, req.NamespacedName, device)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -95,7 +95,7 @@ func (r *DeviceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	return ctrl.Result{}, nil
 }
 
-func (r *DeviceReconciler) RequestGateway(ctx context.Context, device *kubeserialv1alpha1.Device) error {
+func (r *SerialDeviceReconciler) RequestGateway(ctx context.Context, device *kubeserialv1alpha1.SerialDevice) error {
 	apiClient := api.ApiClient{
 		Client: r.Client,
 		Scheme: r.Scheme,
@@ -120,7 +120,7 @@ func (r *DeviceReconciler) RequestGateway(ctx context.Context, device *kubeseria
 	return nil
 }
 
-func (r *DeviceReconciler) EnsureNoGatewayRunning(ctx context.Context, device *kubeserialv1alpha1.Device) error {
+func (r *SerialDeviceReconciler) EnsureNoGatewayRunning(ctx context.Context, device *kubeserialv1alpha1.SerialDevice) error {
 	apiClient := api.ApiClient{
 		Client: r.Client,
 		Scheme: r.Scheme,
@@ -143,16 +143,16 @@ func (r *DeviceReconciler) EnsureNoGatewayRunning(ctx context.Context, device *k
 }
 
 // EnsureConditions makes sure all conditions are available in resource
-func (r *DeviceReconciler) EnsureConditions(ctx context.Context, device *kubeserialv1alpha1.Device) error {
+func (r *SerialDeviceReconciler) EnsureConditions(ctx context.Context, device *kubeserialv1alpha1.SerialDevice) error {
 	logger := devLog.WithName("EnsureConditions")
-	for _, conditionType := range []kubeserialv1alpha1.DeviceConditionType{
-		kubeserialv1alpha1.DeviceAvailable,
-		kubeserialv1alpha1.DeviceReady,
-		kubeserialv1alpha1.DeviceFree,
+	for _, conditionType := range []kubeserialv1alpha1.SerialDeviceConditionType{
+		kubeserialv1alpha1.SerialDeviceAvailable,
+		kubeserialv1alpha1.SerialDeviceReady,
+		kubeserialv1alpha1.SerialDeviceFree,
 	} {
 		if device.GetCondition(conditionType) == nil {
 			logger.Info("Condition didn't exist, creating", "conditionType", conditionType)
-			device.SetCondition(kubeserialv1alpha1.DeviceCondition{
+			device.SetCondition(kubeserialv1alpha1.SerialDeviceCondition{
 				Type:   conditionType,
 				Status: v1.ConditionFalse,
 				Reason: "NotValidated",
@@ -166,7 +166,7 @@ func (r *DeviceReconciler) EnsureConditions(ctx context.Context, device *kubeser
 }
 
 // ValidateDeviceReady validates if device config is ready to be used
-func (r *DeviceReconciler) ValidateDeviceReady(ctx context.Context, device *kubeserialv1alpha1.Device, req reconcile.Request) error {
+func (r *SerialDeviceReconciler) ValidateDeviceReady(ctx context.Context, device *kubeserialv1alpha1.SerialDevice, req reconcile.Request) error {
 	logger := devLog.WithName("ValidateDeviceReady")
 	if !device.IsReady() {
 		valid, err := r.ValidateDeviceManager(ctx, device, req)
@@ -177,8 +177,8 @@ func (r *DeviceReconciler) ValidateDeviceReady(ctx context.Context, device *kube
 			return nil
 		}
 		logger.Info("All checks passed, device ready")
-		device.SetCondition(kubeserialv1alpha1.DeviceCondition{
-			Type:   kubeserialv1alpha1.DeviceReady,
+		device.SetCondition(kubeserialv1alpha1.SerialDeviceCondition{
+			Type:   kubeserialv1alpha1.SerialDeviceReady,
 			Status: v1.ConditionTrue,
 			Reason: "AllChecksPassed",
 		})
@@ -190,13 +190,13 @@ func (r *DeviceReconciler) ValidateDeviceReady(ctx context.Context, device *kube
 }
 
 // ValidateDeviceManager validates if device manaager config is valid and upadates device state in case it's not
-func (r *DeviceReconciler) ValidateDeviceManager(ctx context.Context, device *kubeserialv1alpha1.Device, req reconcile.Request) (bool, error) {
+func (r *SerialDeviceReconciler) ValidateDeviceManager(ctx context.Context, device *kubeserialv1alpha1.SerialDevice, req reconcile.Request) (bool, error) {
 	if !device.NeedsManager() {
 		return true, nil
 	}
 	if !r.ManagerIsAvailable(ctx, device, req) {
-		device.SetCondition(kubeserialv1alpha1.DeviceCondition{
-			Type:   kubeserialv1alpha1.DeviceReady,
+		device.SetCondition(kubeserialv1alpha1.SerialDeviceCondition{
+			Type:   kubeserialv1alpha1.SerialDeviceReady,
 			Status: v1.ConditionFalse,
 			Reason: "ManagerNotAvailable",
 		})
@@ -208,8 +208,8 @@ func (r *DeviceReconciler) ValidateDeviceManager(ctx context.Context, device *ku
 	return true, nil
 }
 
-// ManagerIsAvailable checks if Manager object referenced by Device is available in the cluster
-func (r *DeviceReconciler) ManagerIsAvailable(ctx context.Context, device *kubeserialv1alpha1.Device, req ctrl.Request) bool {
+// ManagerIsAvailable checks if Manager object referenced by SerialDevice is available in the cluster
+func (r *SerialDeviceReconciler) ManagerIsAvailable(ctx context.Context, device *kubeserialv1alpha1.SerialDevice, req ctrl.Request) bool {
 	logger := devLog.WithName("ManagerIsAvailable")
 	manager := &kubeserialv1alpha1.Manager{}
 
@@ -229,7 +229,7 @@ func (r *DeviceReconciler) ManagerIsAvailable(ctx context.Context, device *kubes
 }
 
 // RequestManager create ManagerScheduleRequest for device
-func (r *DeviceReconciler) RequestManager(ctx context.Context, device *kubeserialv1alpha1.Device) error {
+func (r *SerialDeviceReconciler) RequestManager(ctx context.Context, device *kubeserialv1alpha1.SerialDevice) error {
 	logger := devLog.WithName("RequestManager")
 	if !device.NeedsManager() {
 		logger.V(3).Info("Device doesn't need manager, returning")
@@ -257,7 +257,7 @@ func (r *DeviceReconciler) RequestManager(ctx context.Context, device *kubeseria
 }
 
 // EnsureNoManagerRequested makes sure there is no ManagerScheduleRequest for device
-func (r *DeviceReconciler) EnsureNoManagerRequested(ctx context.Context, device *kubeserialv1alpha1.Device) error {
+func (r *SerialDeviceReconciler) EnsureNoManagerRequested(ctx context.Context, device *kubeserialv1alpha1.SerialDevice) error {
 	if !device.NeedsManager() {
 		return nil
 	}
@@ -278,8 +278,8 @@ func (r *DeviceReconciler) EnsureNoManagerRequested(ctx context.Context, device 
 }
 
 // SetupWithManager sets up the controller with the Manager.
-func (r *DeviceReconciler) SetupWithManager(mgr ctrl.Manager) error {
+func (r *SerialDeviceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&kubeserialv1alpha1.Device{}).
+		For(&kubeserialv1alpha1.SerialDevice{}).
 		Complete(r)
 }

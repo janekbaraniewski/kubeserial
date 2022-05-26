@@ -23,14 +23,14 @@ import (
 
 // Interface provides access to all the informers in this group version.
 type Interface interface {
-	// Devices returns a DeviceInformer.
-	Devices() DeviceInformer
 	// KubeSerials returns a KubeSerialInformer.
 	KubeSerials() KubeSerialInformer
 	// Managers returns a ManagerInformer.
 	Managers() ManagerInformer
 	// ManagerScheduleRequests returns a ManagerScheduleRequestInformer.
 	ManagerScheduleRequests() ManagerScheduleRequestInformer
+	// SerialDevices returns a SerialDeviceInformer.
+	SerialDevices() SerialDeviceInformer
 }
 
 type version struct {
@@ -42,11 +42,6 @@ type version struct {
 // New returns a new Interface.
 func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakListOptions internalinterfaces.TweakListOptionsFunc) Interface {
 	return &version{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
-}
-
-// Devices returns a DeviceInformer.
-func (v *version) Devices() DeviceInformer {
-	return &deviceInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // KubeSerials returns a KubeSerialInformer.
@@ -62,4 +57,9 @@ func (v *version) Managers() ManagerInformer {
 // ManagerScheduleRequests returns a ManagerScheduleRequestInformer.
 func (v *version) ManagerScheduleRequests() ManagerScheduleRequestInformer {
 	return &managerScheduleRequestInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// SerialDevices returns a SerialDeviceInformer.
+func (v *version) SerialDevices() SerialDeviceInformer {
+	return &serialDeviceInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }

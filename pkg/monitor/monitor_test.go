@@ -39,26 +39,25 @@ func TestUpdateDeviceState_ConfigMap(t *testing.T) {
 
 func TestUpdateDeviceState_Device(t *testing.T) {
 	ctx := context.Background()
-	getDevice := func(ready, available v1.ConditionStatus, node string) *v1alpha1.Device {
-		return &v1alpha1.Device{
+	getDevice := func(ready, available v1.ConditionStatus, node string) *v1alpha1.SerialDevice {
+		return &v1alpha1.SerialDevice{
 			ObjectMeta: v1.ObjectMeta{
-				Name:      "test-device",
-				Namespace: "test-ns",
+				Name: "test-device",
 			},
-			Spec: v1alpha1.DeviceSpec{
+			Spec: v1alpha1.SerialDeviceSpec{
 				Name:      "test-device",
 				IdVendor:  "123",
 				IdProduct: "456",
 				Manager:   "test-manager",
 			},
-			Status: v1alpha1.DeviceStatus{
-				Conditions: []v1alpha1.DeviceCondition{
+			Status: v1alpha1.SerialDeviceStatus{
+				Conditions: []v1alpha1.SerialDeviceCondition{
 					{
-						Type:   v1alpha1.DeviceReady,
+						Type:   v1alpha1.SerialDeviceReady,
 						Status: ready,
 					},
 					{
-						Type:   v1alpha1.DeviceAvailable,
+						Type:   v1alpha1.SerialDeviceAvailable,
 						Status: available,
 						Reason: "testing",
 					},
@@ -117,11 +116,11 @@ func TestUpdateDeviceState_Device(t *testing.T) {
 
 			monitor.UpdateDeviceState(ctx)
 
-			foundDevice, err := fakeClientsetKubeserial.AppV1alpha1().Devices("test-ns").Get(
+			foundDevice, err := fakeClientsetKubeserial.AppV1alpha1().SerialDevices().Get(
 				ctx, device.Name, v1.GetOptions{})
 
 			assert.Equal(t, nil, err)
-			availableCondition := foundDevice.GetCondition(v1alpha1.DeviceAvailable)
+			availableCondition := foundDevice.GetCondition(v1alpha1.SerialDeviceAvailable)
 			assert.Equal(t, testCase.ResultAvailable, availableCondition.Status)
 			assert.Equal(t, testCase.ResultNode, foundDevice.Status.NodeName)
 		})

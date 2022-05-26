@@ -1,6 +1,6 @@
 {{- range .Values.kubeserial.devices }}
 apiVersion: app.kubeserial.com/v1alpha1
-kind: Device
+kind: SerialDevice
 metadata:
   name: {{ .name }}
   labels:

@@ -37,7 +37,7 @@ spec:
             properties:
               devices:
                 items:
-                  description: Device defines monitored device
+                  description: SerialDevice defines monitored device
                   properties:
                     idProduct:
                       type: string

@@ -31,59 +31,58 @@ import (
 	cache "k8s.io/client-go/tools/cache"
 )
 
-// DeviceInformer provides access to a shared informer and lister for
-// Devices.
-type DeviceInformer interface {
+// SerialDeviceInformer provides access to a shared informer and lister for
+// SerialDevices.
+type SerialDeviceInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1alpha1.DeviceLister
+	Lister() v1alpha1.SerialDeviceLister
 }
 
-type deviceInformer struct {
+type serialDeviceInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
 	tweakListOptions internalinterfaces.TweakListOptionsFunc
-	namespace        string
 }
 
-// NewDeviceInformer constructs a new informer for Device type.
+// NewSerialDeviceInformer constructs a new informer for SerialDevice type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewDeviceInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredDeviceInformer(client, namespace, resyncPeriod, indexers, nil)
+func NewSerialDeviceInformer(client versioned.Interface, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
+	return NewFilteredSerialDeviceInformer(client, resyncPeriod, indexers, nil)
 }
 
-// NewFilteredDeviceInformer constructs a new informer for Device type.
+// NewFilteredSerialDeviceInformer constructs a new informer for SerialDevice type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewFilteredDeviceInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
+func NewFilteredSerialDeviceInformer(client versioned.Interface, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.AppV1alpha1().Devices(namespace).List(context.TODO(), options)
+				return client.AppV1alpha1().SerialDevices().List(context.TODO(), options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.AppV1alpha1().Devices(namespace).Watch(context.TODO(), options)
+				return client.AppV1alpha1().SerialDevices().Watch(context.TODO(), options)
 			},
 		},
-		&kubeserialv1alpha1.Device{},
+		&kubeserialv1alpha1.SerialDevice{},
 		resyncPeriod,
 		indexers,
 	)
 }
 
-func (f *deviceInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredDeviceInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+func (f *serialDeviceInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
+	return NewFilteredSerialDeviceInformer(client, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
 }
 
-func (f *deviceInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&kubeserialv1alpha1.Device{}, f.defaultInformer)
+func (f *serialDeviceInformer) Informer() cache.SharedIndexInformer {
+	return f.factory.InformerFor(&kubeserialv1alpha1.SerialDevice{}, f.defaultInformer)
 }
 
-func (f *deviceInformer) Lister() v1alpha1.DeviceLister {
-	return v1alpha1.NewDeviceLister(f.Informer().GetIndexer())
+func (f *serialDeviceInformer) Lister() v1alpha1.SerialDeviceLister {
+	return v1alpha1.NewSerialDeviceLister(f.Informer().GetIndexer())
 }

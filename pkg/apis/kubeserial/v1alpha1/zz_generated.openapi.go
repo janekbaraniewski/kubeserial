@@ -29,9 +29,6 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.DeviceSpec":                   schema_pkg_apis_kubeserial_v1alpha1_DeviceSpec(ref),
-		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.DeviceStatus":                 schema_pkg_apis_kubeserial_v1alpha1_DeviceStatus(ref),
-		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.Device_2":                     schema_pkg_apis_kubeserial_v1alpha1_Device_2(ref),
 		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.IngressSpec":                  schema_pkg_apis_kubeserial_v1alpha1_IngressSpec(ref),
 		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.KubeSerial":                   schema_pkg_apis_kubeserial_v1alpha1_KubeSerial(ref),
 		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.KubeSerialSpec":               schema_pkg_apis_kubeserial_v1alpha1_KubeSerialSpec(ref),
@@ -40,131 +37,9 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.ManagerScheduleRequestStatus": schema_pkg_apis_kubeserial_v1alpha1_ManagerScheduleRequestStatus(ref),
 		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.ManagerSpec":                  schema_pkg_apis_kubeserial_v1alpha1_ManagerSpec(ref),
 		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.ManagerStatus":                schema_pkg_apis_kubeserial_v1alpha1_ManagerStatus(ref),
-	}
-}
-
-func schema_pkg_apis_kubeserial_v1alpha1_DeviceSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "DeviceSpec defines the desired state of Device",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"name": {
-						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
-						},
-					},
-					"idVendor": {
-						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
-						},
-					},
-					"idProduct": {
-						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
-						},
-					},
-					"manager": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-				},
-				Required: []string{"name", "idVendor", "idProduct"},
-			},
-		},
-	}
-}
-
-func schema_pkg_apis_kubeserial_v1alpha1_DeviceStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "DeviceStatus defines the observed state of Device",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"conditions": {
-						SchemaProps: spec.SchemaProps{
-							Type: []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Default: map[string]interface{}{},
-										Ref:     ref("github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.DeviceCondition"),
-									},
-								},
-							},
-						},
-					},
-					"nodeName": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-				},
-				Required: []string{"conditions"},
-			},
-		},
-		Dependencies: []string{
-			"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.DeviceCondition"},
-	}
-}
-
-func schema_pkg_apis_kubeserial_v1alpha1_Device_2(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "Device defines monitored device",
-				Type:        []string{"object"},
-				Properties: map[string]spec.Schema{
-					"name": {
-						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
-						},
-					},
-					"idVendor": {
-						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
-						},
-					},
-					"idProduct": {
-						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
-						},
-					},
-					"manager": {
-						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
-						},
-					},
-					"subsystem": {
-						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
-						},
-					},
-				},
-				Required: []string{"name", "idVendor", "idProduct", "subsystem"},
-			},
-		},
+		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.SerialDeviceSpec":             schema_pkg_apis_kubeserial_v1alpha1_SerialDeviceSpec(ref),
+		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.SerialDeviceStatus":           schema_pkg_apis_kubeserial_v1alpha1_SerialDeviceStatus(ref),
+		"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.SerialDevice_2":               schema_pkg_apis_kubeserial_v1alpha1_SerialDevice_2(ref),
 	}
 }
 
@@ -265,14 +140,14 @@ func schema_pkg_apis_kubeserial_v1alpha1_KubeSerialSpec(ref common.ReferenceCall
 				Description: "KubeSerialSpec defines the desired state of KubeSerial",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"devices": {
+					"serialDevices": {
 						SchemaProps: spec.SchemaProps{
 							Type: []string{"array"},
 							Items: &spec.SchemaOrArray{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
 										Default: map[string]interface{}{},
-										Ref:     ref("github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.Device_2"),
+										Ref:     ref("github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.SerialDevice_2"),
 									},
 								},
 							},
@@ -285,11 +160,11 @@ func schema_pkg_apis_kubeserial_v1alpha1_KubeSerialSpec(ref common.ReferenceCall
 						},
 					},
 				},
-				Required: []string{"devices", "ingress"},
+				Required: []string{"serialDevices", "ingress"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.Device_2", "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.IngressSpec"},
+			"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.IngressSpec", "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.SerialDevice_2"},
 	}
 }
 
@@ -402,6 +277,131 @@ func schema_pkg_apis_kubeserial_v1alpha1_ManagerStatus(ref common.ReferenceCallb
 			SchemaProps: spec.SchemaProps{
 				Description: "ManagerStatus defines the observed state of Manager",
 				Type:        []string{"object"},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_kubeserial_v1alpha1_SerialDeviceSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SerialDeviceSpec defines the desired state of SerialDevice",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"name": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"idVendor": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"idProduct": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"manager": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+				Required: []string{"name", "idVendor", "idProduct"},
+			},
+		},
+	}
+}
+
+func schema_pkg_apis_kubeserial_v1alpha1_SerialDeviceStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SerialDeviceStatus defines the observed state of SerialDevice",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"conditions": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Default: map[string]interface{}{},
+										Ref:     ref("github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.SerialDeviceCondition"),
+									},
+								},
+							},
+						},
+					},
+					"nodeName": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+				Required: []string{"conditions"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1.SerialDeviceCondition"},
+	}
+}
+
+func schema_pkg_apis_kubeserial_v1alpha1_SerialDevice_2(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SerialDevice defines monitored device",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"name": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"idVendor": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"idProduct": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"manager": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+					"subsystem": {
+						SchemaProps: spec.SchemaProps{
+							Default: "",
+							Type:    []string{"string"},
+							Format:  "",
+						},
+					},
+				},
+				Required: []string{"name", "idVendor", "idProduct", "subsystem"},
 			},
 		},
 	}

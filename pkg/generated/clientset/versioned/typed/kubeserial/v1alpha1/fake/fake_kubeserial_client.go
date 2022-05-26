@@ -27,10 +27,6 @@ type FakeAppV1alpha1 struct {
 	*testing.Fake
 }
 
-func (c *FakeAppV1alpha1) Devices(namespace string) v1alpha1.DeviceInterface {
-	return &FakeDevices{c, namespace}
-}
-
 func (c *FakeAppV1alpha1) KubeSerials(namespace string) v1alpha1.KubeSerialInterface {
 	return &FakeKubeSerials{c, namespace}
 }
@@ -41,6 +37,10 @@ func (c *FakeAppV1alpha1) Managers(namespace string) v1alpha1.ManagerInterface {
 
 func (c *FakeAppV1alpha1) ManagerScheduleRequests(namespace string) v1alpha1.ManagerScheduleRequestInterface {
 	return &FakeManagerScheduleRequests{c, namespace}
+}
+
+func (c *FakeAppV1alpha1) SerialDevices() v1alpha1.SerialDeviceInterface {
+	return &FakeSerialDevices{c}
 }
 
 // RESTClient returns a RESTClient that is used to communicate

@@ -27,19 +27,15 @@ import (
 
 type AppV1alpha1Interface interface {
 	RESTClient() rest.Interface
-	DevicesGetter
 	KubeSerialsGetter
 	ManagersGetter
 	ManagerScheduleRequestsGetter
+	SerialDevicesGetter
 }
 
 // AppV1alpha1Client is used to interact with features provided by the app.kubeserial.com group.
 type AppV1alpha1Client struct {
 	restClient rest.Interface
-}
-
-func (c *AppV1alpha1Client) Devices(namespace string) DeviceInterface {
-	return newDevices(c, namespace)
 }
 
 func (c *AppV1alpha1Client) KubeSerials(namespace string) KubeSerialInterface {
@@ -52,6 +48,10 @@ func (c *AppV1alpha1Client) Managers(namespace string) ManagerInterface {
 
 func (c *AppV1alpha1Client) ManagerScheduleRequests(namespace string) ManagerScheduleRequestInterface {
 	return newManagerScheduleRequests(c, namespace)
+}
+
+func (c *AppV1alpha1Client) SerialDevices() SerialDeviceInterface {
+	return newSerialDevices(c)
 }
 
 // NewForConfig creates a new AppV1alpha1Client for the given config.

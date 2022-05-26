@@ -27,7 +27,7 @@ const (
 	sidecarAlreadyInjectedAnnotation = "app.kubeserial.com/device-injected"
 )
 
-type DeviceInjector struct {
+type SerialDeviceInjector struct {
 	Name            string
 	Clientset       versioned.Interface
 	ConfigExtractor *images.OCIConfigExtractor
@@ -78,9 +78,9 @@ func getContainerCommandArgs(container *corev1.Container) (command []string, arg
 	return container.Command, container.Args
 }
 
-// DeviceInjector mutates command and args to inject script that mounts selected device.
+// SerialDeviceInjector mutates command and args to inject script that mounts selected device.
 // It checks if pod requested device and if requested device is available.
-func (si *DeviceInjector) Handle(ctx context.Context, req admission.Request) admission.Response {
+func (si *SerialDeviceInjector) Handle(ctx context.Context, req admission.Request) admission.Response {
 	PodsHandled.Inc()
 	pod := &corev1.Pod{}
 
@@ -103,9 +103,9 @@ func (si *DeviceInjector) Handle(ctx context.Context, req admission.Request) adm
 
 	log.Info("Pod is requesting device, checking if available", "pod", pod.Name, "device", deviceToInject)
 	log.Info("Looking for device", "device", deviceToInject)
-	device := &v1alpha1.Device{}
+	device := &v1alpha1.SerialDevice{}
 
-	device, err = si.Clientset.AppV1alpha1().Devices(si.Namespace).Get(ctx, deviceToInject, metav1.GetOptions{})
+	device, err = si.Clientset.AppV1alpha1().SerialDevices().Get(ctx, deviceToInject, metav1.GetOptions{})
 
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -116,7 +116,7 @@ func (si *DeviceInjector) Handle(ctx context.Context, req admission.Request) adm
 	}
 	log.Info("Device found, checking if free", "device", device)
 
-	condition := device.GetCondition(v1alpha1.DeviceFree)
+	condition := device.GetCondition(v1alpha1.SerialDeviceFree)
 
 	if condition.Status != metav1.ConditionTrue {
 		log.Info("Device is not free, not injecting", "device", device, "condition", condition)
@@ -167,11 +167,11 @@ func (si *DeviceInjector) Handle(ctx context.Context, req admission.Request) adm
 	return returnProperResponse(pod, req)
 }
 
-// DeviceInjector implements admission.DecoderInjector.
+// SerialDeviceInjector implements admission.DecoderInjector.
 // A decoder will be automatically inj1ected.
 
 // InjectDecoder injects the decoder.
-func (si *DeviceInjector) InjectDecoder(d *admission.Decoder) error {
+func (si *SerialDeviceInjector) InjectDecoder(d *admission.Decoder) error {
 	si.decoder = d
 	return nil
 }

@@ -56,7 +56,7 @@ func Schedule(ctx context.Context, request *appv1alpha1.ManagerScheduleRequest, 
 	return nil
 }
 
-func (m *Manager) Delete(ctx context.Context, cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device_2, api api.API) error {
+func (m *Manager) Delete(ctx context.Context, cr *appv1alpha1.KubeSerial, device *appv1alpha1.SerialDevice_2, api api.API) error {
 	name := m.GetName(cr.Name, device.Name)
 
 	if err := api.DeleteDeployment(ctx, cr, name); err != nil {

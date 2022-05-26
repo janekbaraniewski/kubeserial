@@ -5,15 +5,15 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.9.0
   creationTimestamp: null
   labels: {{ include "kubeserial-crds.labels" . | nindent 4 }}
-  name: devices.app.kubeserial.com
+  name: serialdevices.app.kubeserial.com
 spec:
   group: app.kubeserial.com
   names:
-    kind: Device
-    listKind: DeviceList
-    plural: devices
-    singular: device
-  scope: Namespaced
+    kind: SerialDevice
+    listKind: SerialDeviceList
+    plural: serialdevices
+    singular: serialdevice
+  scope: Cluster
   versions:
   - additionalPrinterColumns:
     - jsonPath: .status.conditions[?(@.type=="Ready")].status
@@ -23,12 +23,12 @@ spec:
       name: Available
       type: string
     - jsonPath: .status.nodeName
-      name: Device Node
+      name: SerialDevice Node
       type: string
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: Device is the Schema for the devices API
+        description: SerialDevice is the Schema for the SerialDevices API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
@@ -39,7 +39,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: DeviceSpec defines the desired state of Device
+            description: SerialDeviceSpec defines the desired state of SerialDevice
             properties:
               idProduct:
                 type: string
@@ -55,7 +55,7 @@ spec:
             - name
             type: object
           status:
-            description: DeviceStatus defines the observed state of Device
+            description: SerialDeviceStatus defines the observed state of SerialDevice
             properties:
               conditions:
                 items:

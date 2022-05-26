@@ -20,9 +20,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// Device defines monitored device
+// SerialDevice defines monitored device
 // +k8s:openapi-gen=true
-type Device_2 struct {
+type SerialDevice_2 struct {
 	// +required
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`
@@ -59,7 +59,7 @@ type IngressSpec struct {
 type KubeSerialSpec struct {
 	// +required
 	// +kubebuilder:validation:Required
-	Devices []Device_2 `json:"devices"`
+	SerialDevices []SerialDevice_2 `json:"serialDevices"`
 	// +required
 	// +kubebuilder:validation:Required
 	Ingress IngressSpec `json:"ingress"`

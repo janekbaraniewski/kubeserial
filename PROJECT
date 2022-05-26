@@ -15,11 +15,11 @@ resources:
   version: v1alpha1
 - api:
     crdVersion: v1
-    namespaced: true
+    namespaced: false
   controller: true
   domain: app.kubeserial.com
   group: kubeserial
-  kind: Device
+  kind: SerialDevice
   path: github.com/janekbaraniewski/kubeserial/api/v1alpha1
   version: v1alpha1
 - api:

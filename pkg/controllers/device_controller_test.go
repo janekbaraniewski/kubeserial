@@ -21,12 +21,12 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 		Namespace: "test-ns",
 	}
 
-	device := &v1alpha1.Device{
+	device := &v1alpha1.SerialDevice{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      deviceName.Name,
 			Namespace: deviceName.Namespace,
 		},
-		Spec: v1alpha1.DeviceSpec{
+		Spec: v1alpha1.SerialDeviceSpec{
 			Manager:   "test-manager",
 			IdVendor:  "123",
 			IdProduct: "456",
@@ -59,7 +59,7 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 		t.Run("device-new-manager-not-available", func(t *testing.T) {
 			fakeClient.Create(context.TODO(), device)
 
-			deviceReconciler := DeviceReconciler{
+			deviceReconciler := SerialDeviceReconciler{
 				Client: fakeClient,
 				Scheme: scheme,
 			}
@@ -69,17 +69,17 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			assert.Equal(t, nil, err)
 			assert.Equal(t, false, result.Requeue)
 
-			foundDevice := &v1alpha1.Device{}
+			foundDevice := &v1alpha1.SerialDevice{}
 			err = fakeClient.Get(context.TODO(), deviceName, foundDevice)
 
 			assert.Equal(t, nil, err)
 			assert.Equal(t, 3, len(foundDevice.Status.Conditions))
 
-			availableCondition := foundDevice.GetCondition(v1alpha1.DeviceAvailable)
+			availableCondition := foundDevice.GetCondition(v1alpha1.SerialDeviceAvailable)
 			assert.Equal(t, v1.ConditionFalse, availableCondition.Status)
 			assert.Equal(t, "NotValidated", availableCondition.Reason)
 
-			readyCondition := foundDevice.GetCondition(v1alpha1.DeviceReady)
+			readyCondition := foundDevice.GetCondition(v1alpha1.SerialDeviceReady)
 			assert.Equal(t, v1.ConditionFalse, readyCondition.Status)
 			assert.Equal(t, "ManagerNotAvailable", readyCondition.Reason)
 		})
@@ -89,7 +89,7 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			fakeClient.Create(context.TODO(), device)
 			fakeClient.Create(context.TODO(), manager)
 
-			deviceReconciler := DeviceReconciler{
+			deviceReconciler := SerialDeviceReconciler{
 				Client: fakeClient,
 				Scheme: scheme,
 			}
@@ -99,28 +99,28 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			assert.Equal(t, nil, err)
 			assert.Equal(t, false, result.Requeue)
 
-			foundDevice := &v1alpha1.Device{}
+			foundDevice := &v1alpha1.SerialDevice{}
 			fakeClient.Get(context.TODO(), deviceName, foundDevice)
 
-			availableCondition := foundDevice.GetCondition(v1alpha1.DeviceAvailable)
+			availableCondition := foundDevice.GetCondition(v1alpha1.SerialDeviceAvailable)
 			assert.Equal(t, v1.ConditionFalse, availableCondition.Status)
 			assert.Equal(t, "NotValidated", availableCondition.Reason)
 
-			readyCondition := foundDevice.GetCondition(v1alpha1.DeviceReady)
+			readyCondition := foundDevice.GetCondition(v1alpha1.SerialDeviceReady)
 			assert.Equal(t, v1.ConditionTrue, readyCondition.Status)
 			assert.Equal(t, "AllChecksPassed", readyCondition.Reason)
 		})
 	}
 	{
 		t.Run("device-available-manager-available", func(t *testing.T) {
-			device.Status.Conditions = append(device.Status.Conditions, v1alpha1.DeviceCondition{
-				Type:   v1alpha1.DeviceAvailable,
+			device.Status.Conditions = append(device.Status.Conditions, v1alpha1.SerialDeviceCondition{
+				Type:   v1alpha1.SerialDeviceAvailable,
 				Status: v1.ConditionTrue,
 			})
 			fakeClient.Create(context.TODO(), device)
 			fakeClient.Create(context.TODO(), manager)
 
-			deviceReconciler := DeviceReconciler{
+			deviceReconciler := SerialDeviceReconciler{
 				Client: fakeClient,
 				Scheme: scheme,
 			}
@@ -130,14 +130,14 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			assert.Equal(t, nil, err)
 			assert.Equal(t, false, result.Requeue)
 
-			foundDevice := &v1alpha1.Device{}
+			foundDevice := &v1alpha1.SerialDevice{}
 			fakeClient.Get(context.TODO(), deviceName, foundDevice)
 
-			availableCondition := foundDevice.GetCondition(v1alpha1.DeviceAvailable)
+			availableCondition := foundDevice.GetCondition(v1alpha1.SerialDeviceAvailable)
 			assert.Equal(t, v1.ConditionFalse, availableCondition.Status)
 			assert.Equal(t, "NotValidated", availableCondition.Reason)
 
-			readyCondition := foundDevice.GetCondition(v1alpha1.DeviceReady)
+			readyCondition := foundDevice.GetCondition(v1alpha1.SerialDeviceReady)
 			assert.Equal(t, v1.ConditionTrue, readyCondition.Status)
 			assert.Equal(t, "AllChecksPassed", readyCondition.Reason)
 
@@ -152,7 +152,7 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 	}
 	{
 		t.Run("device-not-found", func(t *testing.T) {
-			deviceReconciler := DeviceReconciler{
+			deviceReconciler := SerialDeviceReconciler{
 				Client: fakeClient,
 				Scheme: scheme,
 			}

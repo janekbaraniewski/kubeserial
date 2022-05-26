@@ -11,7 +11,7 @@ import (
 func TestCreateConfigMap(t *testing.T) {
 	// TODO: improve this test
 	cm := CreateConfigMap(
-		&v1alpha1.Device{
+		&v1alpha1.SerialDevice{
 			ObjectMeta: v1.ObjectMeta{
 				Name: "test-device",
 			},

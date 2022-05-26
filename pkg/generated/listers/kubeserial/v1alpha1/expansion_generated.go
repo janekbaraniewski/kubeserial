@@ -17,14 +17,6 @@ limitations under the License.
 
 package v1alpha1
 
-// DeviceListerExpansion allows custom methods to be added to
-// DeviceLister.
-type DeviceListerExpansion interface{}
-
-// DeviceNamespaceListerExpansion allows custom methods to be added to
-// DeviceNamespaceLister.
-type DeviceNamespaceListerExpansion interface{}
-
 // KubeSerialListerExpansion allows custom methods to be added to
 // KubeSerialLister.
 type KubeSerialListerExpansion interface{}
@@ -48,3 +40,7 @@ type ManagerScheduleRequestListerExpansion interface{}
 // ManagerScheduleRequestNamespaceListerExpansion allows custom methods to be added to
 // ManagerScheduleRequestNamespaceLister.
 type ManagerScheduleRequestNamespaceListerExpansion interface{}
+
+// SerialDeviceListerExpansion allows custom methods to be added to
+// SerialDeviceLister.
+type SerialDeviceListerExpansion interface{}

@@ -19,7 +19,7 @@ var log = logf.Log.WithName("DeviceMonitor")
 
 type Monitor struct {
 	cmClient      v1.ConfigMapInterface
-	devicesClient v1alpha1client.DeviceInterface
+	devicesClient v1alpha1client.SerialDeviceInterface
 	namespace     string
 	statFile      func(filename string) (os.FileInfo, error)
 }
@@ -27,7 +27,7 @@ type Monitor struct {
 func NewMonitor(clientSet client.Interface, clientsetKubeserial versioned.Interface, namespace string, statFunc func(filename string) (os.FileInfo, error)) *Monitor {
 	return &Monitor{
 		cmClient:      clientSet.CoreV1().ConfigMaps(namespace),
-		devicesClient: clientsetKubeserial.AppV1alpha1().Devices(namespace),
+		devicesClient: clientsetKubeserial.AppV1alpha1().SerialDevices(),
 		namespace:     namespace,
 		statFile:      statFunc,
 	}
@@ -49,20 +49,20 @@ func (m *Monitor) RunUpdateLoop(ctx context.Context) {
 func (m *Monitor) UpdateDeviceState(ctx context.Context) {
 	logger := log.WithName("updateCRDBasedDevice")
 	devices, err := m.devicesClient.List(ctx, metav1.ListOptions{})
-	readyDevices := []v1alpha1.Device{}
+	readyDevices := []v1alpha1.SerialDevice{}
 	for _, device := range devices.Items {
-		readyCondition := device.GetCondition(v1alpha1.DeviceReady)
+		readyCondition := device.GetCondition(v1alpha1.SerialDeviceReady)
 		if readyCondition != nil && readyCondition.Status == metav1.ConditionTrue {
 			readyDevices = append(readyDevices, device)
 		}
 	}
 	if err != nil {
-		log.Error(err, "Failed listing Device CRs")
+		log.Error(err, "Failed listing SerialDevice CRs")
 	}
 	for _, device := range readyDevices {
 		logger.V(2).Info("Got device!", "device", device)
 		logger = logger.WithValues("Device", device.Name)
-		deviceCondition := device.GetCondition(v1alpha1.DeviceAvailable)
+		deviceCondition := device.GetCondition(v1alpha1.SerialDeviceAvailable)
 		if deviceCondition == nil {
 			log.Error(err, "Can't find device condition")
 			continue
@@ -70,13 +70,13 @@ func (m *Monitor) UpdateDeviceState(ctx context.Context) {
 		if deviceCondition.Status != metav1.ConditionTrue {
 			if m.isDeviceAvailable(device.Name) {
 				log.Info("Device available, updating state.")
-				device.SetCondition(v1alpha1.DeviceCondition{
-					Type:   v1alpha1.DeviceAvailable,
+				device.SetCondition(v1alpha1.SerialDeviceCondition{
+					Type:   v1alpha1.SerialDeviceAvailable,
 					Status: metav1.ConditionTrue,
 					Reason: "DeviceAvailable",
 				})
-				device.SetCondition(v1alpha1.DeviceCondition{
-					Type:   v1alpha1.DeviceFree,
+				device.SetCondition(v1alpha1.SerialDeviceCondition{
+					Type:   v1alpha1.SerialDeviceFree,
 					Status: metav1.ConditionTrue,
 					Reason: "DeviceFree",
 				})
@@ -89,13 +89,13 @@ func (m *Monitor) UpdateDeviceState(ctx context.Context) {
 			}
 		} else if device.Status.NodeName == os.Getenv("NODE_NAME") && !m.isDeviceAvailable(device.Name) {
 			log.Info("Device unavailable, updating state.")
-			device.SetCondition(v1alpha1.DeviceCondition{
-				Type:   v1alpha1.DeviceAvailable,
+			device.SetCondition(v1alpha1.SerialDeviceCondition{
+				Type:   v1alpha1.SerialDeviceAvailable,
 				Status: metav1.ConditionFalse,
 				Reason: "DeviceUnavailable",
 			})
-			device.SetCondition(v1alpha1.DeviceCondition{
-				Type:   v1alpha1.DeviceFree,
+			device.SetCondition(v1alpha1.SerialDeviceCondition{
+				Type:   v1alpha1.SerialDeviceFree,
 				Status: metav1.ConditionUnknown,
 				Reason: "DeviceUnavailable",
 			})

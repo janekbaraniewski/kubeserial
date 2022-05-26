@@ -6,15 +6,15 @@ import (
 )
 
 var (
-	DevicesAvailable = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "devices_available",
-		Help: "Total number of devices available",
+	DevicesMonitored = prometheus.NewGauge(prometheus.GaugeOpts{
+		Name: "devices_monitored",
+		Help: "Total number of devices monitored",
 	})
 )
 
 func init() {
 	// Register custom metrics with the global prometheus registry
 	metrics.Registry.MustRegister(
-		DevicesAvailable,
+		DevicesMonitored,
 	)
 }

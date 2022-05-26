@@ -31,9 +31,23 @@ spec:
           spec:
             description: KubeSerialSpec defines the desired state of KubeSerial
             properties:
-              devices:
+              ingress:
+                description: IngressSpec defines the desired Ingress configuration
+                properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  domain:
+                    type: string
+                  enabled:
+                    type: boolean
+                required:
+                - enabled
+                type: object
+              serialDevices:
                 items:
-                  description: Device defines monitored device
+                  description: SerialDevice defines monitored device
                   properties:
                     idProduct:
                       type: string
@@ -52,23 +66,9 @@ spec:
                   - subsystem
                   type: object
                 type: array
-              ingress:
-                description: IngressSpec defines the desired Ingress configuration
-                properties:
-                  annotations:
-                    additionalProperties:
-                      type: string
-                    type: object
-                  domain:
-                    type: string
-                  enabled:
-                    type: boolean
-                required:
-                - enabled
-                type: object
             required:
-            - devices
             - ingress
+            - serialDevices
             type: object
           status:
             description: KubeSerialStatus defines the observed state of KubeSerial

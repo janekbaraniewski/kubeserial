@@ -1,3 +1,3 @@
-# Device Monitor
+# SerialDevice Monitor
 
 <!-- toc -->

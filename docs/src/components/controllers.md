@@ -6,7 +6,7 @@
 
 ## KubeSerial Controller
 
-## Device Controller
+## SerialDevice Controller
 
 ## ManagerScheduleRequest Controller
 

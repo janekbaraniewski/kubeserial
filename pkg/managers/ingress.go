@@ -8,7 +8,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (m *Manager) CreateIngress(cr *appv1alpha1.KubeSerial, device *appv1alpha1.Device_2, domain string) *networkingv1.Ingress {
+func (m *Manager) CreateIngress(cr *appv1alpha1.KubeSerial, device *appv1alpha1.SerialDevice_2, domain string) *networkingv1.Ingress {
 	name := m.GetName(cr.Name, device.Name)
 	labels := map[string]string{
 		"app": name,

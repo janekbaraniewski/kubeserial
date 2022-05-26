@@ -11,7 +11,7 @@ import (
 func TestCreateService(t *testing.T) {
 	// TODO: improve this test
 	svc := CreateService(
-		&v1alpha1.Device{
+		&v1alpha1.SerialDevice{
 			ObjectMeta: v1.ObjectMeta{
 				Name: "test-device",
 			},

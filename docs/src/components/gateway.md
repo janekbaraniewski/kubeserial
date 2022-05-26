@@ -1,3 +1,3 @@
-# Device Gateway
+# SerialDevice Gateway
 
 <!-- toc -->

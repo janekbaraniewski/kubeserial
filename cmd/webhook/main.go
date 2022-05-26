@@ -76,7 +76,7 @@ func main() {
 	hookServer.Register(
 		"/mutate-inject-device",
 		&webhook.Admission{
-			Handler: &webhooks.DeviceInjector{
+			Handler: &webhooks.SerialDeviceInjector{
 				Name:            "DeviceInjector",
 				Clientset:       clientset,
 				ConfigExtractor: images.NewOCIConfigExtractor(),

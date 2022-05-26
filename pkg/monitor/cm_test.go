@@ -10,7 +10,7 @@ import (
 func TestCreateConfigMap(t *testing.T) {
 	cr := &appv1alpha1.KubeSerial{
 		Spec: appv1alpha1.KubeSerialSpec{
-			Devices: []appv1alpha1.Device_2{
+			SerialDevices: []appv1alpha1.SerialDevice_2{
 				{
 					Name:      "testdevice",
 					Subsystem: "tty",

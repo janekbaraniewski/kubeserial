@@ -14,7 +14,7 @@ func CreateConfigMap(cr *appv1alpha1.KubeSerial) *corev1.ConfigMap {
 		"app": cr.Name + "-monitor",
 	}
 
-	for _, device := range cr.Spec.Devices {
+	for _, device := range cr.Spec.SerialDevices {
 		rule += fmt.Sprintf(
 			"SUBSYSTEM==\"tty\", ATTRS{idVendor}==\"%s\", ATTRS{idProduct}==\"%s\", SYMLINK+=\"%s\"\n",
 			device.IdVendor,

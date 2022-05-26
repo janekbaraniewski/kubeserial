@@ -89,7 +89,7 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "KubeSerial")
 		os.Exit(1)
 	}
-	if err = (&controllers.DeviceReconciler{
+	if err = (&controllers.SerialDeviceReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {

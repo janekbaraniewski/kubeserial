@@ -10,11 +10,11 @@ import (
 
 func TestCreateDeployment(t *testing.T) {
 	// TODO: improve this test
-	deployment := CreateDeployment(&v1alpha1.Device{
+	deployment := CreateDeployment(&v1alpha1.SerialDevice{
 		ObjectMeta: v1.ObjectMeta{
 			Name: "test-device",
 		},
-		Status: v1alpha1.DeviceStatus{
+		Status: v1alpha1.SerialDeviceStatus{
 			NodeName: "test-node",
 		},
 	})

@@ -23,17 +23,17 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type DeviceConditionType string
+type SerialDeviceConditionType string
 
 const (
-	DeviceAvailable DeviceConditionType = "Available"
-	DeviceFree      DeviceConditionType = "Free"
-	DeviceReady     DeviceConditionType = "Ready"
+	SerialDeviceAvailable SerialDeviceConditionType = "Available"
+	SerialDeviceFree      SerialDeviceConditionType = "Free"
+	SerialDeviceReady     SerialDeviceConditionType = "Ready"
 )
 
 // +k8s:openapi-gen=true
-// DeviceSpec defines the desired state of Device
-type DeviceSpec struct {
+// SerialDeviceSpec defines the desired state of SerialDevice
+type SerialDeviceSpec struct {
 	// +required
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`
@@ -48,9 +48,9 @@ type DeviceSpec struct {
 	Manager string `json:"manager,omitempty"`
 }
 
-type DeviceCondition struct {
+type SerialDeviceCondition struct {
 	// +required
-	Type DeviceConditionType `json:"type" protobuf:"bytes,1,opt,name=type"`
+	Type SerialDeviceConditionType `json:"type" protobuf:"bytes,1,opt,name=type"`
 	// +required
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Enum=True;False;Unknown
@@ -83,62 +83,63 @@ type DeviceCondition struct {
 }
 
 // +k8s:openapi-gen=true
-// DeviceStatus defines the observed state of Device
-type DeviceStatus struct {
-	Conditions []DeviceCondition `json:"conditions"`
-	NodeName   string            `json:"nodeName,omitempty"`
+// SerialDeviceStatus defines the observed state of SerialDevice
+type SerialDeviceStatus struct {
+	Conditions []SerialDeviceCondition `json:"conditions"`
+	NodeName   string                  `json:"nodeName,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +genclient:nonNamespaced
 // +genclient
 // +k8s:openapi-gen=true
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:path=devices,scope=Namespaced
+// +kubebuilder:resource:path=serialdevices,scope=Cluster
 // +kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
 // +kubebuilder:printcolumn:name="Available",type=string,JSONPath=`.status.conditions[?(@.type=="Available")].status`
-// +kubebuilder:printcolumn:name="Device Node",type=string,JSONPath=`.status.nodeName`
+// +kubebuilder:printcolumn:name="SerialDevice Node",type=string,JSONPath=`.status.nodeName`
 
-// Device is the Schema for the devices API
-type Device struct {
+// SerialDevice is the Schema for the SerialDevices API
+type SerialDevice struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   DeviceSpec   `json:"spec,omitempty"`
-	Status DeviceStatus `json:"status,omitempty"`
+	Spec   SerialDeviceSpec   `json:"spec,omitempty"`
+	Status SerialDeviceStatus `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// DeviceList contains a list of Device
-type DeviceList struct {
+// SerialDeviceList contains a list of SerialDevice
+type SerialDeviceList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []Device `json:"items"`
+	Items           []SerialDevice `json:"items"`
 }
 
-// NeedsManager checks if device needs Manager
-func (d *Device) NeedsManager() bool {
+// NeedsManager checks if SerialDevice needs Manager
+func (d *SerialDevice) NeedsManager() bool {
 	return d.Spec.Manager != ""
 }
 
-func (d *Device) IsAvailable() bool {
-	availableCondition := d.GetCondition(DeviceAvailable)
+func (d *SerialDevice) IsAvailable() bool {
+	availableCondition := d.GetCondition(SerialDeviceAvailable)
 	return availableCondition.Status == metav1.ConditionTrue
 }
 
-func (d *Device) IsReady() bool {
-	readyCondition := d.GetCondition(DeviceReady)
+func (d *SerialDevice) IsReady() bool {
+	readyCondition := d.GetCondition(SerialDeviceReady)
 	return readyCondition.Status == metav1.ConditionTrue
 }
 
-func (d *Device) IsFree() bool {
-	freeCondition := d.GetCondition(DeviceFree)
+func (d *SerialDevice) IsFree() bool {
+	freeCondition := d.GetCondition(SerialDeviceFree)
 	return freeCondition.Status == metav1.ConditionTrue
 }
 
-func (d *Device) GetCondition(conditionType DeviceConditionType) *DeviceCondition {
+func (d *SerialDevice) GetCondition(conditionType SerialDeviceConditionType) *SerialDeviceCondition {
 	for i := range d.Status.Conditions {
 		if d.Status.Conditions[i].Type == conditionType {
 			return &d.Status.Conditions[i]
@@ -147,7 +148,7 @@ func (d *Device) GetCondition(conditionType DeviceConditionType) *DeviceConditio
 	return nil
 }
 
-func (d *Device) SetCondition(newCondition DeviceCondition) {
+func (d *SerialDevice) SetCondition(newCondition SerialDeviceCondition) {
 	existing := d.GetCondition(newCondition.Type)
 
 	if existing == nil {

@@ -4,6 +4,7 @@ import (
 	"flag"
 	"os"
 
+	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
@@ -12,6 +13,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
+	"github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned"
 	"github.com/janekbaraniewski/kubeserial/pkg/images"
 	"github.com/janekbaraniewski/kubeserial/pkg/webhooks"
 )
@@ -19,8 +21,9 @@ import (
 var setupLog = ctrl.Log.WithName("setup")
 
 type HookParamters struct {
-	certDir string
-	port    int
+	certDir   string
+	port      int
+	namespace string
 }
 
 func main() {
@@ -28,6 +31,7 @@ func main() {
 
 	flag.IntVar(&params.port, "port", 8443, "Wehbook port")
 	flag.StringVar(&params.certDir, "certDir", "/certs/", "Wehbook certificate folder")
+	flag.StringVar(&params.namespace, "namespace", "kubeserial", "Namespace in which controller is deployed") // TODO: remove this and make it work globaly
 	opts := zap.Options{
 		Development: true,
 	}
@@ -59,14 +63,24 @@ func main() {
 	hookServer.Port = params.port
 	hookServer.CertDir = params.certDir
 
+	config, err := rest.InClusterConfig()
+
+	if err != nil {
+		entryLog.Error(err, "Failed to get InClusterConfig")
+		panic(err.Error())
+	}
+
+	clientset, err := versioned.NewForConfig(config)
+
 	entryLog.Info("registering webhooks to the webhook server")
 	hookServer.Register(
 		"/mutate-inject-device",
 		&webhook.Admission{
 			Handler: &webhooks.DeviceInjector{
 				Name:            "DeviceInjector",
-				Client:          mgr.GetClient(),
+				Clientset:       clientset,
 				ConfigExtractor: images.NewOCIConfigExtractor(),
+				Namespace:       params.namespace,
 			},
 		},
 	)

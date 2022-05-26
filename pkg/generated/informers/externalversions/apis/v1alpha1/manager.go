@@ -21,10 +21,10 @@ import (
 	"context"
 	time "time"
 
-	kubeserialv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
+	apisv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	versioned "github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned"
 	internalinterfaces "github.com/janekbaraniewski/kubeserial/pkg/generated/informers/externalversions/internalinterfaces"
-	v1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/generated/listers/kubeserial/v1alpha1"
+	v1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/generated/listers/apis/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"
@@ -70,7 +70,7 @@ func NewFilteredManagerInformer(client versioned.Interface, namespace string, re
 				return client.AppV1alpha1().Managers(namespace).Watch(context.TODO(), options)
 			},
 		},
-		&kubeserialv1alpha1.Manager{},
+		&apisv1alpha1.Manager{},
 		resyncPeriod,
 		indexers,
 	)
@@ -81,7 +81,7 @@ func (f *managerInformer) defaultInformer(client versioned.Interface, resyncPeri
 }
 
 func (f *managerInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&kubeserialv1alpha1.Manager{}, f.defaultInformer)
+	return f.factory.InformerFor(&apisv1alpha1.Manager{}, f.defaultInformer)
 }
 
 func (f *managerInformer) Lister() v1alpha1.ManagerLister {

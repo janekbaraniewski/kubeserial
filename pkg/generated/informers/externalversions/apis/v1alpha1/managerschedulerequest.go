@@ -21,10 +21,10 @@ import (
 	"context"
 	time "time"
 
-	kubeserialv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
+	apisv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	versioned "github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned"
 	internalinterfaces "github.com/janekbaraniewski/kubeserial/pkg/generated/informers/externalversions/internalinterfaces"
-	v1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/generated/listers/kubeserial/v1alpha1"
+	v1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/generated/listers/apis/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"
@@ -70,7 +70,7 @@ func NewFilteredManagerScheduleRequestInformer(client versioned.Interface, names
 				return client.AppV1alpha1().ManagerScheduleRequests(namespace).Watch(context.TODO(), options)
 			},
 		},
-		&kubeserialv1alpha1.ManagerScheduleRequest{},
+		&apisv1alpha1.ManagerScheduleRequest{},
 		resyncPeriod,
 		indexers,
 	)
@@ -81,7 +81,7 @@ func (f *managerScheduleRequestInformer) defaultInformer(client versioned.Interf
 }
 
 func (f *managerScheduleRequestInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&kubeserialv1alpha1.ManagerScheduleRequest{}, f.defaultInformer)
+	return f.factory.InformerFor(&apisv1alpha1.ManagerScheduleRequest{}, f.defaultInformer)
 }
 
 func (f *managerScheduleRequestInformer) Lister() v1alpha1.ManagerScheduleRequestLister {

@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
+	"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	"github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned"
 	"github.com/janekbaraniewski/kubeserial/pkg/images"
 	corev1 "k8s.io/api/core/v1"

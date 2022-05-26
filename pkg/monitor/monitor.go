@@ -10,7 +10,7 @@ import (
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
-	"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
+	"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	"github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned"
 	v1alpha1client "github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned/typed/kubeserial/v1alpha1"
 )

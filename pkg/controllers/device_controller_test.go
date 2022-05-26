@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
+	"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"

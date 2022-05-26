@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/janekbaraniewski/kubeserial/pkg/apis/kubeserial/v1alpha1"
+	"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"

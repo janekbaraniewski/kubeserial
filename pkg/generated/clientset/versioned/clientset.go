@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"net/http"
 
-	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned/typed/kubeserial/v1alpha1"
+	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned/typed/apis/v1alpha1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"

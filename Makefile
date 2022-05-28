@@ -64,6 +64,10 @@ vet: ## Run go vet against code.
 test: fmt vet envtest-render-crds ## Run tests.
 	go test ./... -coverprofile coverage.txt -covermode atomic
 
+.PHONY: test-fswatch
+test-fswatch: ## Use fswatch to watch source files and run tests on chamnge
+	fswatch -or pkg Makefile Makefile.build cmd go.mod go.sum | xargs -n1 -I{} make test
+
 .PHONY: envtest-render-crds
 envtest-render-crds:
 	@rm -rf build/_output/kubeserial-crds || echo ""

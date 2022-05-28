@@ -1,4 +1,4 @@
-package api
+package kubeapi
 
 import (
 	"context"

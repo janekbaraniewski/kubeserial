@@ -30,8 +30,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	kubeserialv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
-	"github.com/janekbaraniewski/kubeserial/pkg/controllers/api"
 	"github.com/janekbaraniewski/kubeserial/pkg/gateway"
+	api "github.com/janekbaraniewski/kubeserial/pkg/kubeapi"
 )
 
 var devLog = logf.Log.WithName("DeviceController")

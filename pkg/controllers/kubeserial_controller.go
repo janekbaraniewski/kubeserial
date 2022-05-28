@@ -28,7 +28,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
-	"github.com/janekbaraniewski/kubeserial/pkg/controllers/api"
+	api "github.com/janekbaraniewski/kubeserial/pkg/kubeapi"
 	"github.com/janekbaraniewski/kubeserial/pkg/monitor"
 )
 

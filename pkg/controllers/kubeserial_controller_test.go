@@ -6,7 +6,7 @@ import (
 	"time"
 
 	kubeserialv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
-	"github.com/janekbaraniewski/kubeserial/pkg/controllers/api"
+	api "github.com/janekbaraniewski/kubeserial/pkg/kubeapi"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"

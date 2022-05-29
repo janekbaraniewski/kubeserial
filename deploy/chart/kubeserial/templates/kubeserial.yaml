@@ -5,7 +5,7 @@ metadata:
   labels:
     {{- include "kubeserial.labels" . | nindent 4 }}
 spec:
-  devices: {{ .Values.kubeserial.devices | toYaml | nindent 4 }}
+  serialDevices: {{ .Values.kubeserial.serialDevices | toYaml | nindent 4 }}
 {{- if .Values.ingress }}
   ingress: {{ .Values.ingress | toYaml | nindent 4 }}
 {{- end }}

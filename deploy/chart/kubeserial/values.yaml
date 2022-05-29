@@ -1,7 +1,7 @@
 replicaCount: 1
 
 kubeserial:
-  devices: []
+  serialDevices: []
 
 certManagerIssuer:
   name:

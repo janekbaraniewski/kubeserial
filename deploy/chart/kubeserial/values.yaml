@@ -13,6 +13,13 @@ webhook:
     pullPolicy: IfNotPresent
     tag: "APP_VERSION"
 
+monitor:
+  image:
+    repository: janekbaraniewski/kubeserial-device-monitor
+    pullPolicy: IfNotPresent
+    tag: "APP_VERSION"
+  resources: {}
+
 image:
   repository: janekbaraniewski/kubeserial
   pullPolicy: IfNotPresent

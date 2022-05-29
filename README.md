@@ -9,35 +9,6 @@
 
 KubeSerial monitors your cluster nodes for physical devices specified in spec. Once the device is connected, it creates gateway service that exposes it over the network and manager service with specified management software. When the device gets disconnected everything is cleaned up.
 
-### Example:
-
-This is an example configuration for 2 popular cheap printers - Ender 3 and Anet A8 - that handles their management and exposes Octoprint instance for each of them at `http://ender3.my.home` and `http://aneta8.my.home`.
-
-```yaml
-apiVersion: app.kubeserial.com/v1alpha1
-kind: KubeSerial
-metadata:
-  name: kubeserial
-  namespace: kubeserial
-spec:
-  devices:
-    - name:       "ender3"
-      idVendor:   "0403"
-      idProduct:  "6001"
-      manager:    "octoprint"
-      subsystem:  "tty"
-    - name:       "aneta8"
-      idVendor:   "1a86"
-      idProduct:  "7523"
-      manager:    "octoprint"
-      subsystem:  "tty"
-  ingress:
-    enabled: true
-    domain: ".my.home"
-    annotations:
-      kubernetes.io/ingress.class: traefik
-```
-
 ![Example usage 1](demo1.gif)
 
 
@@ -75,9 +46,7 @@ udevadm info -q all -n /dev/ttyUSB0 --attribute-walk
 ```
 Look for them from the top. Once you've got your configuration, run
 
-```
-kubectl create -f my-kubeserial.yaml
-```
+
 
 # Components
 
@@ -117,12 +86,11 @@ See <https://github.com/multiarch/qemu-user-static> for more details.
 ## To Compile Kubeserial Binary
 
 ```sh
-make compile
+make all
 ```
 
-## Build The Docker Comtainer
+## Build The Docker Comtainer for local development
 
 ```sh
-make build
+make kubeserial-docker-local device-monitor-docker-local injector-webhook-docker-local
 ```
-

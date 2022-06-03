@@ -1,7 +1,12 @@
 # KubeSerial 
+
+<mark>THIS IS STILL WORK IN PROGRESS</mark>
+
 <b>Work with serial devices in Kubernetes</b>
 
 ---
+
+<mark>THIS IS STILL WORK IN PROGRESS</mark>
 
 KubeSerial is a set of Kubernetes controllers and resources that make working with serial devices in Kubernetes clusters easy. It decouples node that device is connected to from workload that's using it.
 

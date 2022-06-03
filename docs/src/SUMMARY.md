@@ -1,6 +1,7 @@
 # Summary
 
 - [Intro](./intro.md)
+- [Quick Start](./quick_start.md)
 - [Configuration](./configuration/SUMMARY.md)
     - [KubeSerial](./configuration/kubeserial.md)
     - [Devices](./configuration/devices.md)
@@ -12,3 +13,4 @@
     - [Device Monitor](./components/monitor.md)
     - [Device Gateway](./components/gateway.md)
     - [Manager](./components/manager.md)
+- [Development](./development.md)

@@ -23,7 +23,7 @@ FROM alpine
 WORKDIR /
 ENV USER_NAME=kubeserial \
     USER_UID=1001
-COPY build/bin/entrypoint .
+COPY entrypoint entrypoint
 COPY --from=builder /build/bin/injector-webhook .
 
 

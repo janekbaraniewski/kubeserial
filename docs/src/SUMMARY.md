@@ -3,7 +3,7 @@
 - [Intro](./intro.md)
 - [Configuration](./configuration/SUMMARY.md)
     - [KubeSerial](./configuration/kubeserial.md)
-    - [Devices](./configuration/kubeserial.md)
+    - [Devices](./configuration/devices.md)
     - [Managers](./configuration/managers/SUMMARY.md)
         - [Managed by KubeSerial](./configuration/managers/internal.md)
         - [Managed externaly](./configuration/managers/external.md)

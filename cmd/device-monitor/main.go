@@ -11,6 +11,7 @@ import (
 
 	"github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned"
 	"github.com/janekbaraniewski/kubeserial/pkg/monitor"
+	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 )
 
 func main() {
@@ -46,8 +47,14 @@ func main() {
 		panic(err.Error())
 	}
 	log.Info("Clientset initialised")
+
 	ctx := ctrl.SetupSignalHandler()
-	deviceMonitor := monitor.NewMonitor(clientset, clientsetKubeserial, os.Getenv("OPERATOR_NAMESPACE"), os.Stat)
+	deviceMonitor := monitor.NewMonitor(
+		clientset,
+		clientsetKubeserial,
+		os.Getenv("OPERATOR_NAMESPACE"),
+		utils.NewOSFS(),
+	)
 	log.Info("Starting monitor update loop")
 	go deviceMonitor.RunUpdateLoop(ctx)
 	<-ctx.Done()

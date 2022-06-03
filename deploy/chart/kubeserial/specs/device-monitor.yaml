@@ -53,8 +53,8 @@ spec:
           volumeMounts:
             - mountPath: /dev
               name: host-dev
-          serviceAccountName: {{ include "kubeserial.serviceAccountName" . }}
-          terminationGracePeriodSeconds: 30
+        serviceAccountName: {{ include "kubeserial.serviceAccountName" . }}
+        terminationGracePeriodSeconds: 30
         volumes:
           - hostPath:
               path: /dev

@@ -30,6 +30,7 @@ import (
 	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	api "github.com/janekbaraniewski/kubeserial/pkg/kubeapi"
 	"github.com/janekbaraniewski/kubeserial/pkg/monitor"
+	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 )
 
 var ksLog = logf.Log.WithName("KubeSerialController")
@@ -39,6 +40,7 @@ type KubeSerialReconciler struct {
 	client.Client
 	Scheme               *runtime.Scheme
 	DeviceMonitorVersion string
+	FS                   utils.FileSystem
 }
 
 //+kubebuilder:rbac:groups=app.kubeserial.com,resources=kubeserials,verbs=get;list;watch;create;update;patch;delete
@@ -75,7 +77,11 @@ func (r *KubeSerialReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 
 func (r *KubeSerialReconciler) ReconcileMonitor(ctx context.Context, cr *appv1alpha1.KubeSerial, api api.API, monitorVersion string) error {
 	conf := monitor.CreateConfigMap(cr)
-	monitorDaemon := monitor.CreateDaemonSet(cr, monitorVersion)
+	monitorDaemon, err := monitor.CreateDaemonSet(r.FS)
+
+	if err != nil {
+		return err
+	}
 
 	if err := api.EnsureConfigMap(ctx, cr, conf); err != nil {
 		return err

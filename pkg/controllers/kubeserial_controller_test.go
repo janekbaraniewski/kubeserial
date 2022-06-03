@@ -2,11 +2,14 @@ package controllers
 
 import (
 	"context"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
 	kubeserialv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	api "github.com/janekbaraniewski/kubeserial/pkg/kubeapi"
+	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -21,7 +24,7 @@ func getCR() *kubeserialv1alpha1.KubeSerial {
 	return &kubeserialv1alpha1.KubeSerial{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "kubeserialtest",
-			Namespace: "test-namespace",
+			Namespace: "test-ns",
 		},
 		Spec: kubeserialv1alpha1.KubeSerialSpec{
 			SerialDevices: []kubeserialv1alpha1.SerialDevice_2{
@@ -69,14 +72,28 @@ func TestReconcile(t *testing.T) {
 			utilruntime.Must(kubeserialv1alpha1.AddToScheme(scheme))
 			fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).Build()
 			cr := getCR()
+			fs := utils.NewInMemoryFS()
+			file, err := fs.Create("/config/monitor-spec.yaml")
+
+			assert.Equal(t, nil, err)
+
+			absPath, _ := filepath.Abs("../assets/monitor-spec.yaml")
+			content, err := os.ReadFile(absPath)
+			if err != nil {
+				t.Fatalf("Failed to read yaml resource: %v", err)
+			}
+
+			file.Write(content)
+
 			reconciler := KubeSerialReconciler{
 				Client: fakeClient,
 				Scheme: scheme,
+				FS:     fs,
 			}
 
 			reconcileReq := reconcile.Request{
 				NamespacedName: types.NamespacedName{
-					Namespace: "test-namespace",
+					Namespace: "test-ns",
 					Name:      "kubeserialtest",
 				},
 			}

@@ -13,6 +13,7 @@ import (
 	"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	"github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned"
 	v1alpha1client "github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned/typed/apis/v1alpha1"
+	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 )
 
 var log = logf.Log.WithName("DeviceMonitor")
@@ -21,15 +22,15 @@ type Monitor struct {
 	cmClient      v1.ConfigMapInterface
 	devicesClient v1alpha1client.SerialDeviceInterface
 	namespace     string
-	statFile      func(filename string) (os.FileInfo, error)
+	fs            utils.FileSystem
 }
 
-func NewMonitor(clientSet client.Interface, clientsetKubeserial versioned.Interface, namespace string, statFunc func(filename string) (os.FileInfo, error)) *Monitor {
+func NewMonitor(clientSet client.Interface, clientsetKubeserial versioned.Interface, namespace string, fs utils.FileSystem) *Monitor {
 	return &Monitor{
 		cmClient:      clientSet.CoreV1().ConfigMaps(namespace),
 		devicesClient: clientsetKubeserial.AppV1alpha1().SerialDevices(),
 		namespace:     namespace,
-		statFile:      statFunc,
+		fs:            fs,
 	}
 }
 
@@ -111,7 +112,7 @@ func (m *Monitor) UpdateDeviceState(ctx context.Context) {
 
 func (m *Monitor) isDeviceAvailable(name string) bool {
 	logger := log.WithName("isDeviceAvailable").WithValues("Device", name)
-	if _, err := m.statFile("/dev/" + name); os.IsNotExist(err) {
+	if _, err := m.fs.Stat("/dev/" + name); os.IsNotExist(err) {
 		logger.V(2).Info("Device not available")
 		return false
 	}

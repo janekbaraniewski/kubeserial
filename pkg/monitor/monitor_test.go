@@ -7,7 +7,7 @@ import (
 
 	"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	"github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned/fake"
-	"github.com/spf13/afero"
+	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -32,8 +32,8 @@ func TestUpdateDeviceState_ConfigMap(t *testing.T) {
 
 	fakeClientset := testclient.NewSimpleClientset(cm)
 	fakeClientsetKubeserial := fake.NewSimpleClientset()
-	fs := afero.NewMemMapFs()
-	monitor := NewMonitor(fakeClientset, fakeClientsetKubeserial, "test-ns", fs.Stat)
+	fs := utils.NewInMemoryFS()
+	monitor := NewMonitor(fakeClientset, fakeClientsetKubeserial, "test-ns", fs)
 	monitor.UpdateDeviceState(ctx)
 }
 
@@ -108,11 +108,11 @@ func TestUpdateDeviceState_Device(t *testing.T) {
 			device := getDevice(testCase.InitReady, testCase.InitAvailable, testCase.InitNode)
 			fakeClientset := testclient.NewSimpleClientset()
 			fakeClientsetKubeserial := fake.NewSimpleClientset(device)
-			fs := afero.NewMemMapFs()
+			fs := utils.NewInMemoryFS()
 			if testCase.CreateDevice {
 				fs.Create("/dev/" + device.Name)
 			}
-			monitor := NewMonitor(fakeClientset, fakeClientsetKubeserial, "test-ns", fs.Stat)
+			monitor := NewMonitor(fakeClientset, fakeClientsetKubeserial, "test-ns", fs)
 
 			monitor.UpdateDeviceState(ctx)
 

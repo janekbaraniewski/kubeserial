@@ -1,96 +1,20 @@
 # KubeSerial
+
 ![Release](https://badgen.net/github/release/janekbaraniewski/kubeserial)
 [![License](https://img.shields.io/github/license/janekbaraniewski/kubeserial.svg)](LICENSE)
 ![GH workflow](https://github.com/janekbaraniewski/kubeserial/actions/workflows/test.yml/badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/janekbaraniewski/kubeserial)](https://goreportcard.com/report/github.com/janekbaraniewski/kubeserial)
 [![codecov](https://codecov.io/gh/janekbaraniewski/kubeserial/branch/master/graph/badge.svg?token=Y95FB6H188)](https://codecov.io/gh/janekbaraniewski/kubeserial)
 [![Go Reference](https://pkg.go.dev/badge/github.com/janekbaraniewski/kubeserial.svg)](https://pkg.go.dev/github.com/janekbaraniewski/kubeserial)
----
 
 KubeSerial monitors your cluster nodes for physical devices specified in spec. Once the device is connected, it creates gateway service that exposes it over the network and manager service with specified management software. When the device gets disconnected everything is cleaned up.
 
 ![Example usage 1](demo1.gif)
 
+## Quick start
 
-# Requirements
+You can find quick start guide [here](#TODO)
 
-- k8s cluster
-- Ingress controller installed in the cluster for ingress rules to work.
+## Docs
 
-# Install with Helm
-
-## Add help repo
-
-
-```bash
-$ helm repo add baraniewski https://baraniewski.com/charts/
-```
-## Install CRDs
-
-Due to way in which helm handles CRDs, they are managed using separate chart.
-
-```bash
-$ helm upgrade --install kubeserial-crds baraniewski/kubeserial-crds
-```
-## Install Controller
-
-```bash
-$ helm upgrade --install kubeserial baraniewski/kubeserial
-```
-
-## Create your configuration
-
-Create your configuration file based on example above. To find out values of `idVendor` and `idProduct` for your device, connect it to your computer, locate where it is (let's say `/dev/ttyUSB0`) and run:
-```
-udevadm info -q all -n /dev/ttyUSB0 --attribute-walk
-```
-Look for them from the top. Once you've got your configuration, run
-
-
-
-# Components
-
-### Controller
-
-Manages operator components by observing state of each of the devices.
-
-### Monitor
-
-Monitors cluster nodes waiting for specified serial devices to be connected and updates their state.
-
-### Gateway
-
-Exposed specific device in cluster network over TCP.
-
-### Manager
-
-Creates deployment with management software, mounts your device over the network and gives you access through ingress rule.
-
-###### Supported managers
-
-- Octoprint
-
-
-# Build
-
-## Multi-Arch Setup
-
-If running from an x86 system, run the following to install necessary qemu emulation:
-
-```sh
-docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-```
-
-See <https://github.com/multiarch/qemu-user-static> for more details.
-
-## To Compile Kubeserial Binary
-
-```sh
-make all
-```
-
-## Build The Docker Comtainer for local development
-
-```sh
-make kubeserial-docker-local device-monitor-docker-local injector-webhook-docker-local
-```
+Docs can be found [here](#TODO)

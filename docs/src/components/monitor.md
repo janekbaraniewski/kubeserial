@@ -1,3 +1,5 @@
-# SerialDevice Monitor
+# SerialDeviceMonitor
 
 <!-- toc -->
+
+## How it works

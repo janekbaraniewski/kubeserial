@@ -23,7 +23,7 @@ WORKDIR /
 ENV USER_NAME=kubeserial \
     USER_UID=1001
 COPY --from=builder /build/bin/kubeserial .
-COPY build/bin/entrypoint .
+COPY entrypoint entrypoint
 
 
 ENTRYPOINT ["/entrypoint", "/kubeserial"]

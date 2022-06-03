@@ -1,23 +1,31 @@
 package monitor
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
-	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
+	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 	"github.com/stretchr/testify/assert"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestCreateDaemonSet(t *testing.T) {
-	// TODO: improve this test
-	cr := &appv1alpha1.KubeSerial{
-		ObjectMeta: v1.ObjectMeta{
-			Name: "test-config",
-		},
+	fs := utils.NewInMemoryFS()
+	file, err := fs.Create("/config/monitor-spec.yaml")
+
+	assert.Equal(t, nil, err)
+
+	absPath, _ := filepath.Abs("../assets/monitor-spec.yaml")
+	content, err := os.ReadFile(absPath)
+	if err != nil {
+		t.Fatalf("Failed to read yaml resource: %v", err)
 	}
 
-	result := CreateDaemonSet(cr, "0.0.1")
+	file.Write(content)
 
-	assert.Equal(t, "test-config-monitor", result.ObjectMeta.Name)
-	assert.Equal(t, "janekbaraniewski/kubeserial-device-monitor:0.0.1", result.Spec.Template.Spec.Containers[0].Image)
+	result, err := CreateDaemonSet(fs)
+
+	assert.Equal(t, nil, err)
+	assert.Equal(t, "test-monitor", result.ObjectMeta.Name)
+	assert.Equal(t, "sample-image:dev", result.Spec.Template.Spec.Containers[0].Image)
 }

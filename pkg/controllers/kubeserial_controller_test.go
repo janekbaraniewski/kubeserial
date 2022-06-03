@@ -72,18 +72,7 @@ func TestReconcile(t *testing.T) {
 			utilruntime.Must(kubeserialv1alpha1.AddToScheme(scheme))
 			fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).Build()
 			cr := getCR()
-			fs := utils.NewInMemoryFS()
-			file, err := fs.Create("/config/monitor-spec.yaml")
-
-			assert.Equal(t, nil, err)
-
-			absPath, _ := filepath.Abs("../assets/monitor-spec.yaml")
-			content, err := os.ReadFile(absPath)
-			if err != nil {
-				t.Fatalf("Failed to read yaml resource: %v", err)
-			}
-
-			file.Write(content)
+			fs := GetFileSystem(t)
 
 			reconciler := KubeSerialReconciler{
 				Client: fakeClient,
@@ -105,15 +94,32 @@ func TestReconcile(t *testing.T) {
 	}
 }
 
+func GetFileSystem(t *testing.T) utils.FileSystem {
+	fs := utils.NewInMemoryFS()
+	file, err := fs.Create("/config/monitor-spec.yaml")
+
+	assert.Equal(t, nil, err)
+
+	absPath, _ := filepath.Abs("../assets/monitor-spec.yaml")
+	content, err := os.ReadFile(absPath)
+	if err != nil {
+		t.Fatalf("Failed to read yaml resource: %v", err)
+	}
+
+	file.Write(content)
+	return fs
+}
+
 func TestReconcileMonitor(t *testing.T) {
 	scheme := runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(kubeserialv1alpha1.AddToScheme(scheme))
 	fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).Build()
-
+	fs := GetFileSystem(t)
 	reconciler := KubeSerialReconciler{
 		Client: fakeClient,
 		Scheme: scheme,
+		FS:     fs,
 	}
 	apiClient := api.NewFakeApiClient()
 

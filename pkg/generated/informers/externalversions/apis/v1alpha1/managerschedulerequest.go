@@ -41,33 +41,32 @@ type ManagerScheduleRequestInformer interface {
 type managerScheduleRequestInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
 	tweakListOptions internalinterfaces.TweakListOptionsFunc
-	namespace        string
 }
 
 // NewManagerScheduleRequestInformer constructs a new informer for ManagerScheduleRequest type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewManagerScheduleRequestInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredManagerScheduleRequestInformer(client, namespace, resyncPeriod, indexers, nil)
+func NewManagerScheduleRequestInformer(client versioned.Interface, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
+	return NewFilteredManagerScheduleRequestInformer(client, resyncPeriod, indexers, nil)
 }
 
 // NewFilteredManagerScheduleRequestInformer constructs a new informer for ManagerScheduleRequest type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewFilteredManagerScheduleRequestInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
+func NewFilteredManagerScheduleRequestInformer(client versioned.Interface, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.AppV1alpha1().ManagerScheduleRequests(namespace).List(context.TODO(), options)
+				return client.AppV1alpha1().ManagerScheduleRequests().List(context.TODO(), options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.AppV1alpha1().ManagerScheduleRequests(namespace).Watch(context.TODO(), options)
+				return client.AppV1alpha1().ManagerScheduleRequests().Watch(context.TODO(), options)
 			},
 		},
 		&apisv1alpha1.ManagerScheduleRequest{},
@@ -77,7 +76,7 @@ func NewFilteredManagerScheduleRequestInformer(client versioned.Interface, names
 }
 
 func (f *managerScheduleRequestInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredManagerScheduleRequestInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+	return NewFilteredManagerScheduleRequestInformer(client, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
 }
 
 func (f *managerScheduleRequestInformer) Informer() cache.SharedIndexInformer {

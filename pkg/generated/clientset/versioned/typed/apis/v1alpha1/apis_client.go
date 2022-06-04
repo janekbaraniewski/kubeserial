@@ -46,8 +46,8 @@ func (c *AppV1alpha1Client) Managers(namespace string) ManagerInterface {
 	return newManagers(c, namespace)
 }
 
-func (c *AppV1alpha1Client) ManagerScheduleRequests(namespace string) ManagerScheduleRequestInterface {
-	return newManagerScheduleRequests(c, namespace)
+func (c *AppV1alpha1Client) ManagerScheduleRequests() ManagerScheduleRequestInterface {
+	return newManagerScheduleRequests(c)
 }
 
 func (c *AppV1alpha1Client) SerialDevices() SerialDeviceInterface {

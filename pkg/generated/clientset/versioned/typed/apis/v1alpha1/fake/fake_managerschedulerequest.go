@@ -32,7 +32,6 @@ import (
 // FakeManagerScheduleRequests implements ManagerScheduleRequestInterface
 type FakeManagerScheduleRequests struct {
 	Fake *FakeAppV1alpha1
-	ns   string
 }
 
 var managerschedulerequestsResource = schema.GroupVersionResource{Group: "app.kubeserial.com", Version: "v1alpha1", Resource: "managerschedulerequests"}
@@ -42,8 +41,7 @@ var managerschedulerequestsKind = schema.GroupVersionKind{Group: "app.kubeserial
 // Get takes name of the managerScheduleRequest, and returns the corresponding managerScheduleRequest object, and an error if there is any.
 func (c *FakeManagerScheduleRequests) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.ManagerScheduleRequest, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(managerschedulerequestsResource, c.ns, name), &v1alpha1.ManagerScheduleRequest{})
-
+		Invokes(testing.NewRootGetAction(managerschedulerequestsResource, name), &v1alpha1.ManagerScheduleRequest{})
 	if obj == nil {
 		return nil, err
 	}
@@ -53,8 +51,7 @@ func (c *FakeManagerScheduleRequests) Get(ctx context.Context, name string, opti
 // List takes label and field selectors, and returns the list of ManagerScheduleRequests that match those selectors.
 func (c *FakeManagerScheduleRequests) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.ManagerScheduleRequestList, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewListAction(managerschedulerequestsResource, managerschedulerequestsKind, c.ns, opts), &v1alpha1.ManagerScheduleRequestList{})
-
+		Invokes(testing.NewRootListAction(managerschedulerequestsResource, managerschedulerequestsKind, opts), &v1alpha1.ManagerScheduleRequestList{})
 	if obj == nil {
 		return nil, err
 	}
@@ -75,15 +72,13 @@ func (c *FakeManagerScheduleRequests) List(ctx context.Context, opts v1.ListOpti
 // Watch returns a watch.Interface that watches the requested managerScheduleRequests.
 func (c *FakeManagerScheduleRequests) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
-		InvokesWatch(testing.NewWatchAction(managerschedulerequestsResource, c.ns, opts))
-
+		InvokesWatch(testing.NewRootWatchAction(managerschedulerequestsResource, opts))
 }
 
 // Create takes the representation of a managerScheduleRequest and creates it.  Returns the server's representation of the managerScheduleRequest, and an error, if there is any.
 func (c *FakeManagerScheduleRequests) Create(ctx context.Context, managerScheduleRequest *v1alpha1.ManagerScheduleRequest, opts v1.CreateOptions) (result *v1alpha1.ManagerScheduleRequest, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(managerschedulerequestsResource, c.ns, managerScheduleRequest), &v1alpha1.ManagerScheduleRequest{})
-
+		Invokes(testing.NewRootCreateAction(managerschedulerequestsResource, managerScheduleRequest), &v1alpha1.ManagerScheduleRequest{})
 	if obj == nil {
 		return nil, err
 	}
@@ -93,8 +88,7 @@ func (c *FakeManagerScheduleRequests) Create(ctx context.Context, managerSchedul
 // Update takes the representation of a managerScheduleRequest and updates it. Returns the server's representation of the managerScheduleRequest, and an error, if there is any.
 func (c *FakeManagerScheduleRequests) Update(ctx context.Context, managerScheduleRequest *v1alpha1.ManagerScheduleRequest, opts v1.UpdateOptions) (result *v1alpha1.ManagerScheduleRequest, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(managerschedulerequestsResource, c.ns, managerScheduleRequest), &v1alpha1.ManagerScheduleRequest{})
-
+		Invokes(testing.NewRootUpdateAction(managerschedulerequestsResource, managerScheduleRequest), &v1alpha1.ManagerScheduleRequest{})
 	if obj == nil {
 		return nil, err
 	}
@@ -105,8 +99,7 @@ func (c *FakeManagerScheduleRequests) Update(ctx context.Context, managerSchedul
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
 func (c *FakeManagerScheduleRequests) UpdateStatus(ctx context.Context, managerScheduleRequest *v1alpha1.ManagerScheduleRequest, opts v1.UpdateOptions) (*v1alpha1.ManagerScheduleRequest, error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(managerschedulerequestsResource, "status", c.ns, managerScheduleRequest), &v1alpha1.ManagerScheduleRequest{})
-
+		Invokes(testing.NewRootUpdateSubresourceAction(managerschedulerequestsResource, "status", managerScheduleRequest), &v1alpha1.ManagerScheduleRequest{})
 	if obj == nil {
 		return nil, err
 	}
@@ -116,14 +109,13 @@ func (c *FakeManagerScheduleRequests) UpdateStatus(ctx context.Context, managerS
 // Delete takes name of the managerScheduleRequest and deletes it. Returns an error if one occurs.
 func (c *FakeManagerScheduleRequests) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteActionWithOptions(managerschedulerequestsResource, c.ns, name, opts), &v1alpha1.ManagerScheduleRequest{})
-
+		Invokes(testing.NewRootDeleteActionWithOptions(managerschedulerequestsResource, name, opts), &v1alpha1.ManagerScheduleRequest{})
 	return err
 }
 
 // DeleteCollection deletes a collection of objects.
 func (c *FakeManagerScheduleRequests) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(managerschedulerequestsResource, c.ns, listOpts)
+	action := testing.NewRootDeleteCollectionAction(managerschedulerequestsResource, listOpts)
 
 	_, err := c.Fake.Invokes(action, &v1alpha1.ManagerScheduleRequestList{})
 	return err
@@ -132,8 +124,7 @@ func (c *FakeManagerScheduleRequests) DeleteCollection(ctx context.Context, opts
 // Patch applies the patch and returns the patched managerScheduleRequest.
 func (c *FakeManagerScheduleRequests) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.ManagerScheduleRequest, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(managerschedulerequestsResource, c.ns, name, pt, data, subresources...), &v1alpha1.ManagerScheduleRequest{})
-
+		Invokes(testing.NewRootPatchSubresourceAction(managerschedulerequestsResource, name, pt, data, subresources...), &v1alpha1.ManagerScheduleRequest{})
 	if obj == nil {
 		return nil, err
 	}

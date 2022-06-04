@@ -37,10 +37,6 @@ type ManagerNamespaceListerExpansion interface{}
 // ManagerScheduleRequestLister.
 type ManagerScheduleRequestListerExpansion interface{}
 
-// ManagerScheduleRequestNamespaceListerExpansion allows custom methods to be added to
-// ManagerScheduleRequestNamespaceLister.
-type ManagerScheduleRequestNamespaceListerExpansion interface{}
-
 // SerialDeviceListerExpansion allows custom methods to be added to
 // SerialDeviceLister.
 type SerialDeviceListerExpansion interface{}

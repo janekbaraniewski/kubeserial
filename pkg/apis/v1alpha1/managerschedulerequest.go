@@ -37,13 +37,14 @@ type ManagerScheduleRequestStatus struct {
 }
 
 // +genclient
+// +genclient:nonNamespaced
 // +k8s:openapi-gen=true
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 // +kubebuilder:printcolumn:name="Device",type=string,JSONPath=`.spec.device`
 // +kubebuilder:printcolumn:name="Manager",type=string,JSONPath=`.spec.manager`
 // +kubebuilder:printcolumn:name="Fulfilled",type=boolean,JSONPath=`.status.fulfilled`
-// +kubebuilder:resource:path=managerschedulerequests,scope=Namespaced
+// +kubebuilder:resource:path=managerschedulerequests,scope=Cluster
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // ManagerScheduleRequest is the Schema for the managerschedulerequests API

@@ -35,8 +35,8 @@ func (c *FakeAppV1alpha1) Managers(namespace string) v1alpha1.ManagerInterface {
 	return &FakeManagers{c, namespace}
 }
 
-func (c *FakeAppV1alpha1) ManagerScheduleRequests(namespace string) v1alpha1.ManagerScheduleRequestInterface {
-	return &FakeManagerScheduleRequests{c, namespace}
+func (c *FakeAppV1alpha1) ManagerScheduleRequests() v1alpha1.ManagerScheduleRequestInterface {
+	return &FakeManagerScheduleRequests{c}
 }
 
 func (c *FakeAppV1alpha1) SerialDevices() v1alpha1.SerialDeviceInterface {

@@ -56,7 +56,7 @@ func (v *version) Managers() ManagerInformer {
 
 // ManagerScheduleRequests returns a ManagerScheduleRequestInformer.
 func (v *version) ManagerScheduleRequests() ManagerScheduleRequestInformer {
-	return &managerScheduleRequestInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+	return &managerScheduleRequestInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
 
 // SerialDevices returns a SerialDeviceInformer.

@@ -13,7 +13,7 @@ spec:
     listKind: ManagerScheduleRequestList
     plural: managerschedulerequests
     singular: managerschedulerequest
-  scope: Namespaced
+  scope: Cluster
   versions:
   - additionalPrinterColumns:
     - jsonPath: .spec.device

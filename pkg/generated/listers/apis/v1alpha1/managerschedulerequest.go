@@ -30,8 +30,9 @@ type ManagerScheduleRequestLister interface {
 	// List lists all ManagerScheduleRequests in the indexer.
 	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1alpha1.ManagerScheduleRequest, err error)
-	// ManagerScheduleRequests returns an object that can list and get ManagerScheduleRequests.
-	ManagerScheduleRequests(namespace string) ManagerScheduleRequestNamespaceLister
+	// Get retrieves the ManagerScheduleRequest from the index for a given name.
+	// Objects returned here must be treated as read-only.
+	Get(name string) (*v1alpha1.ManagerScheduleRequest, error)
 	ManagerScheduleRequestListerExpansion
 }
 
@@ -53,41 +54,9 @@ func (s *managerScheduleRequestLister) List(selector labels.Selector) (ret []*v1
 	return ret, err
 }
 
-// ManagerScheduleRequests returns an object that can list and get ManagerScheduleRequests.
-func (s *managerScheduleRequestLister) ManagerScheduleRequests(namespace string) ManagerScheduleRequestNamespaceLister {
-	return managerScheduleRequestNamespaceLister{indexer: s.indexer, namespace: namespace}
-}
-
-// ManagerScheduleRequestNamespaceLister helps list and get ManagerScheduleRequests.
-// All objects returned here must be treated as read-only.
-type ManagerScheduleRequestNamespaceLister interface {
-	// List lists all ManagerScheduleRequests in the indexer for a given namespace.
-	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1alpha1.ManagerScheduleRequest, err error)
-	// Get retrieves the ManagerScheduleRequest from the indexer for a given namespace and name.
-	// Objects returned here must be treated as read-only.
-	Get(name string) (*v1alpha1.ManagerScheduleRequest, error)
-	ManagerScheduleRequestNamespaceListerExpansion
-}
-
-// managerScheduleRequestNamespaceLister implements the ManagerScheduleRequestNamespaceLister
-// interface.
-type managerScheduleRequestNamespaceLister struct {
-	indexer   cache.Indexer
-	namespace string
-}
-
-// List lists all ManagerScheduleRequests in the indexer for a given namespace.
-func (s managerScheduleRequestNamespaceLister) List(selector labels.Selector) (ret []*v1alpha1.ManagerScheduleRequest, err error) {
-	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.ManagerScheduleRequest))
-	})
-	return ret, err
-}
-
-// Get retrieves the ManagerScheduleRequest from the indexer for a given namespace and name.
-func (s managerScheduleRequestNamespaceLister) Get(name string) (*v1alpha1.ManagerScheduleRequest, error) {
-	obj, exists, err := s.indexer.GetByKey(s.namespace + "/" + name)
+// Get retrieves the ManagerScheduleRequest from the index for a given name.
+func (s *managerScheduleRequestLister) Get(name string) (*v1alpha1.ManagerScheduleRequest, error) {
+	obj, exists, err := s.indexer.GetByKey(name)
 	if err != nil {
 		return nil, err
 	}

@@ -32,7 +32,7 @@ import (
 // ManagerScheduleRequestsGetter has a method to return a ManagerScheduleRequestInterface.
 // A group's client should implement this interface.
 type ManagerScheduleRequestsGetter interface {
-	ManagerScheduleRequests(namespace string) ManagerScheduleRequestInterface
+	ManagerScheduleRequests() ManagerScheduleRequestInterface
 }
 
 // ManagerScheduleRequestInterface has methods to work with ManagerScheduleRequest resources.
@@ -52,14 +52,12 @@ type ManagerScheduleRequestInterface interface {
 // managerScheduleRequests implements ManagerScheduleRequestInterface
 type managerScheduleRequests struct {
 	client rest.Interface
-	ns     string
 }
 
 // newManagerScheduleRequests returns a ManagerScheduleRequests
-func newManagerScheduleRequests(c *AppV1alpha1Client, namespace string) *managerScheduleRequests {
+func newManagerScheduleRequests(c *AppV1alpha1Client) *managerScheduleRequests {
 	return &managerScheduleRequests{
 		client: c.RESTClient(),
-		ns:     namespace,
 	}
 }
 
@@ -67,7 +65,6 @@ func newManagerScheduleRequests(c *AppV1alpha1Client, namespace string) *manager
 func (c *managerScheduleRequests) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.ManagerScheduleRequest, err error) {
 	result = &v1alpha1.ManagerScheduleRequest{}
 	err = c.client.Get().
-		Namespace(c.ns).
 		Resource("managerschedulerequests").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
@@ -84,7 +81,6 @@ func (c *managerScheduleRequests) List(ctx context.Context, opts v1.ListOptions)
 	}
 	result = &v1alpha1.ManagerScheduleRequestList{}
 	err = c.client.Get().
-		Namespace(c.ns).
 		Resource("managerschedulerequests").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -101,7 +97,6 @@ func (c *managerScheduleRequests) Watch(ctx context.Context, opts v1.ListOptions
 	}
 	opts.Watch = true
 	return c.client.Get().
-		Namespace(c.ns).
 		Resource("managerschedulerequests").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -112,7 +107,6 @@ func (c *managerScheduleRequests) Watch(ctx context.Context, opts v1.ListOptions
 func (c *managerScheduleRequests) Create(ctx context.Context, managerScheduleRequest *v1alpha1.ManagerScheduleRequest, opts v1.CreateOptions) (result *v1alpha1.ManagerScheduleRequest, err error) {
 	result = &v1alpha1.ManagerScheduleRequest{}
 	err = c.client.Post().
-		Namespace(c.ns).
 		Resource("managerschedulerequests").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(managerScheduleRequest).
@@ -125,7 +119,6 @@ func (c *managerScheduleRequests) Create(ctx context.Context, managerScheduleReq
 func (c *managerScheduleRequests) Update(ctx context.Context, managerScheduleRequest *v1alpha1.ManagerScheduleRequest, opts v1.UpdateOptions) (result *v1alpha1.ManagerScheduleRequest, err error) {
 	result = &v1alpha1.ManagerScheduleRequest{}
 	err = c.client.Put().
-		Namespace(c.ns).
 		Resource("managerschedulerequests").
 		Name(managerScheduleRequest.Name).
 		VersionedParams(&opts, scheme.ParameterCodec).
@@ -140,7 +133,6 @@ func (c *managerScheduleRequests) Update(ctx context.Context, managerScheduleReq
 func (c *managerScheduleRequests) UpdateStatus(ctx context.Context, managerScheduleRequest *v1alpha1.ManagerScheduleRequest, opts v1.UpdateOptions) (result *v1alpha1.ManagerScheduleRequest, err error) {
 	result = &v1alpha1.ManagerScheduleRequest{}
 	err = c.client.Put().
-		Namespace(c.ns).
 		Resource("managerschedulerequests").
 		Name(managerScheduleRequest.Name).
 		SubResource("status").
@@ -154,7 +146,6 @@ func (c *managerScheduleRequests) UpdateStatus(ctx context.Context, managerSched
 // Delete takes name of the managerScheduleRequest and deletes it. Returns an error if one occurs.
 func (c *managerScheduleRequests) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	return c.client.Delete().
-		Namespace(c.ns).
 		Resource("managerschedulerequests").
 		Name(name).
 		Body(&opts).
@@ -169,7 +160,6 @@ func (c *managerScheduleRequests) DeleteCollection(ctx context.Context, opts v1.
 		timeout = time.Duration(*listOpts.TimeoutSeconds) * time.Second
 	}
 	return c.client.Delete().
-		Namespace(c.ns).
 		Resource("managerschedulerequests").
 		VersionedParams(&listOpts, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -182,7 +172,6 @@ func (c *managerScheduleRequests) DeleteCollection(ctx context.Context, opts v1.
 func (c *managerScheduleRequests) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.ManagerScheduleRequest, err error) {
 	result = &v1alpha1.ManagerScheduleRequest{}
 	err = c.client.Patch(pt).
-		Namespace(c.ns).
 		Resource("managerschedulerequests").
 		Name(name).
 		SubResource(subresources...).

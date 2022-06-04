@@ -32,7 +32,6 @@ import (
 // FakeManagers implements ManagerInterface
 type FakeManagers struct {
 	Fake *FakeAppV1alpha1
-	ns   string
 }
 
 var managersResource = schema.GroupVersionResource{Group: "app.kubeserial.com", Version: "v1alpha1", Resource: "managers"}
@@ -42,8 +41,7 @@ var managersKind = schema.GroupVersionKind{Group: "app.kubeserial.com", Version:
 // Get takes name of the manager, and returns the corresponding manager object, and an error if there is any.
 func (c *FakeManagers) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.Manager, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(managersResource, c.ns, name), &v1alpha1.Manager{})
-
+		Invokes(testing.NewRootGetAction(managersResource, name), &v1alpha1.Manager{})
 	if obj == nil {
 		return nil, err
 	}
@@ -53,8 +51,7 @@ func (c *FakeManagers) Get(ctx context.Context, name string, options v1.GetOptio
 // List takes label and field selectors, and returns the list of Managers that match those selectors.
 func (c *FakeManagers) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.ManagerList, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewListAction(managersResource, managersKind, c.ns, opts), &v1alpha1.ManagerList{})
-
+		Invokes(testing.NewRootListAction(managersResource, managersKind, opts), &v1alpha1.ManagerList{})
 	if obj == nil {
 		return nil, err
 	}
@@ -75,15 +72,13 @@ func (c *FakeManagers) List(ctx context.Context, opts v1.ListOptions) (result *v
 // Watch returns a watch.Interface that watches the requested managers.
 func (c *FakeManagers) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
-		InvokesWatch(testing.NewWatchAction(managersResource, c.ns, opts))
-
+		InvokesWatch(testing.NewRootWatchAction(managersResource, opts))
 }
 
 // Create takes the representation of a manager and creates it.  Returns the server's representation of the manager, and an error, if there is any.
 func (c *FakeManagers) Create(ctx context.Context, manager *v1alpha1.Manager, opts v1.CreateOptions) (result *v1alpha1.Manager, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(managersResource, c.ns, manager), &v1alpha1.Manager{})
-
+		Invokes(testing.NewRootCreateAction(managersResource, manager), &v1alpha1.Manager{})
 	if obj == nil {
 		return nil, err
 	}
@@ -93,8 +88,7 @@ func (c *FakeManagers) Create(ctx context.Context, manager *v1alpha1.Manager, op
 // Update takes the representation of a manager and updates it. Returns the server's representation of the manager, and an error, if there is any.
 func (c *FakeManagers) Update(ctx context.Context, manager *v1alpha1.Manager, opts v1.UpdateOptions) (result *v1alpha1.Manager, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(managersResource, c.ns, manager), &v1alpha1.Manager{})
-
+		Invokes(testing.NewRootUpdateAction(managersResource, manager), &v1alpha1.Manager{})
 	if obj == nil {
 		return nil, err
 	}
@@ -105,8 +99,7 @@ func (c *FakeManagers) Update(ctx context.Context, manager *v1alpha1.Manager, op
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
 func (c *FakeManagers) UpdateStatus(ctx context.Context, manager *v1alpha1.Manager, opts v1.UpdateOptions) (*v1alpha1.Manager, error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(managersResource, "status", c.ns, manager), &v1alpha1.Manager{})
-
+		Invokes(testing.NewRootUpdateSubresourceAction(managersResource, "status", manager), &v1alpha1.Manager{})
 	if obj == nil {
 		return nil, err
 	}
@@ -116,14 +109,13 @@ func (c *FakeManagers) UpdateStatus(ctx context.Context, manager *v1alpha1.Manag
 // Delete takes name of the manager and deletes it. Returns an error if one occurs.
 func (c *FakeManagers) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteActionWithOptions(managersResource, c.ns, name, opts), &v1alpha1.Manager{})
-
+		Invokes(testing.NewRootDeleteActionWithOptions(managersResource, name, opts), &v1alpha1.Manager{})
 	return err
 }
 
 // DeleteCollection deletes a collection of objects.
 func (c *FakeManagers) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(managersResource, c.ns, listOpts)
+	action := testing.NewRootDeleteCollectionAction(managersResource, listOpts)
 
 	_, err := c.Fake.Invokes(action, &v1alpha1.ManagerList{})
 	return err
@@ -132,8 +124,7 @@ func (c *FakeManagers) DeleteCollection(ctx context.Context, opts v1.DeleteOptio
 // Patch applies the patch and returns the patched manager.
 func (c *FakeManagers) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.Manager, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(managersResource, c.ns, name, pt, data, subresources...), &v1alpha1.Manager{})
-
+		Invokes(testing.NewRootPatchSubresourceAction(managersResource, name, pt, data, subresources...), &v1alpha1.Manager{})
 	if obj == nil {
 		return nil, err
 	}

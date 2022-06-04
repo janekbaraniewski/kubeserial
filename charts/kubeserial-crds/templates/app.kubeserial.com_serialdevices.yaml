@@ -23,7 +23,7 @@ spec:
       name: Available
       type: string
     - jsonPath: .status.nodeName
-      name: SerialDevice Node
+      name: Node
       type: string
     name: v1alpha1
     schema:

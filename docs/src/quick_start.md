@@ -55,7 +55,10 @@ Look for them from the top.
 
 ## Update helm values file
 
-TODO: more details
+Now you're ready to create configuration for your devices. Here you can find example of 2 devices - one is using predefined manager, one doesn't. To learn about the difference, please refer to [manager configuration docs](configuration/managers/SUMMARY.md)
+
+Add this config to your values file:
+
 
 ```yaml
 kubeserial:
@@ -68,3 +71,34 @@ kubeserial:
     idVendor: 10c4
     name: sonoff-zigbee
 ```
+
+## Update your helm release with new values
+
+```bash
+$ helm upgrade kubeserial baraniewski/kubeserial -f my-values.yaml
+```
+
+## Validate that everything is working
+
+You should see 3 workloads in your cluster - controler manager, webhook and device monitor:
+
+```bash
+$ ➜  kubectl get pods                                                                  
+NAME                                         READY   STATUS    RESTARTS   AGE
+kubeserial-7d58555d4c-97nqk                  1/1     Running   0          5m
+kubeserial-device-injector-cc7696b59-mfdn5   1/1     Running   0          5m
+kubeserial-monitor-rjs82                     2/2     Running   0          5m
+```
+
+Number of `kubeserial-monitor` pods should match number of your cluster nodes.
+
+You should also see your devices:
+
+```bash
+$ ➜  kubectl get serialdevice
+NAME            READY   AVAILABLE   NODE
+ender3          True    False       
+sonoff-zigbee   True    False       
+```
+
+You're all set with basic configuration of KubeSerial. Please read through rest of docs to configure it to your needs.

@@ -13,7 +13,6 @@ func TestCreateConfigMap(t *testing.T) {
 			SerialDevices: []appv1alpha1.SerialDevice_2{
 				{
 					Name:      "testdevice",
-					Subsystem: "tty",
 					IdVendor:  "123",
 					IdProduct: "456",
 				},

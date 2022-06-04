@@ -33,7 +33,6 @@ func getCR() *kubeserialv1alpha1.KubeSerial {
 					IdVendor:  "0",
 					IdProduct: "1",
 					Manager:   "testManager",
-					Subsystem: "tty",
 				},
 			},
 		},

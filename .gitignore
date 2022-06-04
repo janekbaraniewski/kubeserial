@@ -76,7 +76,7 @@ tags
 .history
 # End of https://www.gitignore.io/api/go,vim,emacs,visualstudiocode
 
-deploy/chart/*/values-local.yaml
+charts/*/values-local.yaml
 
 # Local files
 local/

@@ -125,7 +125,7 @@ jobs:
         env:
           API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
         with:
-          source-directory: 'deploy/chart/kubeserial'
+          source-directory: 'charts/kubeserial'
           destination-github-username: 'janekbaraniewski'
           destination-repository-name: 'charts'
           user-email: dev@baraniewski.com

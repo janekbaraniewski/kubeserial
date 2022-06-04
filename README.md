@@ -13,8 +13,8 @@ KubeSerial monitors your cluster nodes for physical devices specified in spec. O
 
 ## Quick start
 
-You can find quick start guide [here](#TODO)
+You can find quick start guide [here](https://baraniewski.com/kubeserial/quick_start.html)
 
 ## Docs
 
-Docs can be found [here](#TODO)
+Docs can be found [here](https://baraniewski.com/kubeserial/)

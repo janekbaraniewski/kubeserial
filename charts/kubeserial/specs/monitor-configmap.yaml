@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels: {{ include "kubeserial.monitorLabels" . | nindent 8 }}
+  name: {{ include "kubeserial.monitorFullname" . }}
+  namespace: {{ .Release.Namespace }}
+data:
+  98-devices.rules: TODO

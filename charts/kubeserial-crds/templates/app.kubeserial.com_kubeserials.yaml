@@ -57,13 +57,10 @@ spec:
                       type: string
                     name:
                       type: string
-                    subsystem:
-                      type: string
                   required:
                   - idProduct
                   - idVendor
                   - name
-                  - subsystem
                   type: object
                 type: array
             required:

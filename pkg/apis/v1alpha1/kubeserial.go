@@ -35,9 +35,6 @@ type SerialDevice_2 struct {
 	// +optional
 	// +kubebuilder:validation:Optional
 	Manager string `json:"manager"`
-	// +required
-	// +kubebuilder:validation:Required
-	Subsystem string `json:"subsystem"`
 }
 
 // IngressSpec defines the desired Ingress configuration

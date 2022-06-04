@@ -393,15 +393,8 @@ func schema_kubeserial_pkg_apis_v1alpha1_SerialDevice_2(ref common.ReferenceCall
 							Format:  "",
 						},
 					},
-					"subsystem": {
-						SchemaProps: spec.SchemaProps{
-							Default: "",
-							Type:    []string{"string"},
-							Format:  "",
-						},
-					},
 				},
-				Required: []string{"name", "idVendor", "idProduct", "subsystem"},
+				Required: []string{"name", "idVendor", "idProduct"},
 			},
 		},
 	}

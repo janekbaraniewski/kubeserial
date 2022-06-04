@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-CHART_PATH=${CHART_PATH:-"./deploy/chart/kubeserial"}
+CHART_PATH=${CHART_PATH:-"./charts/kubeserial"}
 PLACEHOLDER_VALUE=${PLACEHOLDER_VALUE:-"APP_VERSION"}
 
 if [[ -z "${VERSION}" ]]; then

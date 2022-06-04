@@ -5,7 +5,7 @@ on:
     paths-ignore:
       - '.github/**'
       - 'docs/**'
-      - 'deploy/**'
+      - 'charts/**'
       - 'README.md'
       - 'LICENSE'
 

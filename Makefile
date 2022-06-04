@@ -71,7 +71,7 @@ test-fswatch: ## Use fswatch to watch source files and run tests on chamnge
 .PHONY: envtest-render-crds
 envtest-render-crds:
 	@rm -rf build/_output/kubeserial-crds || echo ""
-	@helm template deploy/chart/kubeserial-crds --name-template kubeserial --output-dir build/_output
+	@helm template charts/kubeserial-crds --name-template kubeserial --output-dir build/_output
 
 # ENVTEST = $(shell pwd)/bin/setup-envtest
 # .PHONY: envtest
@@ -149,26 +149,26 @@ injector-webhook-docker:
 ##@ Helm
 
 .PHONY: update-kubeserial-chart-version
-update-kubeserial-chart-version: CHART_PATH=./deploy/chart/kubeserial
+update-kubeserial-chart-version: CHART_PATH=./charts/kubeserial
 update-kubeserial-chart-version: ## Update version used in chart. Requires VERSION var to be set
 	@CHART_PATH=${CHART_PATH} VERSION=${VERSION} ./hack/update-chart-version.sh
 
 .PHONY: update-kubeserial-crds-chart-version
-update-kubeserial-crds-chart-version: CHART_PATH=./deploy/chart/kubeserial-crds
+update-kubeserial-crds-chart-version: CHART_PATH=./charts/kubeserial-crds
 update-kubeserial-crds-chart-version: ## Update version used in chart. Requires VERSION var to be set
 	@CHART_PATH=${CHART_PATH} VERSION=${VERSION} ./hack/update-chart-version.sh
 
 .PHONY: helm-lint
 helm-lint: ## Run chart-testing to lint kubeserial chart.
-	@ct lint --chart-dirs deploy/chart/ --check-version-increment=false
+	@ct lint --chart-dirs charts/ --check-version-increment=false
 
 .PHONY: update-crds-labels
 update-crds-labels:
-	@python3 ./hack/update-crd-metadata.py deploy/chart/kubeserial-crds/templates/app.kubeserial.com_kubeserials.yaml hack/crd_metadata_template.yaml
+	@python3 ./hack/update-crd-metadata.py charts/kubeserial-crds/templates/app.kubeserial.com_kubeserials.yaml hack/crd_metadata_template.yaml
 
 .PHONY: update-webhook-template
 update-webhook-template:
-	@python3 ./hack/update-webhook-template.py deploy/chart/kubeserial/templates/webhooks.yaml hack/webhook_template.yaml
+	@python3 ./hack/update-webhook-template.py charts/kubeserial/templates/webhooks.yaml hack/webhook_template.yaml
 
 .PHONY: update-version
 update-version: update-kubeserial-crds-chart-version update-kubeserial-chart-version
@@ -233,8 +233,8 @@ uninstall: ## Uninstall release.
 
 .PHONY: deploy-dev
 deploy-dev: manifests-gen update-kubeserial-chart-version update-kubeserial-crds-chart-version ## Install dev release in current context/namespace.
-	helm upgrade --create-namespace --namespace kubeserial --install ${RELEASE_NAME}-crds ./deploy/chart/kubeserial-crds
-	helm upgrade --create-namespace --namespace kubeserial --install ${RELEASE_NAME} ./deploy/chart/kubeserial -f ./deploy/chart/kubeserial/values-local.yaml
+	helm upgrade --create-namespace --namespace kubeserial --install ${RELEASE_NAME}-crds ./charts/kubeserial-crds
+	helm upgrade --create-namespace --namespace kubeserial --install ${RELEASE_NAME} ./charts/kubeserial -f ./charts/kubeserial/values-local.yaml
 
 ##@ Docs
 

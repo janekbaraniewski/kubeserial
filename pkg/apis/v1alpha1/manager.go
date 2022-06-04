@@ -52,10 +52,11 @@ type ManagerSpec struct {
 type ManagerStatus struct{}
 
 // +genclient
+// +genclient:nonNamespaced
 // +k8s:openapi-gen=true
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:path=managers,scope=Namespaced
+// +kubebuilder:resource:path=managers,scope=Cluster
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // Manager is the Schema for the managers API

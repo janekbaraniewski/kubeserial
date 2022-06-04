@@ -30,8 +30,9 @@ type ManagerLister interface {
 	// List lists all Managers in the indexer.
 	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1alpha1.Manager, err error)
-	// Managers returns an object that can list and get Managers.
-	Managers(namespace string) ManagerNamespaceLister
+	// Get retrieves the Manager from the index for a given name.
+	// Objects returned here must be treated as read-only.
+	Get(name string) (*v1alpha1.Manager, error)
 	ManagerListerExpansion
 }
 
@@ -53,41 +54,9 @@ func (s *managerLister) List(selector labels.Selector) (ret []*v1alpha1.Manager,
 	return ret, err
 }
 
-// Managers returns an object that can list and get Managers.
-func (s *managerLister) Managers(namespace string) ManagerNamespaceLister {
-	return managerNamespaceLister{indexer: s.indexer, namespace: namespace}
-}
-
-// ManagerNamespaceLister helps list and get Managers.
-// All objects returned here must be treated as read-only.
-type ManagerNamespaceLister interface {
-	// List lists all Managers in the indexer for a given namespace.
-	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1alpha1.Manager, err error)
-	// Get retrieves the Manager from the indexer for a given namespace and name.
-	// Objects returned here must be treated as read-only.
-	Get(name string) (*v1alpha1.Manager, error)
-	ManagerNamespaceListerExpansion
-}
-
-// managerNamespaceLister implements the ManagerNamespaceLister
-// interface.
-type managerNamespaceLister struct {
-	indexer   cache.Indexer
-	namespace string
-}
-
-// List lists all Managers in the indexer for a given namespace.
-func (s managerNamespaceLister) List(selector labels.Selector) (ret []*v1alpha1.Manager, err error) {
-	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.Manager))
-	})
-	return ret, err
-}
-
-// Get retrieves the Manager from the indexer for a given namespace and name.
-func (s managerNamespaceLister) Get(name string) (*v1alpha1.Manager, error) {
-	obj, exists, err := s.indexer.GetByKey(s.namespace + "/" + name)
+// Get retrieves the Manager from the index for a given name.
+func (s *managerLister) Get(name string) (*v1alpha1.Manager, error) {
+	obj, exists, err := s.indexer.GetByKey(name)
 	if err != nil {
 		return nil, err
 	}

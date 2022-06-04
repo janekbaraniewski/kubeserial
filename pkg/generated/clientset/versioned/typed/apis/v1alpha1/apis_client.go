@@ -42,8 +42,8 @@ func (c *AppV1alpha1Client) KubeSerials(namespace string) KubeSerialInterface {
 	return newKubeSerials(c, namespace)
 }
 
-func (c *AppV1alpha1Client) Managers(namespace string) ManagerInterface {
-	return newManagers(c, namespace)
+func (c *AppV1alpha1Client) Managers() ManagerInterface {
+	return newManagers(c)
 }
 
 func (c *AppV1alpha1Client) ManagerScheduleRequests() ManagerScheduleRequestInterface {

@@ -51,7 +51,7 @@ func (v *version) KubeSerials() KubeSerialInformer {
 
 // Managers returns a ManagerInformer.
 func (v *version) Managers() ManagerInformer {
-	return &managerInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+	return &managerInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
 
 // ManagerScheduleRequests returns a ManagerScheduleRequestInformer.

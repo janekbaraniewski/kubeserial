@@ -31,8 +31,8 @@ func (c *FakeAppV1alpha1) KubeSerials(namespace string) v1alpha1.KubeSerialInter
 	return &FakeKubeSerials{c, namespace}
 }
 
-func (c *FakeAppV1alpha1) Managers(namespace string) v1alpha1.ManagerInterface {
-	return &FakeManagers{c, namespace}
+func (c *FakeAppV1alpha1) Managers() v1alpha1.ManagerInterface {
+	return &FakeManagers{c}
 }
 
 func (c *FakeAppV1alpha1) ManagerScheduleRequests() v1alpha1.ManagerScheduleRequestInterface {

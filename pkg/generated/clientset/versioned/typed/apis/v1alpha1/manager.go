@@ -32,7 +32,7 @@ import (
 // ManagersGetter has a method to return a ManagerInterface.
 // A group's client should implement this interface.
 type ManagersGetter interface {
-	Managers(namespace string) ManagerInterface
+	Managers() ManagerInterface
 }
 
 // ManagerInterface has methods to work with Manager resources.
@@ -52,14 +52,12 @@ type ManagerInterface interface {
 // managers implements ManagerInterface
 type managers struct {
 	client rest.Interface
-	ns     string
 }
 
 // newManagers returns a Managers
-func newManagers(c *AppV1alpha1Client, namespace string) *managers {
+func newManagers(c *AppV1alpha1Client) *managers {
 	return &managers{
 		client: c.RESTClient(),
-		ns:     namespace,
 	}
 }
 
@@ -67,7 +65,6 @@ func newManagers(c *AppV1alpha1Client, namespace string) *managers {
 func (c *managers) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.Manager, err error) {
 	result = &v1alpha1.Manager{}
 	err = c.client.Get().
-		Namespace(c.ns).
 		Resource("managers").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
@@ -84,7 +81,6 @@ func (c *managers) List(ctx context.Context, opts v1.ListOptions) (result *v1alp
 	}
 	result = &v1alpha1.ManagerList{}
 	err = c.client.Get().
-		Namespace(c.ns).
 		Resource("managers").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -101,7 +97,6 @@ func (c *managers) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interf
 	}
 	opts.Watch = true
 	return c.client.Get().
-		Namespace(c.ns).
 		Resource("managers").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -112,7 +107,6 @@ func (c *managers) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interf
 func (c *managers) Create(ctx context.Context, manager *v1alpha1.Manager, opts v1.CreateOptions) (result *v1alpha1.Manager, err error) {
 	result = &v1alpha1.Manager{}
 	err = c.client.Post().
-		Namespace(c.ns).
 		Resource("managers").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(manager).
@@ -125,7 +119,6 @@ func (c *managers) Create(ctx context.Context, manager *v1alpha1.Manager, opts v
 func (c *managers) Update(ctx context.Context, manager *v1alpha1.Manager, opts v1.UpdateOptions) (result *v1alpha1.Manager, err error) {
 	result = &v1alpha1.Manager{}
 	err = c.client.Put().
-		Namespace(c.ns).
 		Resource("managers").
 		Name(manager.Name).
 		VersionedParams(&opts, scheme.ParameterCodec).
@@ -140,7 +133,6 @@ func (c *managers) Update(ctx context.Context, manager *v1alpha1.Manager, opts v
 func (c *managers) UpdateStatus(ctx context.Context, manager *v1alpha1.Manager, opts v1.UpdateOptions) (result *v1alpha1.Manager, err error) {
 	result = &v1alpha1.Manager{}
 	err = c.client.Put().
-		Namespace(c.ns).
 		Resource("managers").
 		Name(manager.Name).
 		SubResource("status").
@@ -154,7 +146,6 @@ func (c *managers) UpdateStatus(ctx context.Context, manager *v1alpha1.Manager, 
 // Delete takes name of the manager and deletes it. Returns an error if one occurs.
 func (c *managers) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	return c.client.Delete().
-		Namespace(c.ns).
 		Resource("managers").
 		Name(name).
 		Body(&opts).
@@ -169,7 +160,6 @@ func (c *managers) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, 
 		timeout = time.Duration(*listOpts.TimeoutSeconds) * time.Second
 	}
 	return c.client.Delete().
-		Namespace(c.ns).
 		Resource("managers").
 		VersionedParams(&listOpts, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -182,7 +172,6 @@ func (c *managers) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, 
 func (c *managers) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.Manager, err error) {
 	result = &v1alpha1.Manager{}
 	err = c.client.Patch(pt).
-		Namespace(c.ns).
 		Resource("managers").
 		Name(name).
 		SubResource(subresources...).

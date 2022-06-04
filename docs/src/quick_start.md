@@ -64,9 +64,7 @@ kubeserial:
     idVendor: "0403"
     manager: octoprint
     name: ender3
-    subsystem: tty
   - idProduct: ea60
     idVendor: 10c4
     name: sonoff-zigbee
-    subsystem: tty
 ```

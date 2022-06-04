@@ -80,7 +80,7 @@ $ helm upgrade kubeserial baraniewski/kubeserial -f my-values.yaml
 
 ## Validate that everything is working
 
-You should see 3 workloads in your cluster - controler manager, webhook and device monitor:
+You should see 3 workloads in your cluster - controler manager, device injector webhook and device monitor:
 
 ```bash
 $ ➜  kubectl get pods                                                                  

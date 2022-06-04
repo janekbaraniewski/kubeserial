@@ -32,7 +32,7 @@ func getCR() *kubeserialv1alpha1.KubeSerial {
 					Name:      "testDevice",
 					IdVendor:  "0",
 					IdProduct: "1",
-					Manager:   "octoprint", // TODO: this should use some test manager
+					Manager:   "testManager",
 					Subsystem: "tty",
 				},
 			},

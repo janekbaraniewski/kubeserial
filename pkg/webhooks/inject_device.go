@@ -31,7 +31,6 @@ type SerialDeviceInjector struct {
 	Name            string
 	Clientset       versioned.Interface
 	ConfigExtractor *images.OCIConfigExtractor
-	Namespace       string
 	decoder         *admission.Decoder
 }
 

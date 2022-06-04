@@ -21,9 +21,8 @@ import (
 var setupLog = ctrl.Log.WithName("setup")
 
 type HookParamters struct {
-	certDir   string
-	port      int
-	namespace string
+	certDir string
+	port    int
 }
 
 func main() {
@@ -31,7 +30,6 @@ func main() {
 
 	flag.IntVar(&params.port, "port", 8443, "Wehbook port")
 	flag.StringVar(&params.certDir, "certDir", "/certs/", "Wehbook certificate folder")
-	flag.StringVar(&params.namespace, "namespace", "kubeserial", "Namespace in which controller is deployed") // TODO: remove this and make it work globaly
 	opts := zap.Options{
 		Development: true,
 	}
@@ -80,7 +78,6 @@ func main() {
 				Name:            "DeviceInjector",
 				Clientset:       clientset,
 				ConfigExtractor: images.NewOCIConfigExtractor(),
-				Namespace:       params.namespace,
 			},
 		},
 	)

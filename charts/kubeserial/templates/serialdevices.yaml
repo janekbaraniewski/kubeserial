@@ -1,4 +1,4 @@
-{{- range .Values.kubeserial.devices }}
+{{- range .Values.kubeserial.serialDevices }}
 apiVersion: app.kubeserial.com/v1alpha1
 kind: SerialDevice
 metadata:

@@ -9,7 +9,7 @@
 
 KubeSerial monitors your cluster nodes for physical devices specified in spec. Once the device is connected, it creates gateway service that exposes it over the network and manager service with specified management software. When the device gets disconnected everything is cleaned up.
 
-![Example usage 1](demo1.gif)
+![Example usage 1](docs/demo1.gif)
 
 ## Quick start
 

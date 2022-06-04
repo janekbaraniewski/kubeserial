@@ -7,7 +7,7 @@ import (
 )
 
 func CreateDaemonSet(fs utils.FileSystem) (*appsv1.DaemonSet, error) {
-	SPEC_PATH := "/config/monitor-spec.yaml"
+	SPEC_PATH := "/config/monitor-daemonset-spec.yaml"
 
 	ds := &appsv1.DaemonSet{}
 

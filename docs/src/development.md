@@ -2,7 +2,11 @@
 
 <!-- toc -->
 
-```zsh 
+## Intro
+
+Most things you'd need for local development are covered in Makefile. Just run `make help` to see available commands:
+
+```zsh
 ➜  make help
 
 Usage:
@@ -55,3 +59,54 @@ Build
   injector-webhook  Build sidecar injector webhook binary binary
   all               Run codegen and build all components.
 ```
+
+## Running tests
+
+After any change run
+
+```bash
+$ make test
+```
+
+to run tests suite
+
+You can also find it helpful to just run tests every time there is a change in project source files, for this run
+
+```bash
+$ make test-fswatch
+```
+
+which will run `test` target every time it detects change using `fswatch` (`fswatch` must be installed)
+
+## Building images
+
+There are sets of 2 targets for each image that is a part of this project:
+
+> *-docker-local
+
+which builds docker image for local development
+
+and 
+
+> *-docker-all
+
+which builds docker image for all target architectures.
+
+For local development you'll only need to build local images
+
+### Building images localy
+
+<mark>Docker buildx builder with support for platforms listed in TARGET_PLATFORMS is required</mark>
+
+If you want to build all images using your local Docker, run
+
+```zsh
+$ make docker-local 
+```
+
+This will execute all `*-docker-local` targets and build images using your local Docker.
+
+## Running minikube
+
+TODO
+<!-- TODO -->

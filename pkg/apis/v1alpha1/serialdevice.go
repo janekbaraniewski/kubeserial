@@ -98,7 +98,7 @@ type SerialDeviceStatus struct {
 // +kubebuilder:resource:path=serialdevices,scope=Cluster
 // +kubebuilder:printcolumn:name="Ready",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
 // +kubebuilder:printcolumn:name="Available",type=string,JSONPath=`.status.conditions[?(@.type=="Available")].status`
-// +kubebuilder:printcolumn:name="SerialDevice Node",type=string,JSONPath=`.status.nodeName`
+// +kubebuilder:printcolumn:name="Node",type=string,JSONPath=`.status.nodeName`
 
 // SerialDevice is the Schema for the SerialDevices API
 type SerialDevice struct {

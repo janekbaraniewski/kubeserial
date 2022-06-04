@@ -11,11 +11,11 @@ import (
 
 func TestCreateDaemonSet(t *testing.T) {
 	fs := utils.NewInMemoryFS()
-	file, err := fs.Create("/config/monitor-spec.yaml")
+	file, err := fs.Create("/config/monitor-daemonset-spec.yaml")
 
 	assert.Equal(t, nil, err)
 
-	absPath, _ := filepath.Abs("../assets/monitor-spec.yaml")
+	absPath, _ := filepath.Abs("../assets/monitor-daemonset-spec.yaml")
 	content, err := os.ReadFile(absPath)
 	if err != nil {
 		t.Fatalf("Failed to read yaml resource: %v", err)

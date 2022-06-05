@@ -30,16 +30,16 @@ func (f *osFS) Stat(name string) (os.FileInfo, error) { return os.Stat(name) }
 func NewOSFS() *osFS { return &osFS{} }
 
 // aferoFS implements fileSystem using afero
-type inMemoryFS struct {
+type InMemoryFS struct {
 	fs afero.Fs
 }
 
-func (f *inMemoryFS) Open(name string) (File, error)        { return f.fs.Open(name) }
-func (f *inMemoryFS) Stat(name string) (os.FileInfo, error) { return f.fs.Stat(name) }
-func (f *inMemoryFS) Create(name string) (File, error)      { return f.fs.Create(name) }
+func (f *InMemoryFS) Open(name string) (File, error)        { return f.fs.Open(name) }
+func (f *InMemoryFS) Stat(name string) (os.FileInfo, error) { return f.fs.Stat(name) }
+func (f *InMemoryFS) Create(name string) (File, error)      { return f.fs.Create(name) }
 
-func NewInMemoryFS() *inMemoryFS {
-	fs := &inMemoryFS{}
+func NewInMemoryFS() *InMemoryFS {
+	fs := &InMemoryFS{}
 	fs.fs = afero.NewMemMapFs()
 	return fs
 }

@@ -3,6 +3,7 @@ package monitor
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/janekbaraniewski/kubeserial/pkg/utils"
@@ -27,5 +28,6 @@ func TestCreateDaemonSet(t *testing.T) {
 
 	assert.Equal(t, nil, err)
 	assert.Equal(t, "kubeserial-monitor", result.ObjectMeta.Name)
-	assert.Equal(t, "janekbaraniewski/kubeserial-device-monitor:dev", result.Spec.Template.Spec.Containers[0].Image)
+	imageAndTag := strings.Split(result.Spec.Template.Spec.Containers[0].Image, ":")
+	assert.Equal(t, "janekbaraniewski/kubeserial-device-monitor", imageAndTag[0])
 }

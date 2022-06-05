@@ -29,6 +29,7 @@ import (
 	kubeserialv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	api "github.com/janekbaraniewski/kubeserial/pkg/kubeapi"
 	"github.com/janekbaraniewski/kubeserial/pkg/managers"
+	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 )
 
 var msrcLog = logf.Log.WithName("ManagerScheduleRequestController")
@@ -38,6 +39,7 @@ type ManagerScheduleRequestReconciler struct {
 	client.Client
 	Scheme    *runtime.Scheme
 	Namespace string
+	FS        utils.FileSystem
 }
 
 //+kubebuilder:rbac:groups=kubeserial.app.kubeserial.com,resources=managerschedulerequests,verbs=get;list;watch;create;update;patch;delete
@@ -86,7 +88,7 @@ func (r *ManagerScheduleRequestReconciler) ReconcileManager(ctx context.Context,
 		Client: r.Client,
 		Scheme: r.Scheme,
 	}
-	if err := managers.Schedule(ctx, instance, mgr, r.Namespace, &apiClient); err != nil {
+	if err := managers.Schedule(ctx, r.FS, instance, mgr, r.Namespace, &apiClient); err != nil {
 		return err
 	}
 	return nil

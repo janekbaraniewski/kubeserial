@@ -86,11 +86,13 @@ func main() {
 		os.Exit(1)
 	}
 
+	fs := utils.NewOSFS()
+
 	if err = (&controllers.KubeSerialReconciler{
 		Client:               mgr.GetClient(),
 		Scheme:               mgr.GetScheme(),
 		DeviceMonitorVersion: deviceMonitorVersion,
-		FS:                   utils.NewOSFS(),
+		FS:                   fs,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "KubeSerial")
 		os.Exit(1)
@@ -106,6 +108,7 @@ func main() {
 		Client:    mgr.GetClient(),
 		Scheme:    mgr.GetScheme(),
 		Namespace: namespace,
+		FS:        fs,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "ManagerScheduleRequest")
 		os.Exit(1)

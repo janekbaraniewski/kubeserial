@@ -105,7 +105,7 @@ func GetMonitorDaemonSetConfig(t *testing.T, fs *utils.InMemoryFS) {
 
 	assert.Equal(t, nil, err)
 
-	absPath, _ := filepath.Abs("../assets/monitor-daemonset.yaml")
+	absPath, _ := filepath.Abs("../../test-assets/monitor-daemonset.yaml")
 	content, err := os.ReadFile(absPath)
 	if err != nil {
 		t.Fatalf("Failed to read yaml resource: %v", err)
@@ -120,7 +120,7 @@ func GetMonitorConfigMapConfig(t *testing.T, fs *utils.InMemoryFS) {
 
 	assert.Equal(t, nil, err)
 
-	absPath, _ := filepath.Abs("../assets/monitor-configmap.yaml")
+	absPath, _ := filepath.Abs("../../test-assets/monitor-configmap.yaml")
 	content, err := os.ReadFile(absPath)
 	if err != nil {
 		t.Fatalf("Failed to read yaml resource: %v", err)

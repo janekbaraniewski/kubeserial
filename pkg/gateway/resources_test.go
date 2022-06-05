@@ -8,6 +8,19 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+func TestCreateConfigMap(t *testing.T) {
+	// TODO: improve this test
+	cm := CreateConfigMap(
+		&v1alpha1.SerialDevice{
+			ObjectMeta: v1.ObjectMeta{
+				Name: "test-device",
+			},
+		},
+	)
+
+	assert.Equal(t, "test-device-gateway", cm.ObjectMeta.Name)
+}
+
 func TestCreateDeployment(t *testing.T) {
 	// TODO: improve this test
 	deployment := CreateDeployment(&v1alpha1.SerialDevice{
@@ -22,4 +35,17 @@ func TestCreateDeployment(t *testing.T) {
 	assert.Equal(t, map[string]string{
 		"kubernetes.io/hostname": "test-node",
 	}, deployment.Spec.Template.Spec.NodeSelector)
+}
+
+func TestCreateService(t *testing.T) {
+	// TODO: improve this test
+	svc := CreateService(
+		&v1alpha1.SerialDevice{
+			ObjectMeta: v1.ObjectMeta{
+				Name: "test-device",
+			},
+		},
+	)
+
+	assert.Equal(t, "test-device-gateway", svc.ObjectMeta.Name)
 }

@@ -7,7 +7,27 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
+
+func CreateConfigMap(device metav1.Object) *corev1.ConfigMap {
+	labels := map[string]string{
+		"app": strings.ToLower(device.GetName() + "-gateway"),
+	}
+
+	conf := "3333:raw:600:/dev/" + device.GetName() + ":115200 8DATABITS NONE 1STOPBIT -XONXOFF LOCAL -RTSCTS HANGUP_WHEN_DONE\n"
+
+	return &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      strings.ToLower(device.GetName() + "-gateway"),
+			Namespace: device.GetNamespace(),
+			Labels:    labels,
+		},
+		Data: map[string]string{
+			"ser2net.conf": conf,
+		},
+	}
+}
 
 func CreateDeployment(device *appv1alpha1.SerialDevice) *appsv1.Deployment {
 	labels := map[string]string{
@@ -98,4 +118,33 @@ func CreateDeployment(device *appv1alpha1.SerialDevice) *appsv1.Deployment {
 			},
 		},
 	}
+}
+
+func CreateService(device *appv1alpha1.SerialDevice) *corev1.Service {
+	labels := map[string]string{
+		"app": device.Name + "-gateway",
+	}
+	name := strings.ToLower(device.Name + "-gateway")
+	return &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: device.Namespace,
+			Labels:    labels,
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
+				{
+					Name:       "ser2net",
+					Protocol:   corev1.ProtocolTCP,
+					Port:       3333,
+					TargetPort: intstr.FromInt(3333),
+				},
+			},
+			Selector: map[string]string{
+				"app": name,
+			},
+			Type: corev1.ServiceTypeLoadBalancer,
+		},
+	}
+
 }

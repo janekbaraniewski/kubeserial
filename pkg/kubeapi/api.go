@@ -37,21 +37,21 @@ func (c *ApiClient) EnsureConfigMap(ctx context.Context, cr metav1.Object, cm *c
 	logger := log.WithValues("KubeSerial.Namespace", cr.GetNamespace(), "KubeSerial.Name", cr.GetName())
 
 	if err := controllerutil.SetControllerReference(cr, cm, c.Scheme); err != nil {
-		logger.Info("Can't set reference")
+		logger.Error(err, "Can't set reference")
 		return err
 	}
 
 	found := &corev1.ConfigMap{}
 	err := c.Client.Get(ctx, types.NamespacedName{Name: cm.Name, Namespace: cm.Namespace}, found)
 	if err != nil && errors.IsNotFound(err) {
-		logger.Info("Creating a new ConfigMap " + cm.Name)
+		logger.Info("Creating a new ConfigMap", "configMap", cm)
 		err = c.Client.Create(ctx, cm)
 		if err != nil {
-			logger.Info("ConfigMap not created")
+			logger.Error(err, "ConfigMap not created")
 			return err
 		}
 	} else if err != nil {
-		logger.Info("ConfigMap not found")
+		logger.Error(err, "ConfigMap not found")
 		return err
 	}
 
@@ -62,7 +62,7 @@ func (r *ApiClient) EnsureService(ctx context.Context, cr metav1.Object, svc *co
 	logger := log.WithValues("KubeSerial.Namespace", cr.GetNamespace(), "KubeSerial.Name", cr.GetName())
 
 	if err := controllerutil.SetControllerReference(cr, svc, r.Scheme); err != nil {
-		logger.Info("Can't set reference")
+		logger.Error(err, "Can't set reference")
 		return err
 	}
 

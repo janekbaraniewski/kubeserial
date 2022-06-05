@@ -7,13 +7,13 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-func (m *Manager) CreateService(cr types.NamespacedName, device types.NamespacedName) *corev1.Service {
+func (m *Manager) CreateService(cr types.NamespacedName, deviceName string) *corev1.Service {
 	labels := map[string]string{
-		"app": m.GetName(cr.Name, device.Name),
+		"app": m.GetName(cr.Name, deviceName),
 	}
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      m.GetName(cr.Name, device.Name),
+			Name:      m.GetName(cr.Name, deviceName),
 			Namespace: cr.Namespace,
 			Labels:    labels,
 		},
@@ -27,7 +27,7 @@ func (m *Manager) CreateService(cr types.NamespacedName, device types.Namespaced
 				},
 			},
 			Selector: map[string]string{
-				"app": m.GetName(cr.Name, device.Name),
+				"app": m.GetName(cr.Name, deviceName),
 			},
 			Type: corev1.ServiceTypeClusterIP,
 		},

@@ -15,7 +15,7 @@ type Manager struct {
 	ConfigPath string
 }
 
-func Schedule(ctx context.Context, request *appv1alpha1.ManagerScheduleRequest, mgr *appv1alpha1.Manager, api api.API) error {
+func Schedule(ctx context.Context, request *appv1alpha1.ManagerScheduleRequest, mgr *appv1alpha1.Manager, namespace string, api api.API) error {
 	manager := &Manager{
 		Image:      mgr.Spec.Image.Repository + ":" + mgr.Spec.Image.Tag,
 		RunCmnd:    mgr.Spec.RunCmd,
@@ -24,20 +24,16 @@ func Schedule(ctx context.Context, request *appv1alpha1.ManagerScheduleRequest, 
 	}
 	cr := types.NamespacedName{
 		Name:      request.Name,
-		Namespace: request.Namespace,
-	}
-	device := types.NamespacedName{
-		Name:      request.Spec.Device,
-		Namespace: mgr.Namespace,
+		Namespace: namespace,
 	}
 	if mgr.Spec.Config != "" {
-		cm := manager.CreateConfigMap(cr, device)
+		cm := manager.CreateConfigMap(cr, request.Spec.Device)
 		if err := api.EnsureConfigMap(ctx, request, cm); err != nil {
 			return err
 		}
 	}
-	deploy := manager.CreateDeployment(cr, device, mgr.Spec.Config != "")
-	svc := manager.CreateService(cr, device)
+	deploy := manager.CreateDeployment(cr, request.Spec.Device, mgr.Spec.Config != "")
+	svc := manager.CreateService(cr, request.Spec.Device)
 
 	if err := api.EnsureDeployment(ctx, request, deploy); err != nil {
 		return err
@@ -47,6 +43,7 @@ func Schedule(ctx context.Context, request *appv1alpha1.ManagerScheduleRequest, 
 		return err
 	}
 
+	// TODO: bring back ingress support
 	// if cr.Spec.Ingress.Enabled {
 	// 	ingress := manager.CreateIngress(cr, device, cr.Spec.Ingress.Domain)
 	// 	if err := api.EnsureIngress(ctx, cr, ingress); err != nil {

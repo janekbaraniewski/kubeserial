@@ -10,13 +10,13 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-func (m *Manager) CreateDeployment(cr types.NamespacedName, device types.NamespacedName, includeCM bool) *appsv1.Deployment {
+func (m *Manager) CreateDeployment(cr types.NamespacedName, deviceName string, includeCM bool) *appsv1.Deployment {
 	labels := map[string]string{
-		"app": m.GetName(cr.Name, device.Name),
+		"app": m.GetName(cr.Name, deviceName),
 	}
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      m.GetName(cr.Name, device.Name),
+			Name:      m.GetName(cr.Name, deviceName),
 			Namespace: cr.Namespace,
 			Labels:    labels,
 		},
@@ -26,19 +26,19 @@ func (m *Manager) CreateDeployment(cr types.NamespacedName, device types.Namespa
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Name:      m.GetName(cr.Name, device.Name),
+					Name:      m.GetName(cr.Name, deviceName),
 					Namespace: cr.Namespace,
 					Labels:    labels,
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
 						{
-							Name:    m.GetName(cr.Name, device.Name),
+							Name:    m.GetName(cr.Name, deviceName),
 							Image:   m.Image,
 							Command: []string{"/bin/sh"},
 							Args: []string{
 								"-c",
-								"socat -d -d pty,raw,echo=0,b115200,link=/dev/device,perm=0660,group=tty tcp:" + strings.ToLower(device.Name+"-gateway") + ":3333 & " + m.RunCmnd, // TODO: make init container
+								"socat -d -d pty,raw,echo=0,b115200,link=/dev/device,perm=0660,group=tty tcp:" + strings.ToLower(deviceName+"-gateway") + ":3333 & " + m.RunCmnd, // TODO: make init container
 							},
 							Ports: []corev1.ContainerPort{
 								{
@@ -59,7 +59,7 @@ func (m *Manager) CreateDeployment(cr types.NamespacedName, device types.Namespa
 			VolumeSource: corev1.VolumeSource{
 				ConfigMap: &corev1.ConfigMapVolumeSource{
 					LocalObjectReference: corev1.LocalObjectReference{
-						Name: m.GetName(cr.Name, device.Name),
+						Name: m.GetName(cr.Name, deviceName),
 					},
 					Items: []corev1.KeyToPath{
 						{

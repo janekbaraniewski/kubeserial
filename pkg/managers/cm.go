@@ -8,14 +8,14 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-func (m *Manager) CreateConfigMap(cr types.NamespacedName, device types.NamespacedName) *corev1.ConfigMap {
+func (m *Manager) CreateConfigMap(cr types.NamespacedName, deviceName string) *corev1.ConfigMap {
 	labels := map[string]string{
-		"app": m.GetName(cr.Name, device.Name),
+		"app": m.GetName(cr.Name, deviceName),
 	}
 
 	return &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      m.GetName(cr.Name, device.Name),
+			Name:      m.GetName(cr.Name, deviceName),
 			Namespace: cr.Namespace,
 			Labels:    labels,
 		},

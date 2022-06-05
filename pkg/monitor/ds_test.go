@@ -16,7 +16,7 @@ func TestCreateDaemonSet(t *testing.T) {
 
 	assert.Equal(t, nil, err)
 
-	absPath, _ := filepath.Abs("../assets/monitor-daemonset.yaml")
+	absPath, _ := filepath.Abs("../../test-assets/monitor-daemonset.yaml")
 	content, err := os.ReadFile(absPath)
 	if err != nil {
 		t.Fatalf("Failed to read yaml resource: %v", err)

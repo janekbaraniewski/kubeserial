@@ -63,12 +63,12 @@ vet: ## Run go vet against code.
 .PHONY: get-test-assets
 get-test-assets:
 	@echo "Genereting test assets"
-	@./hack/get-tests-assets.sh
+	@./hack/get-test-assets.sh
 
 .PHONY: test
 test: fmt vet envtest-render-crds get-test-assets ## Run tests.
 	go test ./... -coverprofile coverage.txt -covermode atomic
-	@rm pkg/assets/*
+	@rm -r test-assets
 
 .PHONY: test-fswatch
 test-fswatch: ## Use fswatch to watch source files and run tests on chamnge

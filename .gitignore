@@ -80,3 +80,6 @@ charts/*/values-local.yaml
 
 # Local files
 local/
+
+# Test assets
+test-assets/

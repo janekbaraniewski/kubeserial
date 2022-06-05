@@ -20,17 +20,12 @@ spec:
       namespace: {{ .Release.Namespace }}
     spec:
       containers:
-      - args:
-        - -c
-        - socat -d -d pty,raw,echo=0,b115200,link=/dev/device,perm=0660,group=tty
-          tcp:ender3-gateway:3333 & mkdir /root/.octoprint && cp /data/config.yaml
-          /root/.octoprint/config.yaml && /OctoPrint-1.3.10/run --iknowwhatimdoing
-          --port 80
+      - args: []
         command:
         - /bin/sh
-        image: janekbaraniewski/octoprint:1.3.10
+        image: TODO
         imagePullPolicy: IfNotPresent
-        name: {{ include "kubeserial.managerFullname" . }}
+        name: manager
         ports:
         - containerPort: 80
           name: http
@@ -38,20 +33,8 @@ spec:
         resources: {}
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
-        volumeMounts:
-        - mountPath: /data/config.yaml
-          name: config
-          subPath: config.yaml
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
-      volumes:
-      - configMap:
-          defaultMode: 420
-          items:
-          - key: config.yaml
-            path: config.yaml
-          name: {{ include "kubeserial.managerFullname" . }}
-        name: config

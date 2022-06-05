@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels: {{ include "kubeserial.gatewayLabels" . | nindent 8 }}
+  name: {{ include "kubeserial.gatewayFullname" . }}
+  namespace: {{ .Release.Namespace }}
+data:
+  ser2net.conf: TODO

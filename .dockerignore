@@ -1,5 +1,15 @@
 Dockerfile
 Dockerfile.monitor
-deploy
+charts/
+build/
+local/
+.github/
 Makefile
 docs/
+CNAME
+codecov.yml
+coverage.txt
+cover.out
+LICENSE
+PROJECT
+README.mode

@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels: {{ include "kubeserial.managerLabels" . | nindent 4 }}
+  name: {{ include "kubeserial.managerFullname" . }}
+  namespace: {{ .Release.Namespace }}
+data:
+  config.yaml: TODO

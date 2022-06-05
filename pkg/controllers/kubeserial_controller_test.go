@@ -24,7 +24,7 @@ func getCR() *kubeserialv1alpha1.KubeSerial {
 	return &kubeserialv1alpha1.KubeSerial{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "kubeserialtest",
-			Namespace: "test-ns",
+			Namespace: "kubeserial",
 		},
 		Spec: kubeserialv1alpha1.KubeSerialSpec{
 			SerialDevices: []kubeserialv1alpha1.SerialDevice_2{
@@ -54,7 +54,7 @@ func TestReconcile(t *testing.T) {
 
 			reconcileReq := reconcile.Request{
 				NamespacedName: types.NamespacedName{
-					Namespace: "test-namespace",
+					Namespace: "kubeserial",
 					Name:      "kubeserialtest",
 				},
 			}
@@ -81,7 +81,7 @@ func TestReconcile(t *testing.T) {
 
 			reconcileReq := reconcile.Request{
 				NamespacedName: types.NamespacedName{
-					Namespace: "test-ns",
+					Namespace: "kubeserial",
 					Name:      "kubeserialtest",
 				},
 			}

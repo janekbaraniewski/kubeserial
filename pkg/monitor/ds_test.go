@@ -26,6 +26,6 @@ func TestCreateDaemonSet(t *testing.T) {
 	result, err := CreateDaemonSet(fs)
 
 	assert.Equal(t, nil, err)
-	assert.Equal(t, "test-monitor", result.ObjectMeta.Name)
-	assert.Equal(t, "sample-image:dev", result.Spec.Template.Spec.Containers[0].Image)
+	assert.Equal(t, "kubeserial-monitor", result.ObjectMeta.Name)
+	assert.Equal(t, "janekbaraniewski/kubeserial-device-monitor:dev", result.Spec.Template.Spec.Containers[0].Image)
 }

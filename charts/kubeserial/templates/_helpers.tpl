@@ -142,3 +142,30 @@ Device Gateway selector labels
 app.kubernetes.io/name: {{ include "kubeserial.gatewayFullname" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
+
+{{/*
+Device Manager fullname
+*/}}
+{{- define "kubeserial.managerFullname" -}}
+{{ include "kubeserial.fullname" .}}-TODO-manager
+{{- end }}
+
+{{/*
+Device Manager common labels
+*/}}
+{{- define "kubeserial.managerLabels" -}}
+helm.sh/chart: {{ include "kubeserial.chart" . }}
+{{ include "kubeserial.managerSelectorLabels" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- end }}
+
+{{/*
+Device Manager selector labels
+*/}}
+{{- define "kubeserial.managerSelectorLabels" -}}
+app.kubernetes.io/name: {{ include "kubeserial.managerFullname" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}

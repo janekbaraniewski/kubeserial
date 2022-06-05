@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  labels: {{ include "kubeserial.monitorLabels" . | nindent 8 }}
+  labels: {{ include "kubeserial.monitorLabels" . | nindent 4 }}
   name: {{ include "kubeserial.monitorFullname" . }}
   namespace: {{ .Release.Namespace }}
 data:

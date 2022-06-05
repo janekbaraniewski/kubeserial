@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels: {{ include "kubeserial.managerLabels" . | nindent 4 }}
+  name: {{ include "kubeserial.managerFullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {{ include "kubeserial.managerSelectorLabels" . | nindent 6 }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels: {{ include "kubeserial.managerLabels" . | nindent 8 }}
+      name: {{ include "kubeserial.managerFullname" . }}
+      namespace: {{ .Release.Namespace }}
+    spec:
+      containers:
+      - args:
+        - -c
+        - socat -d -d pty,raw,echo=0,b115200,link=/dev/device,perm=0660,group=tty
+          tcp:ender3-gateway:3333 & mkdir /root/.octoprint && cp /data/config.yaml
+          /root/.octoprint/config.yaml && /OctoPrint-1.3.10/run --iknowwhatimdoing
+          --port 80
+        command:
+        - /bin/sh
+        image: janekbaraniewski/octoprint:1.3.10
+        imagePullPolicy: IfNotPresent
+        name: {{ include "kubeserial.managerFullname" . }}
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /data/config.yaml
+          name: config
+          subPath: config.yaml
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: config.yaml
+            path: config.yaml
+          name: {{ include "kubeserial.managerFullname" . }}
+        name: config

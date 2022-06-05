@@ -36,7 +36,8 @@ var msrcLog = logf.Log.WithName("ManagerScheduleRequestController")
 // ManagerScheduleRequestReconciler reconciles a ManagerScheduleRequest object
 type ManagerScheduleRequestReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme    *runtime.Scheme
+	Namespace string
 }
 
 //+kubebuilder:rbac:groups=kubeserial.app.kubeserial.com,resources=managerschedulerequests,verbs=get;list;watch;create;update;patch;delete

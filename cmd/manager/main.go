@@ -50,13 +50,17 @@ func init() {
 }
 
 func main() {
-	var metricsAddr string
-	var enableLeaderElection bool
-	var probeAddr string
-	var deviceMonitorVersion string
+	var (
+		metricsAddr          string
+		enableLeaderElection bool
+		probeAddr            string
+		deviceMonitorVersion string
+		namespace            string
+	)
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	flag.StringVar(&deviceMonitorVersion, "device-monitor-version", "latest", "Version of kubeserial-device-monitor image to be used")
+	flag.StringVar(&namespace, "namespace", "kubeserial", "Kubernetes Namespace in which controllers are running")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
@@ -99,8 +103,9 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&controllers.ManagerScheduleRequestReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
+		Client:    mgr.GetClient(),
+		Scheme:    mgr.GetScheme(),
+		Namespace: namespace,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "ManagerScheduleRequest")
 		os.Exit(1)

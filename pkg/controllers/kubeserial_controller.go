@@ -76,14 +76,18 @@ func (r *KubeSerialReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 }
 
 func (r *KubeSerialReconciler) ReconcileMonitor(ctx context.Context, cr *appv1alpha1.KubeSerial, api api.API, monitorVersion string) error {
-	conf := monitor.CreateConfigMap(cr)
+	cm, err := monitor.CreateConfigMap(r.FS, cr.Spec.SerialDevices)
+	if err != nil {
+		return err
+	}
+
 	monitorDaemon, err := monitor.CreateDaemonSet(r.FS)
 
 	if err != nil {
 		return err
 	}
 
-	if err := api.EnsureConfigMap(ctx, cr, conf); err != nil {
+	if err := api.EnsureConfigMap(ctx, cr, cm); err != nil {
 		return err
 	}
 

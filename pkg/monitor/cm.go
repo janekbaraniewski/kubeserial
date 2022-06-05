@@ -4,17 +4,15 @@ import (
 	"fmt"
 
 	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
+	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func CreateConfigMap(cr *appv1alpha1.KubeSerial) *corev1.ConfigMap {
-	rule := ""
-	labels := map[string]string{
-		"app": cr.Name + "-monitor",
-	}
+func CreateConfigMap(fs utils.FileSystem, devices []appv1alpha1.SerialDevice_2) (*corev1.ConfigMap, error) {
+	SPEC_PATH := "/config/monitor-configmap.yaml"
 
-	for _, device := range cr.Spec.SerialDevices {
+	rule := ""
+	for _, device := range devices {
 		rule += fmt.Sprintf(
 			"SUBSYSTEM==\"tty\", ATTRS{idVendor}==\"%s\", ATTRS{idProduct}==\"%s\", SYMLINK+=\"%s\"\n",
 			device.IdVendor,
@@ -23,14 +21,13 @@ func CreateConfigMap(cr *appv1alpha1.KubeSerial) *corev1.ConfigMap {
 		)
 	}
 
-	return &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      cr.Name + "-monitor",
-			Namespace: cr.Namespace,
-			Labels:    labels,
-		},
-		Data: map[string]string{
-			"98-devices.rules": rule,
-		},
+	cm := &corev1.ConfigMap{}
+
+	if err := utils.LoadResourceFromYaml(fs, SPEC_PATH, cm); err != nil {
+		return cm, err
 	}
+
+	cm.Data["98-devices.rules"] = rule
+
+	return cm, nil
 }

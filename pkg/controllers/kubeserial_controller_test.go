@@ -95,6 +95,12 @@ func TestReconcile(t *testing.T) {
 
 func GetFileSystem(t *testing.T) utils.FileSystem {
 	fs := utils.NewInMemoryFS()
+	GetMonitorDaemonSetConfig(t, fs)
+	GetMonitorConfigMapConfig(t, fs)
+	return fs
+}
+
+func GetMonitorDaemonSetConfig(t *testing.T, fs *utils.InMemoryFS) {
 	file, err := fs.Create("/config/monitor-daemonset.yaml")
 
 	assert.Equal(t, nil, err)
@@ -106,7 +112,22 @@ func GetFileSystem(t *testing.T) utils.FileSystem {
 	}
 
 	file.Write(content)
-	return fs
+	file.Close()
+}
+
+func GetMonitorConfigMapConfig(t *testing.T, fs *utils.InMemoryFS) {
+	file, err := fs.Create("/config/monitor-configmap.yaml")
+
+	assert.Equal(t, nil, err)
+
+	absPath, _ := filepath.Abs("../assets/monitor-configmap.yaml")
+	content, err := os.ReadFile(absPath)
+	if err != nil {
+		t.Fatalf("Failed to read yaml resource: %v", err)
+	}
+
+	file.Write(content)
+	file.Close()
 }
 
 func TestReconcileMonitor(t *testing.T) {

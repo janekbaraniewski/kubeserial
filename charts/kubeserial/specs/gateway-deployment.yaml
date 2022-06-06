@@ -1,1 +1,59 @@
-todo
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels: {{ include "kubeserial.gatewayLabels" . | nindent 4 }}
+  name: {{ include "kubeserial.gatewayFullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {{ include "kubeserial.gatewaySelectorLabels" . | nindent 6 }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 0%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels: {{ include "kubeserial.gatewayLabels" . | nindent 8 }}
+      name: {{ include "kubeserial.gatewayFullname" . }}
+      namespace: {{ .Release.Namespace }}
+    spec:
+      containers:
+      - args:
+        - -c
+        - ser2net && sleep inf
+        command:
+        - /bin/sh
+        image: janekbaraniewski/ser2net:latest
+        imagePullPolicy: Always
+        name: kubeserial-gateway
+        ports:
+        - containerPort: 3333
+          name: ser2net
+          protocol: TCP
+        resources: {}
+        securityContext:
+          privileged: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /dev
+          name: host-dev
+        - mountPath: /etc/ser2net.conf
+          name: config
+          subPath: ser2net.conf
+      nodeSelector:
+        kubernetes.io/hostname: TODO
+      volumes:
+      - hostPath:
+          path: /dev
+          type: ""
+        name: host-dev
+      - configMap:
+          defaultMode: 420
+          items:
+          - key: ser2net.conf
+            path: ser2net.conf
+          name: {{ include "kubeserial.gatewayFullname" . }}
+        name: config

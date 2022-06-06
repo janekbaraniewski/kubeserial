@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
+	"github.com/janekbaraniewski/kubeserial/pkg/kubeapi"
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -60,8 +61,9 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			fakeClient.Create(context.TODO(), device)
 
 			deviceReconciler := SerialDeviceReconciler{
-				Client: fakeClient,
-				Scheme: scheme,
+				Client:    fakeClient,
+				Scheme:    scheme,
+				APIClient: kubeapi.NewFakeApiClient(),
 			}
 
 			result, err := deviceReconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
@@ -90,8 +92,9 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			fakeClient.Create(context.TODO(), manager)
 
 			deviceReconciler := SerialDeviceReconciler{
-				Client: fakeClient,
-				Scheme: scheme,
+				Client:    fakeClient,
+				Scheme:    scheme,
+				APIClient: kubeapi.NewFakeApiClient(),
 			}
 
 			result, err := deviceReconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
@@ -121,8 +124,9 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			fakeClient.Create(context.TODO(), manager)
 
 			deviceReconciler := SerialDeviceReconciler{
-				Client: fakeClient,
-				Scheme: scheme,
+				Client:    fakeClient,
+				Scheme:    scheme,
+				APIClient: kubeapi.NewFakeApiClient(),
 			}
 
 			result, err := deviceReconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
@@ -153,8 +157,9 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 	{
 		t.Run("device-not-found", func(t *testing.T) {
 			deviceReconciler := SerialDeviceReconciler{
-				Client: fakeClient,
-				Scheme: scheme,
+				Client:    fakeClient,
+				Scheme:    scheme,
+				APIClient: kubeapi.NewFakeApiClient(),
 			}
 
 			result, err := deviceReconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})

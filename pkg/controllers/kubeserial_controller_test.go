@@ -8,6 +8,7 @@ import (
 	"time"
 
 	kubeserialv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
+	"github.com/janekbaraniewski/kubeserial/pkg/kubeapi"
 	api "github.com/janekbaraniewski/kubeserial/pkg/kubeapi"
 	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 	"github.com/stretchr/testify/assert"
@@ -48,8 +49,9 @@ func TestReconcile(t *testing.T) {
 			fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).Build()
 
 			reconciler := KubeSerialReconciler{
-				Client: fakeClient,
-				Scheme: scheme,
+				Client:    fakeClient,
+				Scheme:    scheme,
+				APIClient: kubeapi.NewFakeApiClient(),
 			}
 
 			reconcileReq := reconcile.Request{
@@ -74,9 +76,10 @@ func TestReconcile(t *testing.T) {
 			fs := GetFileSystem(t)
 
 			reconciler := KubeSerialReconciler{
-				Client: fakeClient,
-				Scheme: scheme,
-				FS:     fs,
+				Client:    fakeClient,
+				Scheme:    scheme,
+				FS:        fs,
+				APIClient: kubeapi.NewFakeApiClient(),
 			}
 
 			reconcileReq := reconcile.Request{

@@ -93,8 +93,8 @@ func main() {
 	apiClient := kubeapi.NewApiClient(client, scheme)
 
 	if err = (&controllers.KubeSerialReconciler{
-		Client:               mgr.GetClient(),
-		Scheme:               mgr.GetScheme(),
+		Client:               client,
+		Scheme:               scheme,
 		DeviceMonitorVersion: deviceMonitorVersion,
 		FS:                   fs,
 		APIClient:            apiClient,
@@ -103,17 +103,19 @@ func main() {
 		os.Exit(1)
 	}
 	if err = (&controllers.SerialDeviceReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
+		Client:    client,
+		Scheme:    scheme,
+		APIClient: apiClient,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Device")
 		os.Exit(1)
 	}
 	if err = (&controllers.ManagerScheduleRequestReconciler{
-		Client:    mgr.GetClient(),
-		Scheme:    mgr.GetScheme(),
+		Client:    client,
+		Scheme:    scheme,
 		Namespace: namespace,
 		FS:        fs,
+		APIClient: apiClient,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "ManagerScheduleRequest")
 		os.Exit(1)

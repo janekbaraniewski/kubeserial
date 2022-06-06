@@ -40,6 +40,7 @@ type ManagerScheduleRequestReconciler struct {
 	Scheme    *runtime.Scheme
 	Namespace string
 	FS        utils.FileSystem
+	APIClient api.API
 }
 
 //+kubebuilder:rbac:groups=kubeserial.app.kubeserial.com,resources=managerschedulerequests,verbs=get;list;watch;create;update;patch;delete
@@ -84,11 +85,7 @@ func (r *ManagerScheduleRequestReconciler) Reconcile(ctx context.Context, req ct
 
 // ReconcileManager
 func (r *ManagerScheduleRequestReconciler) ReconcileManager(ctx context.Context, instance *kubeserialv1alpha1.ManagerScheduleRequest, mgr *kubeserialv1alpha1.Manager, req ctrl.Request) error {
-	apiClient := api.ApiClient{
-		Client: r.Client,
-		Scheme: r.Scheme,
-	}
-	if err := managers.Schedule(ctx, r.FS, instance, mgr, r.Namespace, &apiClient); err != nil {
+	if err := managers.Schedule(ctx, r.FS, instance, mgr, r.Namespace, r.APIClient); err != nil {
 		return err
 	}
 	return nil

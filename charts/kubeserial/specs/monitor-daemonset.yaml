@@ -69,8 +69,8 @@ spec:
               name: kubeserial-monitor
             name: {{ include "kubeserial.fullname" . }}-monitor
           name: config
-    updateStrategy:
-      rollingUpdate:
-        maxSurge: 1
-        maxUnavailable: 0
-        type: RollingUpdate
+  updateStrategy:
+    rollingUpdate:
+      maxSurge: 5
+      maxUnavailable: 0
+      type: RollingUpdate

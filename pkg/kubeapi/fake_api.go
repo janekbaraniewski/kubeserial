@@ -7,6 +7,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type FakeApiClient struct {
@@ -53,5 +54,9 @@ func (a *FakeApiClient) DeleteService(ctx context.Context, cr metav1.Object, nam
 }
 func (a *FakeApiClient) DeleteIngress(ctx context.Context, cr metav1.Object, name string) error {
 	a.Operations = append(a.Operations, "DeleteIngress")
+	return nil
+}
+func (a *FakeApiClient) EnsureObject(ctx context.Context, cr metav1.Object, obj client.Object) error {
+	a.Operations = append(a.Operations, "EnsureObject")
 	return nil
 }

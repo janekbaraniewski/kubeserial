@@ -8,6 +8,7 @@ import (
 	networkingv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -23,6 +24,7 @@ type API interface {
 	EnsureIngress(ctx context.Context, cr metav1.Object, ingress *networkingv1.Ingress) error
 	EnsureDeployment(ctx context.Context, cr metav1.Object, deployment *appsv1.Deployment) error
 	EnsureDaemonSet(ctx context.Context, cr metav1.Object, ds *appsv1.DaemonSet) error
+	EnsureObject(ctx context.Context, cr metav1.Object, obj client.Object) error
 	DeleteDeployment(ctx context.Context, cr metav1.Object, name string) error
 	DeleteConfigMap(ctx context.Context, cr metav1.Object, name string) error
 	DeleteService(ctx context.Context, cr metav1.Object, name string) error
@@ -38,6 +40,42 @@ func NewApiClient(client client.Client, scheme *runtime.Scheme) *ApiClient {
 		Client: client,
 		Scheme: scheme,
 	}
+}
+
+func (r *ApiClient) EnsureObject(ctx context.Context, cr metav1.Object, obj client.Object) error {
+	// TODO: test how this behaves when there is f.e. CM and Deploy with same namespacedname
+	log.Info("Setting controller reference", "owner", cr, "object", obj)
+	if err := controllerutil.SetControllerReference(cr, obj, r.Scheme); err != nil {
+		return err
+	}
+	log.Info("Controller reference set", "owner", cr, "object", obj)
+
+	found := &unstructured.Unstructured{}
+	objNamespacedName := types.NamespacedName{Name: obj.GetName(), Namespace: obj.GetNamespace()}
+	log.Info("Looking for existing Object", "Object NamespacedName", objNamespacedName)
+	err := r.Client.Get(ctx, objNamespacedName, found)
+	if err != nil && errors.IsNotFound(err) {
+		log.Info("Object not found, creating new one", "Object", obj)
+		err = r.Client.Create(ctx, obj)
+		if err != nil {
+			log.Error(err, "Error creating new Object")
+			return err
+		}
+		log.Info("Successfuly created new Object", "Object", obj)
+		return nil
+	} else if err != nil {
+		log.Error(err, "Error looging for existing Object")
+		return err
+	}
+
+	log.Info("Object exists, updating it with current spec", "Existing Object spec", found, "New Object spec", obj)
+	err = r.Client.Update(ctx, obj)
+	if err != nil {
+		log.Error(err, "Error updating object", "Object", obj)
+		return err
+	}
+	log.Info("Successfuly updated", "Object", obj)
+	return nil
 }
 
 func (c *ApiClient) EnsureConfigMap(ctx context.Context, cr metav1.Object, cm *corev1.ConfigMap) error {

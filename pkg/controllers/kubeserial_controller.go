@@ -83,11 +83,11 @@ func (r *KubeSerialReconciler) ReconcileMonitor(ctx context.Context, cr *appv1al
 		return err
 	}
 
-	if err := r.APIClient.EnsureConfigMap(ctx, cr, cm); err != nil {
+	if err := r.APIClient.EnsureObject(ctx, cr, cm); err != nil {
 		return err
 	}
 
-	if err := r.APIClient.EnsureDaemonSet(ctx, cr, monitorDaemon); err != nil {
+	if err := r.APIClient.EnsureObject(ctx, cr, monitorDaemon); err != nil {
 		return err
 	}
 

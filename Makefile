@@ -67,7 +67,9 @@ get-test-assets:
 
 .PHONY: test
 test: fmt vet envtest-render-crds get-test-assets ## Run tests.
-	go test ./... -coverprofile coverage.txt -covermode atomic
+	go test ./... -coverprofile coverage.txt.tmp -covermode atomic
+	@cat coverage.txt.tmp | grep -v "fake_api.go" > coverage.txt
+	@rm coverage.txt.tmp
 	@rm -r test-assets
 
 .PHONY: test-fswatch

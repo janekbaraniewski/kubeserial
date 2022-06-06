@@ -16,7 +16,11 @@ func TestSchedule(t *testing.T) {
 	AddSpecFilesToFilesystem(t, fs)
 
 	req := &v1alpha1.ManagerScheduleRequest{}
-	manager := &v1alpha1.Manager{}
+	manager := &v1alpha1.Manager{
+		Spec: v1alpha1.ManagerSpec{
+			Config: "dummy",
+		},
+	}
 	api := kubeapi.NewFakeApiClient()
 
 	err := Schedule(context.TODO(), fs, req, manager, "kubeserial", api)

@@ -1,1 +1,14 @@
-todo
+apiVersion: v1
+kind: Service
+metadata:
+  labels: {{ include "kubeserial.gatewayLabels" . | nindent 4 }}
+  name: {{ include "kubeserial.gatewayFullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+  - name: ser2net
+    port: 3333
+    protocol: TCP
+    targetPort: 3333
+  selector: {{ include "kubeserial.gatewaySelectorLabels" . | nindent 4 }}
+  type: ClusterIP

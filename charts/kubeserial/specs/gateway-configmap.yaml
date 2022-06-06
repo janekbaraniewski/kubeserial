@@ -1,8 +1,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  labels: {{ include "kubeserial.gatewayLabels" . | nindent 8 }}
+  labels: {{ include "kubeserial.gatewayLabels" . | nindent 4 }}
   name: {{ include "kubeserial.gatewayFullname" . }}
   namespace: {{ .Release.Namespace }}
 data:
-  ser2net.conf: TODO
+  ser2net.conf: |
+    3333:raw:600:/dev/sonoff-zigbee:115200 8DATABITS NONE 1STOPBIT -XONXOFF LOCAL -RTSCTS HANGUP_WHEN_DONE

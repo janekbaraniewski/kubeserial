@@ -28,6 +28,14 @@ func TestSchedule(t *testing.T) {
 	assert.Equal(t, nil, err)
 }
 
+func TestDelete(t *testing.T) {
+	manager := Manager{}
+
+	err := manager.Delete(context.TODO(), &v1alpha1.KubeSerial{}, &v1alpha1.SerialDevice_2{}, kubeapi.NewFakeApiClient())
+
+	assert.Equal(t, nil, err)
+}
+
 func AddSpecFilesToFilesystem(t *testing.T, fs *utils.InMemoryFS) {
 	if err := fs.AddFileFromHostPath("manager-configmap.yaml"); err != nil {
 		t.Fatalf("Failed to load test asset: %v", err)

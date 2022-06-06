@@ -39,7 +39,8 @@ var devLog = logf.Log.WithName("DeviceController")
 // SerialDeviceReconciler reconciles a SerialDevice object
 type SerialDeviceReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme    *runtime.Scheme
+	APIClient api.API
 }
 
 //+kubebuilder:rbac:groups=kubeserial.app.kubeserial.com,resources=devices,verbs=get;list;watch;create;update;patch;delete
@@ -96,24 +97,19 @@ func (r *SerialDeviceReconciler) Reconcile(ctx context.Context, req ctrl.Request
 }
 
 func (r *SerialDeviceReconciler) RequestGateway(ctx context.Context, device *kubeserialv1alpha1.SerialDevice) error {
-	apiClient := api.ApiClient{
-		Client: r.Client,
-		Scheme: r.Scheme,
-	}
-
 	cm := gateway.CreateConfigMap(device)
 	deploy := gateway.CreateDeployment(device)
 	svc := gateway.CreateService(device)
 
-	if err := apiClient.EnsureConfigMap(ctx, device, cm); err != nil {
+	if err := r.APIClient.EnsureConfigMap(ctx, device, cm); err != nil {
 		return err
 	}
 
-	if err := apiClient.EnsureDeployment(ctx, device, deploy); err != nil {
+	if err := r.APIClient.EnsureDeployment(ctx, device, deploy); err != nil {
 		return err
 	}
 
-	if err := apiClient.EnsureService(ctx, device, svc); err != nil {
+	if err := r.APIClient.EnsureService(ctx, device, svc); err != nil {
 		return err
 	}
 
@@ -121,22 +117,17 @@ func (r *SerialDeviceReconciler) RequestGateway(ctx context.Context, device *kub
 }
 
 func (r *SerialDeviceReconciler) EnsureNoGatewayRunning(ctx context.Context, device *kubeserialv1alpha1.SerialDevice) error {
-	apiClient := api.ApiClient{
-		Client: r.Client,
-		Scheme: r.Scheme,
-	}
-
 	name := device.Name + "-gateway" // TODO: move name generation to some utils so it's in one place
 
-	if err := apiClient.DeleteDeployment(ctx, device, name); err != nil {
+	if err := r.APIClient.DeleteDeployment(ctx, device, name); err != nil {
 		return err
 	}
 
-	if err := apiClient.DeleteConfigMap(ctx, device, name); err != nil {
+	if err := r.APIClient.DeleteConfigMap(ctx, device, name); err != nil {
 		return err
 	}
 
-	if err := apiClient.DeleteService(ctx, device, name); err != nil {
+	if err := r.APIClient.DeleteService(ctx, device, name); err != nil {
 		return err
 	}
 	return nil

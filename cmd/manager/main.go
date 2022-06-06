@@ -33,6 +33,7 @@ import (
 
 	kubeserialv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	"github.com/janekbaraniewski/kubeserial/pkg/controllers"
+	"github.com/janekbaraniewski/kubeserial/pkg/kubeapi"
 	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 	//+kubebuilder:scaffold:imports
 )
@@ -87,12 +88,16 @@ func main() {
 	}
 
 	fs := utils.NewOSFS()
+	client := mgr.GetClient()
+	scheme := mgr.GetScheme()
+	apiClient := kubeapi.NewApiClient(client, scheme)
 
 	if err = (&controllers.KubeSerialReconciler{
 		Client:               mgr.GetClient(),
 		Scheme:               mgr.GetScheme(),
 		DeviceMonitorVersion: deviceMonitorVersion,
 		FS:                   fs,
+		APIClient:            apiClient,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "KubeSerial")
 		os.Exit(1)

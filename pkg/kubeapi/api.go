@@ -33,6 +33,13 @@ type ApiClient struct {
 	Scheme *runtime.Scheme
 }
 
+func NewApiClient(client client.Client, scheme *runtime.Scheme) *ApiClient {
+	return &ApiClient{
+		Client: client,
+		Scheme: scheme,
+	}
+}
+
 func (c *ApiClient) EnsureConfigMap(ctx context.Context, cr metav1.Object, cm *corev1.ConfigMap) error {
 	logger := log.WithValues("KubeSerial.Namespace", cr.GetNamespace(), "KubeSerial.Name", cr.GetName())
 

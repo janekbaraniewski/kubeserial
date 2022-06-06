@@ -136,14 +136,15 @@ func TestReconcileMonitor(t *testing.T) {
 	utilruntime.Must(kubeserialv1alpha1.AddToScheme(scheme))
 	fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).Build()
 	fs := GetFileSystem(t)
-	reconciler := KubeSerialReconciler{
-		Client: fakeClient,
-		Scheme: scheme,
-		FS:     fs,
-	}
 	apiClient := api.NewFakeApiClient()
+	reconciler := KubeSerialReconciler{
+		Client:    fakeClient,
+		Scheme:    scheme,
+		FS:        fs,
+		APIClient: apiClient,
+	}
 
-	err := reconciler.ReconcileMonitor(context.TODO(), getCR(), &apiClient, "latest")
+	err := reconciler.ReconcileMonitor(context.TODO(), getCR(), "latest")
 
 	assert.Equal(t, nil, err)
 	assert.Equal(t, []string{"EnsureConfigMap", "EnsureDaemonSet"}, apiClient.Operations)

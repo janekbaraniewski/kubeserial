@@ -41,6 +41,7 @@ type KubeSerialReconciler struct {
 	Scheme               *runtime.Scheme
 	DeviceMonitorVersion string
 	FS                   utils.FileSystem
+	APIClient            api.API
 }
 
 //+kubebuilder:rbac:groups=app.kubeserial.com,resources=kubeserials,verbs=get;list;watch;create;update;patch;delete
@@ -60,12 +61,7 @@ func (r *KubeSerialReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 		return reconcile.Result{}, err
 	}
 
-	apiClient := api.ApiClient{
-		Client: r.Client,
-		Scheme: r.Scheme,
-	}
-
-	if err := r.ReconcileMonitor(ctx, instance, &apiClient, r.DeviceMonitorVersion); err != nil {
+	if err := r.ReconcileMonitor(ctx, instance, r.DeviceMonitorVersion); err != nil {
 		reqLogger.Info("ReconcileMonitor fail")
 		return reconcile.Result{}, err
 	}
@@ -75,7 +71,7 @@ func (r *KubeSerialReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	}, nil
 }
 
-func (r *KubeSerialReconciler) ReconcileMonitor(ctx context.Context, cr *appv1alpha1.KubeSerial, api api.API, monitorVersion string) error {
+func (r *KubeSerialReconciler) ReconcileMonitor(ctx context.Context, cr *appv1alpha1.KubeSerial, monitorVersion string) error {
 	cm, err := monitor.CreateConfigMap(r.FS, cr.Spec.SerialDevices)
 	if err != nil {
 		return err
@@ -87,11 +83,11 @@ func (r *KubeSerialReconciler) ReconcileMonitor(ctx context.Context, cr *appv1al
 		return err
 	}
 
-	if err := api.EnsureConfigMap(ctx, cr, cm); err != nil {
+	if err := r.APIClient.EnsureConfigMap(ctx, cr, cm); err != nil {
 		return err
 	}
 
-	if err := api.EnsureDaemonSet(ctx, cr, monitorDaemon); err != nil {
+	if err := r.APIClient.EnsureDaemonSet(ctx, cr, monitorDaemon); err != nil {
 		return err
 	}
 

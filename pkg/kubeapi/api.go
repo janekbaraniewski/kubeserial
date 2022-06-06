@@ -44,18 +44,21 @@ func NewApiClient(client client.Client, scheme *runtime.Scheme) *ApiClient {
 
 func (r *ApiClient) EnsureObject(ctx context.Context, cr metav1.Object, obj client.Object) error {
 	// TODO: test how this behaves when there is f.e. CM and Deploy with same namespacedname
-	log.Info("Setting controller reference", "owner", cr, "object", obj)
+	log.V(2).Info("Setting controller reference", "owner", cr, "object", obj)
 	if err := controllerutil.SetControllerReference(cr, obj, r.Scheme); err != nil {
 		return err
 	}
-	log.Info("Controller reference set", "owner", cr, "object", obj)
+	log.V(2).Info("Controller reference set", "owner", cr, "object", obj)
 
 	found := &unstructured.Unstructured{}
 	objNamespacedName := types.NamespacedName{Name: obj.GetName(), Namespace: obj.GetNamespace()}
-	log.Info("Looking for existing Object", "Object NamespacedName", objNamespacedName)
+	log.Info("Setting GVK for unstructured resource", "GVK", obj.GetObjectKind().GroupVersionKind())
+	found.SetGroupVersionKind(obj.GetObjectKind().GroupVersionKind())
+	log.Info("GVK set", "New GVK", found.GroupVersionKind())
+	log.V(2).Info("Looking for existing Object", "Object NamespacedName", objNamespacedName)
 	err := r.Client.Get(ctx, objNamespacedName, found)
 	if err != nil && errors.IsNotFound(err) {
-		log.Info("Object not found, creating new one", "Object", obj)
+		log.V(2).Info("Object not found, creating new one", "Object", obj)
 		err = r.Client.Create(ctx, obj)
 		if err != nil {
 			log.Error(err, "Error creating new Object")

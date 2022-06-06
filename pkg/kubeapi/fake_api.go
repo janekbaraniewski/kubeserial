@@ -13,8 +13,8 @@ type FakeApiClient struct {
 	Operations []string
 }
 
-func NewFakeApiClient() FakeApiClient {
-	return FakeApiClient{
+func NewFakeApiClient() *FakeApiClient {
+	return &FakeApiClient{
 		Operations: []string{},
 	}
 }

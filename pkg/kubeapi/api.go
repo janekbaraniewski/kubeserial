@@ -134,26 +134,37 @@ func (r *ApiClient) EnsureDeployment(ctx context.Context, cr metav1.Object, depl
 }
 
 func (r *ApiClient) EnsureDaemonSet(ctx context.Context, cr metav1.Object, ds *appsv1.DaemonSet) error {
+	log.Info("Setting controller reference", "owner", cr, "object", ds)
 	if err := controllerutil.SetControllerReference(cr, ds, r.Scheme); err != nil {
 		return err
 	}
+	log.Info("Controller reference set", "owner", cr, "object", ds)
 
 	found := &appsv1.DaemonSet{}
-	err := r.Client.Get(ctx, types.NamespacedName{Name: ds.Name, Namespace: ds.Namespace}, found)
+	dsNamespacedName := types.NamespacedName{Name: ds.Name, Namespace: ds.Namespace}
+	log.Info("Looking for existing DaemonSet", "DaemonSet NamespacedName", dsNamespacedName)
+	err := r.Client.Get(ctx, dsNamespacedName, found)
 	if err != nil && errors.IsNotFound(err) {
+		log.Info("DaemonSet not found, creating new one", "DaemonSet", ds)
 		err = r.Client.Create(ctx, ds)
 		if err != nil {
+			log.Error(err, "Error creating new DaemonSet")
 			return err
 		}
+		log.Info("Successfuly created new DaemonSet", "DaemonSet", ds)
 		return nil
 	} else if err != nil {
+		log.Error(err, "Error looging for existing DaemonSet")
 		return err
 	}
 
+	log.Info("DaemonSet exists, updating it with current spec", "Existing DaemonSet spec", found, "New DaemonSet spec", ds)
 	err = r.Client.Update(ctx, ds)
 	if err != nil {
+		log.Error(err, "Error updating DaemonSet")
 		return err
 	}
+	log.Info("Successfuly updated DaemonSet", "DaemonSet", ds)
 	return nil
 }
 

@@ -307,11 +307,11 @@ func TestEnsureDaemonSet(t *testing.T) {
 	assert.Equal(t, "test-ds", found.Spec.Template.ObjectMeta.Name)
 }
 
-func TestEnsureDaemonSetDoesntOverwriteExisting(t *testing.T) {
+func TestEnsureDaemonSetUpdatesExisting(t *testing.T) {
 	scheme, fakeClient := GetFakeApiAndScheme()
 	api := GetApi(fakeClient, scheme)
 
-	fakeClient.Create(context.TODO(), &appsv1.DaemonSet{
+	ds := &appsv1.DaemonSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-ds",
 			Namespace: "test-ns",
@@ -319,30 +319,30 @@ func TestEnsureDaemonSetDoesntOverwriteExisting(t *testing.T) {
 		Spec: appsv1.DaemonSetSpec{
 			Template: v1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Name: "original-ds",
+					Name: "test-ds",
+				},
+				Spec: v1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Image: "original-image",
+						},
+					},
 				},
 			},
 		},
-	})
+	}
 
-	err := api.EnsureDaemonSet(context.TODO(), &kubeserialv1alpha1.KubeSerial{}, &appsv1.DaemonSet{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "test-ds",
-			Namespace: "test-ns",
-		},
-		Spec: appsv1.DaemonSetSpec{
-			Template: v1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "new-ds",
-				},
-			},
-		},
-	})
+	fakeClient.Create(context.TODO(), ds)
+
+	newDs := ds.DeepCopy()
+	newDs.Spec.Template.Spec.Containers[0].Image = "new-image"
+
+	err := api.EnsureDaemonSet(context.TODO(), &kubeserialv1alpha1.KubeSerial{}, newDs)
 
 	assert.Equal(t, nil, err)
 	found := &appsv1.DaemonSet{}
 	fakeClient.Get(context.TODO(), types.NamespacedName{Name: "test-ds", Namespace: "test-ns"}, found)
-	assert.Equal(t, "original-ds", found.Spec.Template.ObjectMeta.Name)
+	assert.Equal(t, "new-image", found.Spec.Template.Spec.Containers[0].Image)
 }
 
 func TestDelete(t *testing.T) {

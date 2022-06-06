@@ -145,7 +145,13 @@ func (r *ApiClient) EnsureDaemonSet(ctx context.Context, cr metav1.Object, ds *a
 		if err != nil {
 			return err
 		}
+		return nil
 	} else if err != nil {
+		return err
+	}
+
+	err = r.Client.Update(ctx, ds)
+	if err != nil {
 		return err
 	}
 	return nil

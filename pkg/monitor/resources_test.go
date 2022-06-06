@@ -1,8 +1,6 @@
 package monitor
 
 import (
-	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 
@@ -13,20 +11,11 @@ import (
 
 func TestCreateDaemonSet(t *testing.T) {
 	fs := utils.NewInMemoryFS()
-	file, err := fs.Create("/config/monitor-daemonset.yaml")
-
-	assert.Equal(t, nil, err)
-
-	absPath, _ := filepath.Abs("../../test-assets/monitor-daemonset.yaml")
-	content, err := os.ReadFile(absPath)
-	if err != nil {
-		t.Fatalf("Failed to read yaml resource: %v", err)
+	if err := fs.AddFileFromHostPath("monitor-daemonset.yaml"); err != nil {
+		t.Fatalf("Failed to load test asset: %v", err)
 	}
 
-	file.Write(content)
-
 	result, err := CreateDaemonSet(fs)
-
 	assert.Equal(t, nil, err)
 	assert.Equal(t, "kubeserial-monitor", result.ObjectMeta.Name)
 	imageAndTag := strings.Split(result.Spec.Template.Spec.Containers[0].Image, ":")
@@ -35,17 +24,9 @@ func TestCreateDaemonSet(t *testing.T) {
 
 func TestCreateConfigMap(t *testing.T) {
 	fs := utils.NewInMemoryFS()
-	file, err := fs.Create("/config/monitor-configmap.yaml")
-
-	assert.Equal(t, nil, err)
-
-	absPath, _ := filepath.Abs("../../test-assets/monitor-configmap.yaml")
-	content, err := os.ReadFile(absPath)
-	if err != nil {
-		t.Fatalf("Failed to read yaml resource: %v", err)
+	if err := fs.AddFileFromHostPath("monitor-configmap.yaml"); err != nil {
+		t.Fatalf("Failed to load test asset: %v", err)
 	}
-
-	file.Write(content)
 
 	devices := []appv1alpha1.SerialDevice_2{
 		{

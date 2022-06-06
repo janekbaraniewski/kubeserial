@@ -2,9 +2,6 @@ package managers
 
 import (
 	"context"
-	"fmt"
-	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
@@ -28,22 +25,13 @@ func TestSchedule(t *testing.T) {
 }
 
 func AddSpecFilesToFilesystem(t *testing.T, fs *utils.InMemoryFS) {
-	AddFileToFileSystem(t, fs, "manager-configmap.yaml")
-	AddFileToFileSystem(t, fs, "manager-deployment.yaml")
-	AddFileToFileSystem(t, fs, "manager-service.yaml")
-}
-
-func AddFileToFileSystem(t *testing.T, fs *utils.InMemoryFS, path string) {
-	file, err := fs.Create(fmt.Sprintf("/config/%v", path))
-
-	assert.Equal(t, nil, err)
-
-	absPath, _ := filepath.Abs(fmt.Sprintf("../../test-assets/%v", path))
-	content, err := os.ReadFile(absPath)
-	if err != nil {
-		t.Fatalf("Failed to read yaml resource: %v", err)
+	if err := fs.AddFileFromHostPath("manager-configmap.yaml"); err != nil {
+		t.Fatalf("Failed to load test asset: %v", err)
 	}
-
-	file.Write(content)
-	file.Close()
+	if err := fs.AddFileFromHostPath("manager-deployment.yaml"); err != nil {
+		t.Fatalf("Failed to load test asset: %v", err)
+	}
+	if err := fs.AddFileFromHostPath("manager-service.yaml"); err != nil {
+		t.Fatalf("Failed to load test asset: %v", err)
+	}
 }

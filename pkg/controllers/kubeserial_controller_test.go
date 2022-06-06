@@ -2,8 +2,6 @@ package controllers
 
 import (
 	"context"
-	"os"
-	"path/filepath"
 	"testing"
 	"time"
 
@@ -98,39 +96,13 @@ func TestReconcile(t *testing.T) {
 
 func GetFileSystem(t *testing.T) utils.FileSystem {
 	fs := utils.NewInMemoryFS()
-	GetMonitorDaemonSetConfig(t, fs)
-	GetMonitorConfigMapConfig(t, fs)
+	if err := fs.AddFileFromHostPath("monitor-daemonset.yaml"); err != nil {
+		t.Fatalf("Failed to load test asset: %v", err)
+	}
+	if err := fs.AddFileFromHostPath("monitor-configmap.yaml"); err != nil {
+		t.Fatalf("Failed to load test asset: %v", err)
+	}
 	return fs
-}
-
-func GetMonitorDaemonSetConfig(t *testing.T, fs *utils.InMemoryFS) {
-	file, err := fs.Create("/config/monitor-daemonset.yaml")
-
-	assert.Equal(t, nil, err)
-
-	absPath, _ := filepath.Abs("../../test-assets/monitor-daemonset.yaml")
-	content, err := os.ReadFile(absPath)
-	if err != nil {
-		t.Fatalf("Failed to read yaml resource: %v", err)
-	}
-
-	file.Write(content)
-	file.Close()
-}
-
-func GetMonitorConfigMapConfig(t *testing.T, fs *utils.InMemoryFS) {
-	file, err := fs.Create("/config/monitor-configmap.yaml")
-
-	assert.Equal(t, nil, err)
-
-	absPath, _ := filepath.Abs("../../test-assets/monitor-configmap.yaml")
-	content, err := os.ReadFile(absPath)
-	if err != nil {
-		t.Fatalf("Failed to read yaml resource: %v", err)
-	}
-
-	file.Write(content)
-	file.Close()
 }
 
 func TestReconcileMonitor(t *testing.T) {

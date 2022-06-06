@@ -1,8 +1,10 @@
 package utils
 
 import (
+	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/spf13/afero"
 )
@@ -37,6 +39,23 @@ type InMemoryFS struct {
 func (f *InMemoryFS) Open(name string) (File, error)        { return f.fs.Open(name) }
 func (f *InMemoryFS) Stat(name string) (os.FileInfo, error) { return f.fs.Stat(name) }
 func (f *InMemoryFS) Create(name string) (File, error)      { return f.fs.Create(name) }
+func (f *InMemoryFS) AddFileFromHostPath(path string) error {
+	file, err := f.Create(fmt.Sprintf("/config/%v", path))
+
+	if err != nil {
+		return err
+	}
+
+	absPath, _ := filepath.Abs(fmt.Sprintf("../../test-assets/%v", path))
+	content, err := os.ReadFile(absPath)
+	if err != nil {
+		return err
+	}
+
+	file.Write(content)
+	file.Close()
+	return nil
+}
 
 func NewInMemoryFS() *InMemoryFS {
 	fs := &InMemoryFS{}

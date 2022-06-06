@@ -84,3 +84,6 @@ local/
 
 # Test assets
 test-assets/
+
+### InteliJ
+.idea/

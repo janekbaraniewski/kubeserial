@@ -19,6 +19,8 @@ package controllers
 import (
 	"context"
 
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -101,15 +103,15 @@ func (r *SerialDeviceReconciler) RequestGateway(ctx context.Context, device *kub
 	deploy := gateway.CreateDeployment(device)
 	svc := gateway.CreateService(device)
 
-	if err := r.APIClient.EnsureConfigMap(ctx, device, cm); err != nil {
+	if err := r.APIClient.EnsureObject(ctx, device, cm); err != nil {
 		return err
 	}
 
-	if err := r.APIClient.EnsureDeployment(ctx, device, deploy); err != nil {
+	if err := r.APIClient.EnsureObject(ctx, device, deploy); err != nil {
 		return err
 	}
 
-	if err := r.APIClient.EnsureService(ctx, device, svc); err != nil {
+	if err := r.APIClient.EnsureObject(ctx, device, svc); err != nil {
 		return err
 	}
 
@@ -119,15 +121,14 @@ func (r *SerialDeviceReconciler) RequestGateway(ctx context.Context, device *kub
 func (r *SerialDeviceReconciler) EnsureNoGatewayRunning(ctx context.Context, device *kubeserialv1alpha1.SerialDevice) error {
 	name := device.Name + "-gateway" // TODO: move name generation to some utils so it's in one place
 
-	if err := r.APIClient.DeleteDeployment(ctx, device, name); err != nil {
+	if err := r.APIClient.DeleteObject(ctx, &appsv1.Deployment{ObjectMeta: v1.ObjectMeta{Name: name, Namespace: device.Namespace}}); err != nil {
 		return err
 	}
 
-	if err := r.APIClient.DeleteConfigMap(ctx, device, name); err != nil {
+	if err := r.APIClient.DeleteObject(ctx, &corev1.ConfigMap{ObjectMeta: v1.ObjectMeta{Name: name, Namespace: device.Namespace}}); err != nil {
 		return err
 	}
-
-	if err := r.APIClient.DeleteService(ctx, device, name); err != nil {
+	if err := r.APIClient.DeleteObject(ctx, &corev1.Service{ObjectMeta: v1.ObjectMeta{Name: name, Namespace: device.Namespace}}); err != nil {
 		return err
 	}
 	return nil

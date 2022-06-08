@@ -19,16 +19,8 @@ import (
 var log = logf.Log.WithName("ApiClient")
 
 type API interface {
-	EnsureConfigMap(ctx context.Context, cr metav1.Object, cm *corev1.ConfigMap) error
-	EnsureService(ctx context.Context, cr metav1.Object, svc *corev1.Service) error
-	EnsureIngress(ctx context.Context, cr metav1.Object, ingress *networkingv1.Ingress) error
-	EnsureDeployment(ctx context.Context, cr metav1.Object, deployment *appsv1.Deployment) error
-	EnsureDaemonSet(ctx context.Context, cr metav1.Object, ds *appsv1.DaemonSet) error
 	EnsureObject(ctx context.Context, cr metav1.Object, obj client.Object) error
-	DeleteDeployment(ctx context.Context, cr metav1.Object, name string) error
-	DeleteConfigMap(ctx context.Context, cr metav1.Object, name string) error
-	DeleteService(ctx context.Context, cr metav1.Object, name string) error
-	DeleteIngress(ctx context.Context, cr metav1.Object, name string) error
+	DeleteObject(ctx context.Context, obj client.Object) error
 }
 type ApiClient struct {
 	Client client.Client
@@ -52,9 +44,10 @@ func (r *ApiClient) EnsureObject(ctx context.Context, cr metav1.Object, obj clie
 
 	found := &unstructured.Unstructured{}
 	objNamespacedName := types.NamespacedName{Name: obj.GetName(), Namespace: obj.GetNamespace()}
-	log.Info("Setting GVK for unstructured resource", "GVK", obj.GetObjectKind().GroupVersionKind())
-	found.SetGroupVersionKind(obj.GetObjectKind().GroupVersionKind())
-	log.Info("GVK set", "New GVK", found.GroupVersionKind())
+	gvk := obj.GetObjectKind().GroupVersionKind()
+	log.V(2).Info("Setting GVK for unstructured resource", "GVK", gvk)
+	found.SetGroupVersionKind(gvk)
+	log.V(2).Info("GVK set", "New GVK", found.GroupVersionKind())
 	log.V(2).Info("Looking for existing Object", "Object NamespacedName", objNamespacedName)
 	err := r.Client.Get(ctx, objNamespacedName, found)
 	if err != nil && errors.IsNotFound(err) {
@@ -71,148 +64,13 @@ func (r *ApiClient) EnsureObject(ctx context.Context, cr metav1.Object, obj clie
 		return err
 	}
 
-	log.Info("Object exists, updating it with current spec", "Existing Object spec", found, "New Object spec", obj)
+	log.V(2).Info("Object exists, updating it with current spec", "Existing Object spec", found, "New Object spec", obj)
 	err = r.Client.Update(ctx, obj)
 	if err != nil {
 		log.Error(err, "Error updating object", "Object", obj)
 		return err
 	}
-	log.Info("Successfuly updated", "Object", obj)
-	return nil
-}
-
-func (c *ApiClient) EnsureConfigMap(ctx context.Context, cr metav1.Object, cm *corev1.ConfigMap) error {
-	logger := log.WithValues("KubeSerial.Namespace", cr.GetNamespace(), "KubeSerial.Name", cr.GetName())
-
-	if err := controllerutil.SetControllerReference(cr, cm, c.Scheme); err != nil {
-		logger.Error(err, "Can't set reference")
-		return err
-	}
-
-	found := &corev1.ConfigMap{}
-	err := c.Client.Get(ctx, types.NamespacedName{Name: cm.Name, Namespace: cm.Namespace}, found)
-	if err != nil && errors.IsNotFound(err) {
-		logger.Info("Creating a new ConfigMap", "configMap", cm)
-		err = c.Client.Create(ctx, cm)
-		if err != nil {
-			logger.Error(err, "ConfigMap not created")
-			return err
-		}
-	} else if err != nil {
-		logger.Error(err, "ConfigMap not found")
-		return err
-	}
-
-	return nil
-}
-
-func (r *ApiClient) EnsureService(ctx context.Context, cr metav1.Object, svc *corev1.Service) error {
-	logger := log.WithValues("KubeSerial.Namespace", cr.GetNamespace(), "KubeSerial.Name", cr.GetName())
-
-	if err := controllerutil.SetControllerReference(cr, svc, r.Scheme); err != nil {
-		logger.Error(err, "Can't set reference")
-		return err
-	}
-
-	found := &corev1.Service{}
-	err := r.Client.Get(ctx, types.NamespacedName{Name: svc.Name, Namespace: svc.Namespace}, found)
-	if err != nil && errors.IsNotFound(err) {
-		logger.Info("Creating a new Service" + svc.Name)
-		err = r.Client.Create(ctx, svc)
-		if err != nil {
-			logger.Info("Service not created")
-			return err
-		}
-	} else if err != nil {
-		logger.Info("Service not found")
-		return err
-	}
-
-	return nil
-}
-
-func (r *ApiClient) EnsureIngress(ctx context.Context, cr metav1.Object, ingress *networkingv1.Ingress) error {
-	logger := log.WithValues("KubeSerial.Namespace", cr.GetNamespace(), "KubeSerial.Name", cr.GetName())
-
-	if err := controllerutil.SetControllerReference(cr, ingress, r.Scheme); err != nil {
-		logger.Info("Can't set reference")
-		return err
-	}
-
-	found := &networkingv1.Ingress{}
-	err := r.Client.Get(ctx, types.NamespacedName{Name: ingress.Name, Namespace: ingress.Namespace}, found)
-	if err != nil && errors.IsNotFound(err) {
-		logger.Info("Creating a new Ingress " + ingress.Name)
-		err = r.Client.Create(ctx, ingress)
-		if err != nil {
-			logger.Info("Deployment not created")
-			return err
-		}
-	} else if err != nil {
-		logger.Info("Deployment not found")
-		return err
-	}
-
-	return nil
-}
-
-func (r *ApiClient) EnsureDeployment(ctx context.Context, cr metav1.Object, deployment *appsv1.Deployment) error {
-	logger := log.WithValues("KubeSerial.Namespace", cr.GetNamespace(), "KubeSerial.Name", cr.GetName())
-
-	if err := controllerutil.SetControllerReference(cr, deployment, r.Scheme); err != nil {
-		logger.Info("Can't set reference")
-		return err
-	}
-
-	found := &appsv1.Deployment{}
-	err := r.Client.Get(ctx, types.NamespacedName{Name: deployment.Name, Namespace: deployment.Namespace}, found)
-	if err != nil && errors.IsNotFound(err) {
-		logger.Info("Creating a new Deployment " + deployment.Name)
-		err = r.Client.Create(ctx, deployment)
-		if err != nil {
-			logger.Info("Deployment not created")
-			return err
-		}
-	} else if err != nil {
-		logger.Info("Deployment not found")
-		return err
-	}
-
-	return nil
-}
-
-func (r *ApiClient) EnsureDaemonSet(ctx context.Context, cr metav1.Object, ds *appsv1.DaemonSet) error {
-	log.Info("Setting controller reference", "owner", cr, "object", ds)
-	if err := controllerutil.SetControllerReference(cr, ds, r.Scheme); err != nil {
-		return err
-	}
-	log.Info("Controller reference set", "owner", cr, "object", ds)
-
-	found := &appsv1.DaemonSet{}
-	dsNamespacedName := types.NamespacedName{Name: ds.Name, Namespace: ds.Namespace}
-	log.Info("Looking for existing DaemonSet", "DaemonSet NamespacedName", dsNamespacedName)
-	err := r.Client.Get(ctx, dsNamespacedName, found)
-	if err != nil && errors.IsNotFound(err) {
-		log.Info("DaemonSet not found, creating new one", "DaemonSet", ds)
-		err = r.Client.Create(ctx, ds)
-		if err != nil {
-			log.Error(err, "Error creating new DaemonSet")
-			return err
-		}
-		log.Info("Successfuly created new DaemonSet", "DaemonSet", ds)
-		return nil
-	} else if err != nil {
-		log.Error(err, "Error looging for existing DaemonSet")
-		return err
-	}
-
-	log.Info("DaemonSet exists, updating it with current spec", "Existing DaemonSet spec", found, "New DaemonSet spec", ds)
-	err = r.Client.Update(ctx, ds)
-	if err != nil {
-		log.Error(err, "Error updating DaemonSet")
-		return err
-	}
-	log.Info("Successfuly updated DaemonSet", "DaemonSet", ds)
+	log.V(2).Info("Successfuly updated", "Object", obj)
 	return nil
 }
 
@@ -257,6 +115,16 @@ func (r *ApiClient) DeleteIngress(ctx context.Context, cr metav1.Object, name st
 		return err
 	} else if err == nil {
 		r.Client.Delete(ctx, ingress, client.PropagationPolicy(metav1.DeletePropagationForeground))
+	}
+	return nil
+}
+
+func (r *ApiClient) DeleteObject(ctx context.Context, obj client.Object) error {
+	err := r.Client.Get(ctx, types.NamespacedName{Name: obj.GetName(), Namespace: obj.GetNamespace()}, obj)
+	if err != nil && !errors.IsNotFound(err) {
+		return err
+	} else if err == nil {
+		r.Client.Delete(ctx, obj, client.PropagationPolicy(metav1.DeletePropagationForeground))
 	}
 	return nil
 }

@@ -3,7 +3,7 @@ module github.com/janekbaraniewski/kubeserial
 go 1.18
 
 require (
-	github.com/regclient/regclient v0.4.2
+	github.com/regclient/regclient v0.4.3
 	k8s.io/api v0.24.1
 	k8s.io/apimachinery v0.24.1
 	k8s.io/client-go v0.24.1
@@ -14,9 +14,6 @@ require (
 )
 
 require (
-	github.com/docker/cli v20.10.12+incompatible // indirect
-	github.com/docker/docker v20.10.12+incompatible // indirect
-	github.com/docker/docker-credential-helpers v0.6.4 // indirect
 	github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7 // indirect
 	github.com/google/gnostic v0.6.9 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect

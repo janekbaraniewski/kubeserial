@@ -11,6 +11,8 @@ import (
 	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	networkingv1 "k8s.io/api/networking/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
 
@@ -39,7 +41,7 @@ func Schedule(ctx context.Context, fs utils.FileSystem, request *appv1alpha1.Man
 		if err != nil {
 			return err
 		}
-		if err := api.EnsureConfigMap(ctx, request, cm); err != nil {
+		if err := api.EnsureObject(ctx, request, cm); err != nil {
 			return err
 		}
 	}
@@ -53,11 +55,11 @@ func Schedule(ctx context.Context, fs utils.FileSystem, request *appv1alpha1.Man
 		return err
 	}
 
-	if err := api.EnsureDeployment(ctx, request, deploy); err != nil {
+	if err := api.EnsureObject(ctx, request, deploy); err != nil {
 		return err
 	}
 
-	if err := api.EnsureService(ctx, request, svc); err != nil {
+	if err := api.EnsureObject(ctx, request, svc); err != nil {
 		return err
 	}
 
@@ -169,16 +171,16 @@ func (m *Manager) CreateService(cr types.NamespacedName, deviceName string) (*co
 func (m *Manager) Delete(ctx context.Context, cr *appv1alpha1.KubeSerial, device *appv1alpha1.SerialDevice_2, api api.API) error {
 	name := m.GetName(cr.Name, device.Name)
 
-	if err := api.DeleteDeployment(ctx, cr, name); err != nil {
+	if err := api.DeleteObject(ctx, &appsv1.Deployment{ObjectMeta: v1.ObjectMeta{Name: name, Namespace: cr.Namespace}}); err != nil {
 		return err
 	}
-	if err := api.DeleteConfigMap(ctx, cr, name); err != nil {
+	if err := api.DeleteObject(ctx, &corev1.ConfigMap{ObjectMeta: v1.ObjectMeta{Name: name, Namespace: cr.Namespace}}); err != nil {
 		return err
 	}
-	if err := api.DeleteService(ctx, cr, name); err != nil {
+	if err := api.DeleteObject(ctx, &corev1.Service{ObjectMeta: v1.ObjectMeta{Name: name, Namespace: cr.Namespace}}); err != nil {
 		return err
 	}
-	if err := api.DeleteIngress(ctx, cr, name); err != nil {
+	if err := api.DeleteObject(ctx, &networkingv1.Ingress{ObjectMeta: v1.ObjectMeta{Name: name, Namespace: cr.Namespace}}); err != nil {
 		return err
 	}
 

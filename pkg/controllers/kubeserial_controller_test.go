@@ -12,12 +12,25 @@ import (
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	runtimefake "sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
+
+var ConfigMapGVK = schema.GroupVersionKind{
+	Group:   "",
+	Version: "v1",
+	Kind:    "ConfigMap",
+}
+
+var DaemonSetGVK = schema.GroupVersionKind{
+	Group:   "apps",
+	Version: "v1",
+	Kind:    "DaemonSet",
+}
 
 func getCR() *kubeserialv1alpha1.KubeSerial {
 	return &kubeserialv1alpha1.KubeSerial{
@@ -121,6 +134,17 @@ func TestReconcileMonitor(t *testing.T) {
 
 	err := reconciler.ReconcileMonitor(context.TODO(), getCR(), "latest")
 
+	expected := []api.Operation{
+		{
+			Action: "EnsureObject",
+			GVK:    ConfigMapGVK,
+		},
+		{
+			Action: "EnsureObject",
+			GVK:    DaemonSetGVK,
+		},
+	}
+
 	assert.Equal(t, nil, err)
-	assert.Equal(t, []string{"EnsureConfigMap", "EnsureDaemonSet"}, apiClient.Operations)
+	assert.Equal(t, expected, apiClient.Operations)
 }

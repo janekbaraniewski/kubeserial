@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -26,10 +27,7 @@ func GetFakeApiAndScheme() (*runtime.Scheme, client.Client) {
 }
 
 func GetApi(fakeClient client.Client, scheme *runtime.Scheme) API {
-	return &ApiClient{
-		Client: fakeClient,
-		Scheme: scheme,
-	}
+	return NewApiClient(fakeClient, scheme)
 }
 
 func TestEnsureConfigMap(t *testing.T) {
@@ -101,4 +99,33 @@ func TestEnsureConfigMapUpdatesExisting(t *testing.T) {
 
 	assert.Equal(t, "overwritten", found.Data["data"])
 
+}
+
+func TestDeleteObject(t *testing.T) {
+	scheme, fakeClient := GetFakeApiAndScheme()
+	api := GetApi(fakeClient, scheme)
+
+	obj := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "test-cm",
+			Namespace: "test-namespace",
+		},
+		Data: map[string]string{
+			"data": "not-overwritten",
+		},
+	}
+
+	fakeClient.Create(context.TODO(), obj)
+
+	api.DeleteObject(context.TODO(), obj)
+
+	lookup := &corev1.ConfigMap{}
+
+	err := fakeClient.Get(
+		context.TODO(),
+		types.NamespacedName{Name: "test-cm", Namespace: "test-namespace"},
+		lookup,
+	)
+
+	assert.Equal(t, true, errors.IsNotFound(err))
 }

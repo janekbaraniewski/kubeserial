@@ -10,7 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-func CreateConfigMap(device metav1.Object) *corev1.ConfigMap {
+func CreateConfigMap(device metav1.Object, namespace string) *corev1.ConfigMap {
 	labels := map[string]string{
 		"app": strings.ToLower(device.GetName() + "-gateway"),
 	}
@@ -29,7 +29,7 @@ func CreateConfigMap(device metav1.Object) *corev1.ConfigMap {
 	}
 }
 
-func CreateDeployment(device *appv1alpha1.SerialDevice) *appsv1.Deployment {
+func CreateDeployment(device *appv1alpha1.SerialDevice, namespace string) *appsv1.Deployment {
 	labels := map[string]string{
 		"app": device.Name + "-gateway",
 	}
@@ -37,7 +37,7 @@ func CreateDeployment(device *appv1alpha1.SerialDevice) *appsv1.Deployment {
 	return &appsv1.Deployment{ // TODO: add TCP probes
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
-			Namespace: device.Namespace,
+			Namespace: namespace,
 			Labels:    labels,
 		},
 		Spec: appsv1.DeploymentSpec{
@@ -47,7 +47,7 @@ func CreateDeployment(device *appv1alpha1.SerialDevice) *appsv1.Deployment {
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Name:      name,
-					Namespace: device.Namespace,
+					Namespace: namespace,
 					Labels:    labels,
 				},
 				Spec: corev1.PodSpec{
@@ -120,7 +120,7 @@ func CreateDeployment(device *appv1alpha1.SerialDevice) *appsv1.Deployment {
 	}
 }
 
-func CreateService(device *appv1alpha1.SerialDevice) *corev1.Service {
+func CreateService(device *appv1alpha1.SerialDevice, namespace string) *corev1.Service {
 	labels := map[string]string{
 		"app": device.Name + "-gateway",
 	}
@@ -128,7 +128,7 @@ func CreateService(device *appv1alpha1.SerialDevice) *corev1.Service {
 	return &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
-			Namespace: device.Namespace,
+			Namespace: namespace,
 			Labels:    labels,
 		},
 		Spec: corev1.ServiceSpec{

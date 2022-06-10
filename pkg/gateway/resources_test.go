@@ -16,6 +16,7 @@ func TestCreateConfigMap(t *testing.T) {
 				Name: "test-device",
 			},
 		},
+		"test-ns",
 	)
 
 	assert.Equal(t, "test-device-gateway", cm.ObjectMeta.Name)
@@ -23,14 +24,17 @@ func TestCreateConfigMap(t *testing.T) {
 
 func TestCreateDeployment(t *testing.T) {
 	// TODO: improve this test
-	deployment := CreateDeployment(&v1alpha1.SerialDevice{
-		ObjectMeta: v1.ObjectMeta{
-			Name: "test-device",
+	deployment := CreateDeployment(
+		&v1alpha1.SerialDevice{
+			ObjectMeta: v1.ObjectMeta{
+				Name: "test-device",
+			},
+			Status: v1alpha1.SerialDeviceStatus{
+				NodeName: "test-node",
+			},
 		},
-		Status: v1alpha1.SerialDeviceStatus{
-			NodeName: "test-node",
-		},
-	})
+		"test-ns",
+	)
 
 	assert.Equal(t, map[string]string{
 		"kubernetes.io/hostname": "test-node",
@@ -45,6 +49,7 @@ func TestCreateService(t *testing.T) {
 				Name: "test-device",
 			},
 		},
+		"test-ns",
 	)
 
 	assert.Equal(t, "test-device-gateway", svc.ObjectMeta.Name)

@@ -3,9 +3,6 @@ package kubeapi
 import (
 	"context"
 
-	appsv1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
-	networkingv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -56,51 +53,6 @@ func (r *ApiClient) EnsureObject(ctx context.Context, cr metav1.Object, obj clie
 		return err
 	}
 	log.Info("Successfuly created new Object", "Object", obj)
-	return nil
-}
-
-func (r *ApiClient) DeleteDeployment(ctx context.Context, cr metav1.Object, name string) error {
-	d := &appsv1.Deployment{}
-	err := r.Client.Get(ctx, types.NamespacedName{Name: name, Namespace: cr.GetNamespace()}, d)
-	if err != nil && !errors.IsNotFound(err) {
-		return err
-	} else if err == nil {
-		r.Client.Delete(ctx, d, client.PropagationPolicy(metav1.DeletePropagationForeground))
-	}
-	return nil
-}
-
-func (r *ApiClient) DeleteConfigMap(ctx context.Context, cr metav1.Object, name string) error {
-	cm := &corev1.ConfigMap{}
-	err := r.Client.Get(ctx, types.NamespacedName{Name: name, Namespace: cr.GetNamespace()}, cm)
-	if err != nil && !errors.IsNotFound(err) {
-		return err
-	} else if err == nil {
-		r.Client.Delete(ctx, cm, client.PropagationPolicy(metav1.DeletePropagationForeground))
-	}
-	return nil
-}
-
-func (r *ApiClient) DeleteService(ctx context.Context, cr metav1.Object, name string) error {
-	svc := &corev1.Service{}
-	err := r.Client.Get(ctx, types.NamespacedName{Name: name, Namespace: cr.GetNamespace()}, svc)
-	if err != nil && !errors.IsNotFound(err) {
-		return err
-	} else if err == nil {
-		r.Client.Delete(ctx, svc, client.PropagationPolicy(metav1.DeletePropagationForeground))
-	}
-	return nil
-
-}
-
-func (r *ApiClient) DeleteIngress(ctx context.Context, cr metav1.Object, name string) error {
-	ingress := &networkingv1.Ingress{}
-	err := r.Client.Get(ctx, types.NamespacedName{Name: name, Namespace: cr.GetNamespace()}, ingress)
-	if err != nil && !errors.IsNotFound(err) {
-		return err
-	} else if err == nil {
-		r.Client.Delete(ctx, ingress, client.PropagationPolicy(metav1.DeletePropagationForeground))
-	}
 	return nil
 }
 

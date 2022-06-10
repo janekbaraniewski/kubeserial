@@ -36,8 +36,8 @@ jobs:
           platforms: ${{ env.PLATFORMS }}
           push: true
           tags: janekbaraniewski/kubeserial:${{ env.RELEASE_VERSION }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=registry,ref=janekbaraniewski/kubeserial:cache
+          cache-to: type=registry,ref=janekbaraniewski/kubeserial:cache,mode=max
 
   docker-device-monitor:
     runs-on: ubuntu-latest
@@ -70,8 +70,8 @@ jobs:
           push: true
           tags: janekbaraniewski/kubeserial-device-monitor:${{ env.RELEASE_VERSION }}
           file: Dockerfile.monitor
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=registry,ref=janekbaraniewski/kubeserial-device-monitor:cache
+          cache-to: type=registry,ref=janekbaraniewski/kubeserial-device-monitor:cache,mode=max
 
   docker-injector-webhook:
     runs-on: ubuntu-latest
@@ -104,8 +104,8 @@ jobs:
           push: true
           tags: janekbaraniewski/kubeserial-injector-webhook:${{ env.RELEASE_VERSION }}
           file: Dockerfile.webhook
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=registry,ref=janekbaraniewski/kubeserial-injector-webhook:cache
+          cache-to: type=registry,ref=janekbaraniewski/kubeserial-injector-webhook:cache,mode=max
 
   helm-chart:
     runs-on: ubuntu-latest

@@ -4,27 +4,35 @@ import (
 	"testing"
 
 	"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
+	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestCreateConfigMap(t *testing.T) {
-	// TODO: improve this test
-	cm := CreateConfigMap(
+	fs := utils.NewInMemoryFS()
+
+	AddSpecFilesToFilesystem(t, fs)
+
+	cm, err := CreateConfigMap(
 		&v1alpha1.SerialDevice{
 			ObjectMeta: v1.ObjectMeta{
 				Name: "test-device",
 			},
 		},
-		"test-ns",
+		fs,
 	)
 
+	assert.Equal(t, nil, err)
 	assert.Equal(t, "test-device-gateway", cm.ObjectMeta.Name)
 }
 
 func TestCreateDeployment(t *testing.T) {
-	// TODO: improve this test
-	deployment := CreateDeployment(
+	fs := utils.NewInMemoryFS()
+
+	AddSpecFilesToFilesystem(t, fs)
+
+	deployment, err := CreateDeployment(
 		&v1alpha1.SerialDevice{
 			ObjectMeta: v1.ObjectMeta{
 				Name: "test-device",
@@ -34,23 +42,48 @@ func TestCreateDeployment(t *testing.T) {
 			},
 		},
 		"test-ns",
+		fs,
 	)
 
+	assert.Equal(t, nil, err)
 	assert.Equal(t, map[string]string{
 		"kubernetes.io/hostname": "test-node",
 	}, deployment.Spec.Template.Spec.NodeSelector)
+	for _, volume := range deployment.Spec.Template.Spec.Volumes {
+		if volume.Name == "config" {
+			assert.Equal(t, "test-device-gateway", volume.ConfigMap.Name)
+		}
+	}
 }
 
 func TestCreateService(t *testing.T) {
+	fs := utils.NewInMemoryFS()
+
+	AddSpecFilesToFilesystem(t, fs)
+
 	// TODO: improve this test
-	svc := CreateService(
+	svc, err := CreateService(
 		&v1alpha1.SerialDevice{
 			ObjectMeta: v1.ObjectMeta{
 				Name: "test-device",
 			},
 		},
 		"test-ns",
+		fs,
 	)
 
+	assert.Equal(t, nil, err)
 	assert.Equal(t, "test-device-gateway", svc.ObjectMeta.Name)
+}
+
+func AddSpecFilesToFilesystem(t *testing.T, fs *utils.InMemoryFS) {
+	if err := fs.AddFileFromHostPath("gateway-configmap.yaml"); err != nil {
+		t.Fatalf("Failed to load test asset: %v", err)
+	}
+	if err := fs.AddFileFromHostPath("gateway-deployment.yaml"); err != nil {
+		t.Fatalf("Failed to load test asset: %v", err)
+	}
+	if err := fs.AddFileFromHostPath("gateway-service.yaml"); err != nil {
+		t.Fatalf("Failed to load test asset: %v", err)
+	}
 }

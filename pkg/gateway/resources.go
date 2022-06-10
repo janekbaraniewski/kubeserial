@@ -1,150 +1,75 @@
 package gateway
 
 import (
-	"strings"
+	"fmt"
 
 	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
+	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-func CreateConfigMap(device metav1.Object, namespace string) *corev1.ConfigMap {
-	labels := map[string]string{
-		"app": strings.ToLower(device.GetName() + "-gateway"),
+func CreateConfigMap(device metav1.Object, fs utils.FileSystem) (*corev1.ConfigMap, error) {
+	SPEC_PATH := "/config/gateway-configmap.yaml"
+	cm := &corev1.ConfigMap{}
+	name := fmt.Sprintf("%v-gateway", device.GetName())
+
+	conf := fmt.Sprintf("3333:raw:600:/dev/%v:115200 8DATABITS NONE 1STOPBIT -XONXOFF LOCAL -RTSCTS HANGUP_WHEN_DONE\n", device.GetName())
+
+	if err := utils.LoadResourceFromYaml(fs, SPEC_PATH, cm); err != nil {
+		return cm, err
 	}
 
-	conf := "3333:raw:600:/dev/" + device.GetName() + ":115200 8DATABITS NONE 1STOPBIT -XONXOFF LOCAL -RTSCTS HANGUP_WHEN_DONE\n"
+	cm.ObjectMeta.Labels["app.kubernetes.io/name"] = name
+	cm.ObjectMeta.Name = name
+	cm.Data["ser2net.conf"] = conf
 
-	return &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      strings.ToLower(device.GetName() + "-gateway"),
-			Namespace: namespace,
-			Labels:    labels,
-		},
-		Data: map[string]string{
-			"ser2net.conf": conf,
-		},
-	}
+	return cm, nil
 }
 
-func CreateDeployment(device *appv1alpha1.SerialDevice, namespace string) *appsv1.Deployment {
-	labels := map[string]string{
-		"app": device.Name + "-gateway",
+func CreateDeployment(device *appv1alpha1.SerialDevice, namespace string, fs utils.FileSystem) (*appsv1.Deployment, error) {
+	SPEC_PATH := "/config/gateway-deployment.yaml"
+
+	deployment := &appsv1.Deployment{}
+
+	if err := utils.LoadResourceFromYaml(fs, SPEC_PATH, deployment); err != nil {
+		return deployment, err
 	}
-	name := strings.ToLower(device.Name + "-gateway")
-	return &appsv1.Deployment{ // TODO: add TCP probes
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-			Labels:    labels,
-		},
-		Spec: appsv1.DeploymentSpec{
-			Selector: &metav1.LabelSelector{
-				MatchLabels: labels,
-			},
-			Template: corev1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      name,
-					Namespace: namespace,
-					Labels:    labels,
-				},
-				Spec: corev1.PodSpec{
-					Volumes: []corev1.Volume{
-						{
-							Name: "host-dev",
-							VolumeSource: corev1.VolumeSource{
-								HostPath: &corev1.HostPathVolumeSource{
-									Path: "/dev",
-								},
-							},
-						},
-						{
-							Name: "config",
-							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: name,
-									},
-									Items: []corev1.KeyToPath{
-										{
-											Key:  "ser2net.conf",
-											Path: "ser2net.conf",
-										},
-									},
-								},
-							},
-						},
-					},
-					Containers: []corev1.Container{
-						{
-							Name:    "kubeserial-gateway",
-							Image:   "janekbaraniewski/ser2net:latest",
-							Command: []string{"/bin/sh"},
-							Args: []string{
-								"-c",
-								"ser2net && sleep inf",
-							},
-							SecurityContext: &corev1.SecurityContext{
-								Privileged: &[]bool{true}[0],
-							},
-							Ports: []corev1.ContainerPort{
-								{
-									Name:          "ser2net",
-									Protocol:      corev1.ProtocolTCP,
-									ContainerPort: 3333,
-								},
-							},
-							VolumeMounts: []corev1.VolumeMount{
-								{
-									Name:      "host-dev",
-									ReadOnly:  false,
-									MountPath: "/dev",
-								},
-								{
-									Name:      "config",
-									ReadOnly:  false,
-									MountPath: "/etc/ser2net.conf",
-									SubPath:   "ser2net.conf",
-								},
-							},
-						},
-					},
-					NodeSelector: map[string]string{
-						"kubernetes.io/hostname": device.Status.NodeName,
-					},
-				},
-			},
-		},
+	name := fmt.Sprintf("%v-gateway", device.GetName())
+
+	deployment.ObjectMeta.Name = name
+	deployment.ObjectMeta.Labels["app.kubernetes.io/name"] = name
+	deployment.Spec.Selector.MatchLabels["app.kubernetes.io/name"] = name
+	deployment.Spec.Template.ObjectMeta.Labels["app.kubernetes.io/name"] = name
+	deployment.Spec.Template.ObjectMeta.Name = name
+
+	deployment.Spec.Template.Spec.NodeSelector = map[string]string{
+		"kubernetes.io/hostname": device.Status.NodeName,
 	}
+	volumes := []corev1.Volume{}
+
+	for _, volume := range deployment.Spec.Template.Spec.Volumes {
+		if volume.Name == "config" {
+			volume.ConfigMap.Name = name
+		}
+		volumes = append(volumes, volume)
+	}
+	deployment.Spec.Template.Spec.Volumes = volumes
+
+	return deployment, nil
 }
 
-func CreateService(device *appv1alpha1.SerialDevice, namespace string) *corev1.Service {
-	labels := map[string]string{
-		"app": device.Name + "-gateway",
-	}
-	name := strings.ToLower(device.Name + "-gateway")
-	return &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-			Labels:    labels,
-		},
-		Spec: corev1.ServiceSpec{
-			Ports: []corev1.ServicePort{
-				{
-					Name:       "ser2net",
-					Protocol:   corev1.ProtocolTCP,
-					Port:       3333,
-					TargetPort: intstr.FromInt(3333),
-				},
-			},
-			Selector: map[string]string{
-				"app": name,
-			},
-			Type: corev1.ServiceTypeLoadBalancer,
-		},
-	}
+func CreateService(device *appv1alpha1.SerialDevice, namespace string, fs utils.FileSystem) (*corev1.Service, error) {
+	SPEC_PATH := "/config/gateway-service.yaml"
 
+	svc := &corev1.Service{}
+	if err := utils.LoadResourceFromYaml(fs, SPEC_PATH, svc); err != nil {
+		return svc, err
+	}
+	name := fmt.Sprintf("%v-gateway", device.GetName())
+	svc.ObjectMeta.Name = name
+	svc.ObjectMeta.Labels["app.kubernetes.io/name"] = name
+	svc.Spec.Selector["app.kubernetes.io/name"] = name
+	return svc, nil
 }

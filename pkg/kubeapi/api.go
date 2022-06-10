@@ -8,7 +8,6 @@ import (
 	networkingv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -42,35 +41,21 @@ func (r *ApiClient) EnsureObject(ctx context.Context, cr metav1.Object, obj clie
 	}
 	log.V(2).Info("Controller reference set", "owner", cr, "object", obj)
 
-	found := &unstructured.Unstructured{}
-	objNamespacedName := types.NamespacedName{Name: obj.GetName(), Namespace: obj.GetNamespace()}
-	gvk := obj.GetObjectKind().GroupVersionKind()
-	log.V(2).Info("Setting GVK for unstructured resource", "GVK", gvk)
-	found.SetGroupVersionKind(gvk)
-	log.V(2).Info("GVK set", "New GVK", found.GroupVersionKind())
-	log.V(2).Info("Looking for existing Object", "Object NamespacedName", objNamespacedName)
-	err := r.Client.Get(ctx, objNamespacedName, found)
-	if err != nil && errors.IsNotFound(err) {
-		log.V(2).Info("Object not found, creating new one", "Object", obj)
-		err = r.Client.Create(ctx, obj)
-		if err != nil {
-			log.Error(err, "Error creating new Object")
-			return err
-		}
-		log.Info("Successfuly created new Object", "Object", obj)
-		return nil
-	} else if err != nil {
-		log.Error(err, "Error looging for existing Object")
-		return err
-	}
-
-	log.V(2).Info("Object exists, updating it with current spec", "Existing Object spec", found, "New Object spec", obj)
-	err = r.Client.Update(ctx, obj)
+	err := r.Client.Create(ctx, obj)
 	if err != nil {
-		log.Error(err, "Error updating object", "Object", obj)
+		if errors.IsAlreadyExists(err) {
+			err = r.Client.Update(ctx, obj)
+			if err != nil {
+				log.Error(err, "Error updating object", "Object", obj)
+				return err
+			}
+			log.Info("Successfuly updated object", "Object", obj)
+			return nil
+		}
+		log.Error(err, "Error creating new Object")
 		return err
 	}
-	log.V(2).Info("Successfuly updated", "Object", obj)
+	log.Info("Successfuly created new Object", "Object", obj)
 	return nil
 }
 

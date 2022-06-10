@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	kubeserial "github.com/janekbaraniewski/kubeserial/pkg"
 	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	api "github.com/janekbaraniewski/kubeserial/pkg/kubeapi"
 	"github.com/janekbaraniewski/kubeserial/pkg/utils"
@@ -74,10 +75,8 @@ func Schedule(ctx context.Context, fs utils.FileSystem, request *appv1alpha1.Man
 }
 
 func (m *Manager) CreateConfigMap(cr types.NamespacedName, deviceName string) (*corev1.ConfigMap, error) {
-	SPEC_PATH := "/config/manager-configmap.yaml"
 	cm := &corev1.ConfigMap{}
-
-	if err := utils.LoadResourceFromYaml(m.FS, SPEC_PATH, cm); err != nil {
+	if err := utils.LoadResourceFromYaml(m.FS, kubeserial.ManagerCMSpecPath, cm); err != nil {
 		return cm, err
 	}
 	name := m.GetName(cr.Name, deviceName)
@@ -93,11 +92,8 @@ func (m *Manager) CreateConfigMap(cr types.NamespacedName, deviceName string) (*
 }
 
 func (m *Manager) CreateDeployment(cr types.NamespacedName, deviceName string, includeCM bool) (*appsv1.Deployment, error) {
-	SPEC_PATH := "/config/manager-deployment.yaml"
-
 	deployment := &appsv1.Deployment{}
-
-	if err := utils.LoadResourceFromYaml(m.FS, SPEC_PATH, deployment); err != nil {
+	if err := utils.LoadResourceFromYaml(m.FS, kubeserial.ManagerDeploySpecPath, deployment); err != nil {
 		return deployment, err
 	}
 	name := m.GetName(cr.Name, deviceName)
@@ -153,10 +149,8 @@ func (m *Manager) CreateDeployment(cr types.NamespacedName, deviceName string, i
 }
 
 func (m *Manager) CreateService(cr types.NamespacedName, deviceName string) (*corev1.Service, error) {
-	SPEC_PATH := "/config/manager-service.yaml"
-
 	svc := &corev1.Service{}
-	if err := utils.LoadResourceFromYaml(m.FS, SPEC_PATH, svc); err != nil {
+	if err := utils.LoadResourceFromYaml(m.FS, kubeserial.ManagerSvcSpecPath, svc); err != nil {
 		return svc, err
 	}
 

@@ -3,6 +3,7 @@ package gateway
 import (
 	"fmt"
 
+	kubeserial "github.com/janekbaraniewski/kubeserial/pkg"
 	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 	appsv1 "k8s.io/api/apps/v1"
@@ -11,13 +12,12 @@ import (
 )
 
 func CreateConfigMap(device metav1.Object, fs utils.FileSystem) (*corev1.ConfigMap, error) {
-	SPEC_PATH := "/config/gateway-configmap.yaml"
 	cm := &corev1.ConfigMap{}
 	name := fmt.Sprintf("%v-gateway", device.GetName())
 
 	conf := fmt.Sprintf("3333:raw:600:/dev/%v:115200 8DATABITS NONE 1STOPBIT -XONXOFF LOCAL -RTSCTS HANGUP_WHEN_DONE\n", device.GetName())
 
-	if err := utils.LoadResourceFromYaml(fs, SPEC_PATH, cm); err != nil {
+	if err := utils.LoadResourceFromYaml(fs, kubeserial.GatewayCMSpecPath, cm); err != nil {
 		return cm, err
 	}
 
@@ -29,11 +29,9 @@ func CreateConfigMap(device metav1.Object, fs utils.FileSystem) (*corev1.ConfigM
 }
 
 func CreateDeployment(device *appv1alpha1.SerialDevice, namespace string, fs utils.FileSystem) (*appsv1.Deployment, error) {
-	SPEC_PATH := "/config/gateway-deployment.yaml"
-
 	deployment := &appsv1.Deployment{}
 
-	if err := utils.LoadResourceFromYaml(fs, SPEC_PATH, deployment); err != nil {
+	if err := utils.LoadResourceFromYaml(fs, kubeserial.GatewayDeploySpecPath, deployment); err != nil {
 		return deployment, err
 	}
 	name := fmt.Sprintf("%v-gateway", device.GetName())
@@ -61,10 +59,8 @@ func CreateDeployment(device *appv1alpha1.SerialDevice, namespace string, fs uti
 }
 
 func CreateService(device *appv1alpha1.SerialDevice, namespace string, fs utils.FileSystem) (*corev1.Service, error) {
-	SPEC_PATH := "/config/gateway-service.yaml"
-
 	svc := &corev1.Service{}
-	if err := utils.LoadResourceFromYaml(fs, SPEC_PATH, svc); err != nil {
+	if err := utils.LoadResourceFromYaml(fs, kubeserial.GatewaySvcSpecPath, svc); err != nil {
 		return svc, err
 	}
 	name := fmt.Sprintf("%v-gateway", device.GetName())

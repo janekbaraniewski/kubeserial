@@ -3,7 +3,6 @@ package controllers
 import (
 	"context"
 	"testing"
-	"time"
 
 	kubeserialv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	"github.com/janekbaraniewski/kubeserial/pkg/kubeapi"
@@ -102,7 +101,7 @@ func TestReconcile(t *testing.T) {
 			fakeClient.Create(context.TODO(), cr)
 			result, err := reconciler.Reconcile(context.TODO(), reconcileReq)
 			assert.Equal(t, nil, err)
-			assert.Equal(t, reconcile.Result{RequeueAfter: time.Second * 5}, result)
+			assert.Equal(t, reconcile.Result{}, result)
 		})
 	}
 }

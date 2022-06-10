@@ -49,7 +49,7 @@ func (r *ApiClient) EnsureObject(ctx context.Context, cr metav1.Object, obj clie
 			log.Info("Successfuly updated object", "ObjectName", obj.GetName())
 			return nil
 		}
-		log.Error(err, "Error creating new Object")
+		log.Error(err, "Error creating new Object", "ObjectName", obj.GetName(), "ObjectNamespace", obj.GetNamespace())
 		return err
 	}
 	log.Info("Successfuly created new Object", "ObjectName", obj.GetName())

@@ -34,6 +34,7 @@ import (
 	kubeserialv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	"github.com/janekbaraniewski/kubeserial/pkg/gateway"
 	api "github.com/janekbaraniewski/kubeserial/pkg/kubeapi"
+	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 )
 
 var devLog = logf.Log.WithName("DeviceController")
@@ -44,6 +45,7 @@ type SerialDeviceReconciler struct {
 	Scheme    *runtime.Scheme
 	APIClient api.API
 	Namespace string
+	FS        utils.FileSystem
 }
 
 //+kubebuilder:rbac:groups=kubeserial.app.kubeserial.com,resources=devices,verbs=get;list;watch;create;update;patch;delete
@@ -85,7 +87,10 @@ func (r *SerialDeviceReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	}
 
 	if device.IsAvailable() {
-		r.RequestGateway(ctx, device)
+		err := r.RequestGateway(ctx, device)
+		if err != nil {
+			logger.Error(err, "Failed creating gateway")
+		}
 		if device.NeedsManager() {
 			r.RequestManager(ctx, device)
 		}
@@ -100,9 +105,18 @@ func (r *SerialDeviceReconciler) Reconcile(ctx context.Context, req ctrl.Request
 }
 
 func (r *SerialDeviceReconciler) RequestGateway(ctx context.Context, device *kubeserialv1alpha1.SerialDevice) error {
-	cm := gateway.CreateConfigMap(device, r.Namespace)
-	deploy := gateway.CreateDeployment(device, r.Namespace)
-	svc := gateway.CreateService(device, r.Namespace)
+	cm, err := gateway.CreateConfigMap(device, r.FS)
+	if err != nil {
+		return err
+	}
+	deploy, err := gateway.CreateDeployment(device, r.Namespace, r.FS)
+	if err != nil {
+		return err
+	}
+	svc, err := gateway.CreateService(device, r.Namespace, r.FS)
+	if err != nil {
+		return err
+	}
 
 	if err := r.APIClient.EnsureObject(ctx, device, cm); err != nil {
 		return err

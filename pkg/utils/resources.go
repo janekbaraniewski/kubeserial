@@ -1,11 +1,12 @@
 package utils
 
 import (
+	kubeserial "github.com/janekbaraniewski/kubeserial/pkg"
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
 
-func LoadResourceFromYaml(fs FileSystem, filepath string, data interface{}) error {
-	reader, err := fs.Open(filepath)
+func LoadResourceFromYaml(fs FileSystem, filepath kubeserial.ResourceSpecPath, data interface{}) error {
+	reader, err := fs.Open(string(filepath))
 	if err != nil {
 		return err
 	}

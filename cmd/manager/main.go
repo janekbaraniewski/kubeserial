@@ -106,6 +106,7 @@ func main() {
 		Client:    client,
 		Scheme:    scheme,
 		APIClient: apiClient,
+		Namespace: namespace,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Device")
 		os.Exit(1)

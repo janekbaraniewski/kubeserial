@@ -36,23 +36,23 @@ func (r *ApiClient) EnsureObject(ctx context.Context, cr metav1.Object, obj clie
 	if err := controllerutil.SetControllerReference(cr, obj, r.Scheme); err != nil {
 		return err
 	}
-	log.V(2).Info("Controller reference set", "owner", cr, "object", obj)
+	log.V(2).Info("Controller reference set", "ownerName", cr.GetName(), "objectName", obj.GetName())
 
 	err := r.Client.Create(ctx, obj)
 	if err != nil {
 		if errors.IsAlreadyExists(err) {
 			err = r.Client.Update(ctx, obj)
 			if err != nil {
-				log.Error(err, "Error updating object", "Object", obj)
+				log.Error(err, "Error updating object", "ObjectName", obj.GetName())
 				return err
 			}
-			log.Info("Successfuly updated object", "Object", obj)
+			log.Info("Successfuly updated object", "ObjectName", obj.GetName())
 			return nil
 		}
 		log.Error(err, "Error creating new Object")
 		return err
 	}
-	log.Info("Successfuly created new Object", "Object", obj)
+	log.Info("Successfuly created new Object", "ObjectName", obj.GetName())
 	return nil
 }
 

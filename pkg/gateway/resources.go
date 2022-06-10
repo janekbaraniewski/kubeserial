@@ -20,7 +20,7 @@ func CreateConfigMap(device metav1.Object, namespace string) *corev1.ConfigMap {
 	return &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      strings.ToLower(device.GetName() + "-gateway"),
-			Namespace: device.GetNamespace(),
+			Namespace: namespace,
 			Labels:    labels,
 		},
 		Data: map[string]string{

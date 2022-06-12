@@ -53,13 +53,14 @@ func (f *InMemoryFS) Create(name string) (File, error) { return f.fs.Create(name
 
 // AddFileFromHostPath takes file path of file inside test-assets and places it inside /config dir in mem fs
 func (f *InMemoryFS) AddFileFromHostPath(path string) error {
-	file, err := f.Create(fmt.Sprintf("/config/%v", path))
+	_, fileName := filepath.Split(path)
+	file, err := f.Create(fmt.Sprintf(path))
 
 	if err != nil {
 		return err
 	}
 
-	absPath, _ := filepath.Abs(fmt.Sprintf("../../test-assets/%v", path))
+	absPath, _ := filepath.Abs(fmt.Sprintf("../../test-assets/%v", fileName))
 	content, err := os.ReadFile(absPath)
 	if err != nil {
 		return err

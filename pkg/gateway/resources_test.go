@@ -3,6 +3,7 @@ package gateway
 import (
 	"testing"
 
+	kubeserial "github.com/janekbaraniewski/kubeserial/pkg"
 	"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 	"github.com/stretchr/testify/assert"
@@ -77,13 +78,13 @@ func TestCreateService(t *testing.T) {
 }
 
 func AddSpecFilesToFilesystem(t *testing.T, fs *utils.InMemoryFS) {
-	if err := fs.AddFileFromHostPath("gateway-configmap.yaml"); err != nil {
+	if err := fs.AddFileFromHostPath(string(kubeserial.GatewayCMSpecPath)); err != nil {
 		t.Fatalf("Failed to load test asset: %v", err)
 	}
-	if err := fs.AddFileFromHostPath("gateway-deployment.yaml"); err != nil {
+	if err := fs.AddFileFromHostPath(string(kubeserial.GatewayDeploySpecPath)); err != nil {
 		t.Fatalf("Failed to load test asset: %v", err)
 	}
-	if err := fs.AddFileFromHostPath("gateway-service.yaml"); err != nil {
+	if err := fs.AddFileFromHostPath(string(kubeserial.GatewaySvcSpecPath)); err != nil {
 		t.Fatalf("Failed to load test asset: %v", err)
 	}
 }

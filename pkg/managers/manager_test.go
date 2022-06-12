@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	kubeserial "github.com/janekbaraniewski/kubeserial/pkg"
 	"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	"github.com/janekbaraniewski/kubeserial/pkg/kubeapi"
 	"github.com/janekbaraniewski/kubeserial/pkg/utils"
@@ -37,13 +38,13 @@ func TestDelete(t *testing.T) {
 }
 
 func AddSpecFilesToFilesystem(t *testing.T, fs *utils.InMemoryFS) {
-	if err := fs.AddFileFromHostPath("manager-configmap.yaml"); err != nil {
+	if err := fs.AddFileFromHostPath(string(kubeserial.ManagerCMSpecPath)); err != nil {
 		t.Fatalf("Failed to load test asset: %v", err)
 	}
-	if err := fs.AddFileFromHostPath("manager-deployment.yaml"); err != nil {
+	if err := fs.AddFileFromHostPath(string(kubeserial.ManagerDeploySpecPath)); err != nil {
 		t.Fatalf("Failed to load test asset: %v", err)
 	}
-	if err := fs.AddFileFromHostPath("manager-service.yaml"); err != nil {
+	if err := fs.AddFileFromHostPath(string(kubeserial.ManagerSvcSpecPath)); err != nil {
 		t.Fatalf("Failed to load test asset: %v", err)
 	}
 }

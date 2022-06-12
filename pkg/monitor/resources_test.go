@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	kubeserial "github.com/janekbaraniewski/kubeserial/pkg"
 	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 	"github.com/stretchr/testify/assert"
@@ -11,7 +12,7 @@ import (
 
 func TestCreateDaemonSet(t *testing.T) {
 	fs := utils.NewInMemoryFS()
-	if err := fs.AddFileFromHostPath("monitor-daemonset.yaml"); err != nil {
+	if err := fs.AddFileFromHostPath(string(kubeserial.MonitorDSSpecPath)); err != nil {
 		t.Fatalf("Failed to load test asset: %v", err)
 	}
 
@@ -24,7 +25,7 @@ func TestCreateDaemonSet(t *testing.T) {
 
 func TestCreateConfigMap(t *testing.T) {
 	fs := utils.NewInMemoryFS()
-	if err := fs.AddFileFromHostPath("monitor-configmap.yaml"); err != nil {
+	if err := fs.AddFileFromHostPath(string(kubeserial.MonitorCMSpecPath)); err != nil {
 		t.Fatalf("Failed to load test asset: %v", err)
 	}
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	kubeserial "github.com/janekbaraniewski/kubeserial/pkg"
 	kubeserialv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	"github.com/janekbaraniewski/kubeserial/pkg/kubeapi"
 	api "github.com/janekbaraniewski/kubeserial/pkg/kubeapi"
@@ -108,10 +109,10 @@ func TestReconcile(t *testing.T) {
 
 func GetFileSystem(t *testing.T) utils.FileSystem {
 	fs := utils.NewInMemoryFS()
-	if err := fs.AddFileFromHostPath("monitor-daemonset.yaml"); err != nil {
+	if err := fs.AddFileFromHostPath(string(kubeserial.MonitorDSSpecPath)); err != nil {
 		t.Fatalf("Failed to load test asset: %v", err)
 	}
-	if err := fs.AddFileFromHostPath("monitor-configmap.yaml"); err != nil {
+	if err := fs.AddFileFromHostPath(string(kubeserial.MonitorCMSpecPath)); err != nil {
 		t.Fatalf("Failed to load test asset: %v", err)
 	}
 	return fs

@@ -1,1 +1,1 @@
-# Managed externaly
+# Manager scheduled externaly

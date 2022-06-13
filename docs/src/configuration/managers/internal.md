@@ -1,4 +1,4 @@
-# Managed by KubeSerial
+# Manager scheduled by KubeSerial
 
 ```yaml
 apiVersion: app.kubeserial.com/v1alpha1

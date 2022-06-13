@@ -6,7 +6,7 @@
     - [KubeSerial](./configuration/kubeserial.md)
     - [Devices](./configuration/devices.md)
     - [Managers](./configuration/managers/SUMMARY.md)
-        - [Managed by KubeSerial](./configuration/managers/internal.md)
+        - [Manager scheduled by KubeSerial](./configuration/managers/internal.md)
         - [Managed externaly](./configuration/managers/external.md)
 - [Components](./components/SUMMARY.md)
     - [Controllers](./components/controllers.md)

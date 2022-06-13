@@ -42,7 +42,6 @@ func TestCreateDeployment(t *testing.T) {
 				NodeName: "test-node",
 			},
 		},
-		"test-ns",
 		fs,
 	)
 
@@ -69,7 +68,6 @@ func TestCreateService(t *testing.T) {
 				Name: "test-device",
 			},
 		},
-		"test-ns",
 		fs,
 	)
 

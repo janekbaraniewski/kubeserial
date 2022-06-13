@@ -9,7 +9,41 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+type GatewayBuilder struct {
+	Device *appv1alpha1.SerialDevice
+	FS     utils.FileSystem
+}
+
+func NewGatewayBuilder(device *appv1alpha1.SerialDevice, fs utils.FileSystem) *GatewayBuilder {
+	return &GatewayBuilder{
+		Device: device,
+		FS:     fs,
+	}
+}
+
+func (g *GatewayBuilder) Build() []client.Object {
+	cm, err := CreateConfigMap(g.Device, g.FS)
+	if err != nil {
+		return nil
+	}
+
+	dpl, err := CreateDeployment(g.Device, g.FS)
+	if err != nil {
+		return nil
+	}
+
+	svc, err := CreateService(g.Device, g.FS)
+	if err != nil {
+		return nil
+	}
+
+	return []client.Object{
+		cm, dpl, svc,
+	}
+}
 
 func CreateConfigMap(device metav1.Object, fs utils.FileSystem) (*corev1.ConfigMap, error) {
 	cm := &corev1.ConfigMap{}
@@ -28,7 +62,7 @@ func CreateConfigMap(device metav1.Object, fs utils.FileSystem) (*corev1.ConfigM
 	return cm, nil
 }
 
-func CreateDeployment(device *appv1alpha1.SerialDevice, namespace string, fs utils.FileSystem) (*appsv1.Deployment, error) {
+func CreateDeployment(device *appv1alpha1.SerialDevice, fs utils.FileSystem) (*appsv1.Deployment, error) {
 	deployment := &appsv1.Deployment{}
 
 	if err := utils.LoadResourceFromYaml(fs, kubeserial.GatewayDeploySpecPath, deployment); err != nil {
@@ -58,7 +92,7 @@ func CreateDeployment(device *appv1alpha1.SerialDevice, namespace string, fs uti
 	return deployment, nil
 }
 
-func CreateService(device *appv1alpha1.SerialDevice, namespace string, fs utils.FileSystem) (*corev1.Service, error) {
+func CreateService(device *appv1alpha1.SerialDevice, fs utils.FileSystem) (*corev1.Service, error) {
 	svc := &corev1.Service{}
 	if err := utils.LoadResourceFromYaml(fs, kubeserial.GatewaySvcSpecPath, svc); err != nil {
 		return svc, err

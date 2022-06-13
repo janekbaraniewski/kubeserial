@@ -105,29 +105,12 @@ func (r *SerialDeviceReconciler) Reconcile(ctx context.Context, req ctrl.Request
 }
 
 func (r *SerialDeviceReconciler) RequestGateway(ctx context.Context, device *kubeserialv1alpha1.SerialDevice) error {
-	cm, err := gateway.CreateConfigMap(device, r.FS)
-	if err != nil {
-		return err
-	}
-	deploy, err := gateway.CreateDeployment(device, r.Namespace, r.FS)
-	if err != nil {
-		return err
-	}
-	svc, err := gateway.CreateService(device, r.Namespace, r.FS)
-	if err != nil {
-		return err
-	}
+	gatewayObjects := gateway.NewGatewayBuilder(device, r.FS).Build()
 
-	if err := r.APIClient.EnsureObject(ctx, device, cm); err != nil {
-		return err
-	}
-
-	if err := r.APIClient.EnsureObject(ctx, device, deploy); err != nil {
-		return err
-	}
-
-	if err := r.APIClient.EnsureObject(ctx, device, svc); err != nil {
-		return err
+	for _, o := range gatewayObjects {
+		if err := r.APIClient.EnsureObject(ctx, device, o); err != nil {
+			return err
+		}
 	}
 
 	return nil

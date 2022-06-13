@@ -1,6 +1,7 @@
 package kubeserial
 
 type ResourceSpecPath string
+type ResourceLabel string
 
 // Resource config paths
 const (
@@ -14,4 +15,8 @@ const (
 
 	MonitorCMSpecPath ResourceSpecPath = "/config/monitor-configmap.yaml"
 	MonitorDSSpecPath ResourceSpecPath = "/config/monitor-daemonset.yaml"
+)
+
+const (
+	AppNameLabel ResourceLabel = "app.kubernetes.io/name"
 )

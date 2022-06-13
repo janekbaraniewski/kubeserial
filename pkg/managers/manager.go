@@ -81,7 +81,7 @@ func (m *Manager) CreateConfigMap(cr types.NamespacedName, deviceName string) (*
 	}
 	name := m.GetName(cr.Name, deviceName)
 
-	cm.ObjectMeta.Labels["app.kubernetes.io/name"] = name
+	cm.ObjectMeta.Labels[string(kubeserial.AppNameLabel)] = name
 	cm.ObjectMeta.Name = name
 
 	cm.Data = map[string]string{
@@ -98,9 +98,9 @@ func (m *Manager) CreateDeployment(cr types.NamespacedName, deviceName string, i
 	}
 	name := m.GetName(cr.Name, deviceName)
 	deployment.ObjectMeta.Name = name
-	deployment.ObjectMeta.Labels["app.kubernetes.io/name"] = name
-	deployment.Spec.Selector.MatchLabels["app.kubernetes.io/name"] = name
-	deployment.Spec.Template.ObjectMeta.Labels["app.kubernetes.io/name"] = name
+	deployment.ObjectMeta.Labels[string(kubeserial.AppNameLabel)] = name
+	deployment.Spec.Selector.MatchLabels[string(kubeserial.AppNameLabel)] = name
+	deployment.Spec.Template.ObjectMeta.Labels[string(kubeserial.AppNameLabel)] = name
 	deployment.Spec.Template.ObjectMeta.Name = name
 
 	deployment.Spec.Template.Spec.Containers[0].Image = m.Image
@@ -156,8 +156,8 @@ func (m *Manager) CreateService(cr types.NamespacedName, deviceName string) (*co
 
 	name := m.GetName(cr.Name, deviceName)
 	svc.ObjectMeta.Name = name
-	svc.ObjectMeta.Labels["app.kubernetes.io/name"] = name
-	svc.Spec.Selector["app.kubernetes.io/name"] = name
+	svc.ObjectMeta.Labels[string(kubeserial.AppNameLabel)] = name
+	svc.Spec.Selector[string(kubeserial.AppNameLabel)] = name
 
 	return svc, nil
 }

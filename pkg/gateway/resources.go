@@ -21,7 +21,7 @@ func CreateConfigMap(device metav1.Object, fs utils.FileSystem) (*corev1.ConfigM
 		return cm, err
 	}
 
-	cm.ObjectMeta.Labels["app.kubernetes.io/name"] = name
+	cm.ObjectMeta.Labels[string(kubeserial.AppNameLabel)] = name
 	cm.ObjectMeta.Name = name
 	cm.Data["ser2net.conf"] = conf
 
@@ -37,9 +37,9 @@ func CreateDeployment(device *appv1alpha1.SerialDevice, namespace string, fs uti
 	name := fmt.Sprintf("%v-gateway", device.GetName())
 
 	deployment.ObjectMeta.Name = name
-	deployment.ObjectMeta.Labels["app.kubernetes.io/name"] = name
-	deployment.Spec.Selector.MatchLabels["app.kubernetes.io/name"] = name
-	deployment.Spec.Template.ObjectMeta.Labels["app.kubernetes.io/name"] = name
+	deployment.ObjectMeta.Labels[string(kubeserial.AppNameLabel)] = name
+	deployment.Spec.Selector.MatchLabels[string(kubeserial.AppNameLabel)] = name
+	deployment.Spec.Template.ObjectMeta.Labels[string(kubeserial.AppNameLabel)] = name
 	deployment.Spec.Template.ObjectMeta.Name = name
 
 	deployment.Spec.Template.Spec.NodeSelector = map[string]string{
@@ -65,7 +65,7 @@ func CreateService(device *appv1alpha1.SerialDevice, namespace string, fs utils.
 	}
 	name := fmt.Sprintf("%v-gateway", device.GetName())
 	svc.ObjectMeta.Name = name
-	svc.ObjectMeta.Labels["app.kubernetes.io/name"] = name
-	svc.Spec.Selector["app.kubernetes.io/name"] = name
+	svc.ObjectMeta.Labels[string(kubeserial.AppNameLabel)] = name
+	svc.Spec.Selector[string(kubeserial.AppNameLabel)] = name
 	return svc, nil
 }

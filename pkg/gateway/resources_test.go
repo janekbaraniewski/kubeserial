@@ -10,6 +10,23 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+func TestGatewayBuilder_Build(t *testing.T) {
+	fs := utils.NewInMemoryFS()
+
+	AddSpecFilesToFilesystem(t, fs)
+
+	device := &v1alpha1.SerialDevice{
+		ObjectMeta: v1.ObjectMeta{
+			Name: "test-device",
+		},
+	}
+
+	objects := NewGatewayBuilder(device, fs).Build()
+
+	assert.NotEqual(t, nil, objects)
+	assert.Equal(t, 3, len(objects))
+}
+
 func TestCreateConfigMap(t *testing.T) {
 	fs := utils.NewInMemoryFS()
 

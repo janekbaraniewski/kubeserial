@@ -69,6 +69,10 @@ func main() {
 	}
 
 	clientset, err := versioned.NewForConfig(config)
+	if err != nil {
+		entryLog.Error(err, "Failed to get clientset")
+		panic(err.Error())
+	}
 
 	entryLog.Info("registering webhooks to the webhook server")
 	hookServer.Register(

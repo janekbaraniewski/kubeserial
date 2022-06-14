@@ -92,12 +92,22 @@ func (r *SerialDeviceReconciler) Reconcile(ctx context.Context, req ctrl.Request
 			logger.Error(err, "Failed creating gateway")
 		}
 		if device.NeedsManager() {
-			r.RequestManager(ctx, device)
+			err = r.RequestManager(ctx, device)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
 		}
 	} else {
-		r.EnsureNoGatewayRunning(ctx, device)
+		err = r.EnsureNoGatewayRunning(ctx, device)
+		if err != nil {
+			logger.Error(err, "Can't ensure gateway is not running")
+			return ctrl.Result{}, err
+		}
 		if device.NeedsManager() {
-			r.EnsureNoManagerRequested(ctx, device)
+			err = r.EnsureNoManagerRequested(ctx, device)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
 		}
 	}
 

@@ -102,9 +102,8 @@ func (si *SerialDeviceInjector) Handle(ctx context.Context, req admission.Reques
 
 	log.Info("Pod is requesting device, checking if available", "pod", pod.Name, "device", deviceToInject)
 	log.Info("Looking for device", "device", deviceToInject)
-	device := &v1alpha1.SerialDevice{}
 
-	device, err = si.Clientset.AppV1alpha1().SerialDevices().Get(ctx, deviceToInject, metav1.GetOptions{})
+	device, err := si.Clientset.AppV1alpha1().SerialDevices().Get(ctx, deviceToInject, metav1.GetOptions{})
 
 	if err != nil {
 		if errors.IsNotFound(err) {

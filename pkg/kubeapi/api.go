@@ -58,10 +58,10 @@ func (r *ApiClient) EnsureObject(ctx context.Context, cr metav1.Object, obj clie
 
 func (r *ApiClient) DeleteObject(ctx context.Context, obj client.Object) error {
 	err := r.Client.Get(ctx, types.NamespacedName{Name: obj.GetName(), Namespace: obj.GetNamespace()}, obj)
-	if err != nil && !errors.IsNotFound(err) {
-		return err
-	} else if err == nil {
-		r.Client.Delete(ctx, obj, client.PropagationPolicy(metav1.DeletePropagationForeground))
+	if err != nil {
+		if !errors.IsNotFound(err) {
+			return err
+		}
 	}
-	return nil
+	return r.Client.Delete(ctx, obj, client.PropagationPolicy(metav1.DeletePropagationForeground))
 }

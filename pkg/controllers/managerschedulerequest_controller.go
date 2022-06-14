@@ -78,9 +78,9 @@ func (r *ManagerScheduleRequestReconciler) Reconcile(ctx context.Context, req ct
 	}
 	logger = logger.WithValues("manager", manager)
 	logger.Info("Got manager, starting ReconcileManager")
-	r.ReconcileManager(ctx, instance, manager, req)
+	err = r.ReconcileManager(ctx, instance, manager, req)
 
-	return ctrl.Result{}, nil
+	return ctrl.Result{}, err
 }
 
 // ReconcileManager

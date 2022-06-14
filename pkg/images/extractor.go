@@ -34,10 +34,14 @@ func (e *OCIConfigExtractor) GetImageConfig(ctx context.Context, image string) (
 	referance, err := ref.New(image)
 
 	if err != nil {
-		panic(err)
+		return v1.ImageConfig{}, err
 	}
 
-	manifest, err := e.client.ManifestGet(context.Background(), referance)
+	manifest, err := e.client.ManifestGet(ctx, referance)
+
+	if err != nil {
+		return v1.ImageConfig{}, err
+	}
 
 	if manifest.IsList() {
 		man, ref, err := e.getManifestFromList(ctx, manifest, referance)

@@ -1,0 +1,28 @@
+linters:
+  enable-all: true
+  disable:
+    - errcheck
+    - exhaustruct
+    - exhaustivestruct
+    - funlen
+    - gci
+    - gochecknoglobals
+    - gochecknoinits
+    - gomnd
+    - ireturn
+    - maligned
+    - nlreturn
+    - nonamedreturns # fix maybe?
+    - paralleltest # TODO: fix
+    - testpackage # TODO: remove this
+    - varnamelen
+    - wrapcheck
+    - wsl
+linters-settings:
+  godox:
+    keywords:
+      - NOTE
+      - OPTIMIZE # marks code that should be optimized before merging
+      - HACK # marks hack-around that should be removed before merging
+  lll:
+    line-length: 130

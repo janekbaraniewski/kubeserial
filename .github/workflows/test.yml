@@ -80,7 +80,7 @@ jobs:
       - name: Build
         run: make injector-webhook-docker-all
         env:
-          DOCKERBUILD_ACTION: --load
+          DOCKERBUILD_ACTION: ""
 
   codegen:
     runs-on: ubuntu-latest

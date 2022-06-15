@@ -34,7 +34,7 @@ import (
 
 var msrcLog = logf.Log.WithName("ManagerScheduleRequestController")
 
-// ManagerScheduleRequestReconciler reconciles a ManagerScheduleRequest object
+// ManagerScheduleRequestReconciler reconciles a ManagerScheduleRequest object.
 type ManagerScheduleRequestReconciler struct {
 	client.Client
 	Scheme    *runtime.Scheme
@@ -83,7 +83,7 @@ func (r *ManagerScheduleRequestReconciler) Reconcile(ctx context.Context, req ct
 	return ctrl.Result{}, err
 }
 
-// ReconcileManager
+// ReconcileManager.
 func (r *ManagerScheduleRequestReconciler) ReconcileManager(ctx context.Context, instance *kubeserialv1alpha1.ManagerScheduleRequest, mgr *kubeserialv1alpha1.Manager, req ctrl.Request) error {
 	if err := managers.Schedule(ctx, r.FS, instance, mgr, r.Namespace, r.APIClient); err != nil {
 		return err

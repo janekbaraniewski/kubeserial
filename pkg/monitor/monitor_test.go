@@ -2,7 +2,6 @@ package monitor
 
 import (
 	"context"
-	"os"
 	"testing"
 
 	"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
@@ -46,8 +45,8 @@ func TestUpdateDeviceState_Device(t *testing.T) {
 			},
 			Spec: v1alpha1.SerialDeviceSpec{
 				Name:      "test-device",
-				IdVendor:  "123",
-				IdProduct: "456",
+				IDVendor:  "123",
+				IDProduct: "456",
 				Manager:   "test-manager",
 			},
 			Status: v1alpha1.SerialDeviceStatus{
@@ -66,7 +65,7 @@ func TestUpdateDeviceState_Device(t *testing.T) {
 			},
 		}
 	}
-	os.Setenv("NODE_NAME", "test-node")
+	t.Setenv("NODE_NAME", "test-node")
 	testCases := []struct {
 		Name            string
 		InitReady       v1.ConditionStatus
@@ -125,5 +124,4 @@ func TestUpdateDeviceState_Device(t *testing.T) {
 			assert.Equal(t, testCase.ResultNode, foundDevice.Status.NodeName)
 		})
 	}
-	os.Unsetenv("NODE_NAME")
 }

@@ -18,7 +18,7 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: Manager is the Schema for the managers API
+        description: Manager is the Schema for the managers API.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
@@ -29,14 +29,14 @@ spec:
           metadata:
             type: object
           spec:
-            description: ManagerSpec defines the desired state of Manager
+            description: ManagerSpec defines the desired state of Manager.
             properties:
               config:
                 type: string
               configPath:
                 type: string
               image:
-                description: Image is spec for image to be used by manager
+                description: Image is spec for image to be used by manager.
                 properties:
                   repository:
                     type: string
@@ -53,7 +53,7 @@ spec:
             - runCmd
             type: object
           status:
-            description: ManagerStatus defines the observed state of Manager
+            description: ManagerStatus defines the observed state of Manager.
             type: object
         type: object
     served: true

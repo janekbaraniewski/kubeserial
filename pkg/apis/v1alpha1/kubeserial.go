@@ -22,16 +22,16 @@ import (
 
 // SerialDevice defines monitored device
 // +k8s:openapi-gen=true
-type SerialDevice_2 struct {
+type SerialDevice2 struct {
 	// +required
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`
 	// +required
 	// +kubebuilder:validation:Required
-	IdVendor string `json:"idVendor"`
+	IDVendor string `json:"idVendor"`
 	// +required
 	// +kubebuilder:validation:Required
-	IdProduct string `json:"idProduct"`
+	IDProduct string `json:"idProduct"`
 	// +optional
 	// +kubebuilder:validation:Optional
 	Manager string `json:"manager"`
@@ -56,7 +56,7 @@ type IngressSpec struct {
 type KubeSerialSpec struct {
 	// +required
 	// +kubebuilder:validation:Required
-	SerialDevices []SerialDevice_2 `json:"serialDevices"`
+	SerialDevices []SerialDevice2 `json:"serialDevices"`
 	// +required
 	// +kubebuilder:validation:Required
 	Ingress IngressSpec `json:"ingress"`
@@ -83,7 +83,7 @@ type KubeSerial struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// KubeSerialList contains a list of KubeSerial
+// KubeSerialList contains a list of KubeSerial.
 type KubeSerialList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

@@ -7,7 +7,6 @@ import (
 	kubeserial "github.com/janekbaraniewski/kubeserial/pkg"
 	kubeserialv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	"github.com/janekbaraniewski/kubeserial/pkg/kubeapi"
-	api "github.com/janekbaraniewski/kubeserial/pkg/kubeapi"
 	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -39,11 +38,11 @@ func getCR() *kubeserialv1alpha1.KubeSerial {
 			Namespace: "kubeserial",
 		},
 		Spec: kubeserialv1alpha1.KubeSerialSpec{
-			SerialDevices: []kubeserialv1alpha1.SerialDevice_2{
+			SerialDevices: []kubeserialv1alpha1.SerialDevice2{
 				{
 					Name:      "testDevice",
-					IdVendor:  "0",
-					IdProduct: "1",
+					IDVendor:  "0",
+					IDProduct: "1",
 					Manager:   "testManager",
 				},
 			},
@@ -62,7 +61,7 @@ func TestReconcile(t *testing.T) {
 			reconciler := KubeSerialReconciler{
 				Client:    fakeClient,
 				Scheme:    scheme,
-				APIClient: kubeapi.NewFakeApiClient(),
+				APIClient: kubeapi.NewFakeAPIClient(),
 			}
 
 			reconcileReq := reconcile.Request{
@@ -90,7 +89,7 @@ func TestReconcile(t *testing.T) {
 				Client:    fakeClient,
 				Scheme:    scheme,
 				FS:        fs,
-				APIClient: kubeapi.NewFakeApiClient(),
+				APIClient: kubeapi.NewFakeAPIClient(),
 			}
 
 			reconcileReq := reconcile.Request{
@@ -108,6 +107,7 @@ func TestReconcile(t *testing.T) {
 }
 
 func GetFileSystem(t *testing.T) utils.FileSystem {
+	t.Helper()
 	fs := utils.NewInMemoryFS()
 	if err := fs.AddFileFromHostPath(string(kubeserial.MonitorDSSpecPath)); err != nil {
 		t.Fatalf("Failed to load test asset: %v", err)
@@ -124,7 +124,7 @@ func TestReconcileMonitor(t *testing.T) {
 	utilruntime.Must(kubeserialv1alpha1.AddToScheme(scheme))
 	fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).Build()
 	fs := GetFileSystem(t)
-	apiClient := api.NewFakeApiClient()
+	apiClient := kubeapi.NewFakeAPIClient()
 	reconciler := KubeSerialReconciler{
 		Client:    fakeClient,
 		Scheme:    scheme,
@@ -134,7 +134,7 @@ func TestReconcileMonitor(t *testing.T) {
 
 	err := reconciler.ReconcileMonitor(context.TODO(), getCR(), "latest")
 
-	expected := []api.Operation{
+	expected := []kubeapi.Operation{
 		{
 			Action: "EnsureObject",
 			GVK:    ConfigMapGVK,

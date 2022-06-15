@@ -60,7 +60,12 @@ func main() {
 	)
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
-	flag.StringVar(&deviceMonitorVersion, "device-monitor-version", "latest", "Version of kubeserial-device-monitor image to be used")
+	flag.StringVar(
+		&deviceMonitorVersion,
+		"device-monitor-version",
+		"latest",
+		"Version of kubeserial-device-monitor image to be used",
+	)
 	flag.StringVar(&namespace, "namespace", "kubeserial", "Kubernetes Namespace in which controllers are running")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
@@ -90,7 +95,7 @@ func main() {
 	fs := utils.NewOSFS()
 	client := mgr.GetClient()
 	scheme := mgr.GetScheme()
-	apiClient := kubeapi.NewApiClient(client, scheme)
+	apiClient := kubeapi.NewAPIClient(client, scheme)
 
 	if err = (&controllers.KubeSerialReconciler{
 		Client:               client,

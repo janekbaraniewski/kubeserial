@@ -22,7 +22,7 @@ func TestSchedule(t *testing.T) {
 			Config: "dummy",
 		},
 	}
-	api := kubeapi.NewFakeApiClient()
+	api := kubeapi.NewFakeAPIClient()
 
 	err := Schedule(context.TODO(), fs, req, manager, "kubeserial", api)
 
@@ -32,12 +32,13 @@ func TestSchedule(t *testing.T) {
 func TestDelete(t *testing.T) {
 	manager := Manager{}
 
-	err := manager.Delete(context.TODO(), &v1alpha1.KubeSerial{}, &v1alpha1.SerialDevice_2{}, kubeapi.NewFakeApiClient())
+	err := manager.Delete(context.TODO(), &v1alpha1.KubeSerial{}, &v1alpha1.SerialDevice2{}, kubeapi.NewFakeAPIClient())
 
 	assert.Equal(t, nil, err)
 }
 
 func AddSpecFilesToFilesystem(t *testing.T, fs *utils.InMemoryFS) {
+	t.Helper()
 	if err := fs.AddFileFromHostPath(string(kubeserial.ManagerCMSpecPath)); err != nil {
 		t.Fatalf("Failed to load test asset: %v", err)
 	}

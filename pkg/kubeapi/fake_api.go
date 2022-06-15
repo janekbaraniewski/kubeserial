@@ -13,21 +13,22 @@ type Operation struct {
 	GVK    schema.GroupVersionKind
 }
 
-type FakeApiClient struct {
+type FakeAPIClient struct {
 	Operations []Operation
 }
 
-func NewFakeApiClient() *FakeApiClient {
-	return &FakeApiClient{
+func NewFakeAPIClient() *FakeAPIClient {
+	return &FakeAPIClient{
 		Operations: []Operation{},
 	}
 }
 
-func (a *FakeApiClient) EnsureObject(ctx context.Context, cr metav1.Object, obj client.Object) error {
+func (a *FakeAPIClient) EnsureObject(ctx context.Context, cr metav1.Object, obj client.Object) error {
 	a.Operations = append(a.Operations, Operation{"EnsureObject", obj.GetObjectKind().GroupVersionKind()})
 	return nil
 }
-func (a *FakeApiClient) DeleteObject(ctx context.Context, obj client.Object) error {
+
+func (a *FakeAPIClient) DeleteObject(ctx context.Context, obj client.Object) error {
 	a.Operations = append(a.Operations, Operation{"DeleteObject", obj.GetObjectKind().GroupVersionKind()})
 	return nil
 }

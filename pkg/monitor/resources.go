@@ -10,13 +10,13 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-func CreateConfigMap(fs utils.FileSystem, devices []appv1alpha1.SerialDevice_2) (*corev1.ConfigMap, error) {
+func CreateConfigMap(fs utils.FileSystem, devices []appv1alpha1.SerialDevice2) (*corev1.ConfigMap, error) {
 	rule := ""
 	for _, device := range devices {
 		rule += fmt.Sprintf(
-			"SUBSYSTEM==\"tty\", ATTRS{idVendor}==\"%s\", ATTRS{idProduct}==\"%s\", SYMLINK+=\"%s\"\n",
-			device.IdVendor,
-			device.IdProduct,
+			"SUBSYSTEM==\"tty\", ATTRS{IDVendor}==\"%s\", ATTRS{IDProduct}==\"%s\", SYMLINK+=\"%s\"\n",
+			device.IDVendor,
+			device.IDProduct,
 			device.Name,
 		)
 	}

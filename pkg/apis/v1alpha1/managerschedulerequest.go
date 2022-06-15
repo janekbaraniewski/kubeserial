@@ -21,7 +21,7 @@ import (
 )
 
 // +k8s:openapi-gen=true
-// ManagerScheduleRequestSpec defines the desired state of ManagerScheduleRequest
+// ManagerScheduleRequestSpec defines the desired state of ManagerScheduleRequest.
 type ManagerScheduleRequestSpec struct {
 	// +kubebuilder:validation:Required
 	Device string `json:"device"`
@@ -30,7 +30,7 @@ type ManagerScheduleRequestSpec struct {
 }
 
 // +k8s:openapi-gen=true
-// ManagerScheduleRequestStatus defines the observed state of ManagerScheduleRequest
+// ManagerScheduleRequestStatus defines the observed state of ManagerScheduleRequest.
 type ManagerScheduleRequestStatus struct {
 	// +kubebuilder:default:=false
 	Fulfilled bool `json:"fulfilled"` // TODO: this is still empty when created
@@ -47,7 +47,7 @@ type ManagerScheduleRequestStatus struct {
 // +kubebuilder:resource:path=managerschedulerequests,scope=Cluster
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// ManagerScheduleRequest is the Schema for the managerschedulerequests API
+// ManagerScheduleRequest is the Schema for the managerschedulerequests API.
 type ManagerScheduleRequest struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -59,7 +59,7 @@ type ManagerScheduleRequest struct {
 //+kubebuilder:object:root=true
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// ManagerScheduleRequestList contains a list of ManagerScheduleRequest
+// ManagerScheduleRequestList contains a list of ManagerScheduleRequest.
 type ManagerScheduleRequestList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

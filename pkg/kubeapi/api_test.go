@@ -7,7 +7,6 @@ import (
 	kubeserialv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -18,7 +17,7 @@ import (
 	runtimefake "sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
-func GetFakeApiAndScheme() (*runtime.Scheme, client.Client) {
+func GetFakeAPIAndScheme() (*runtime.Scheme, client.Client) {
 	scheme := runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(kubeserialv1alpha1.AddToScheme(scheme))
@@ -26,13 +25,13 @@ func GetFakeApiAndScheme() (*runtime.Scheme, client.Client) {
 	return scheme, fakeClient
 }
 
-func GetApi(fakeClient client.Client, scheme *runtime.Scheme) API {
-	return NewApiClient(fakeClient, scheme)
+func GetAPI(fakeClient client.Client, scheme *runtime.Scheme) API {
+	return NewAPIClient(fakeClient, scheme)
 }
 
 func TestEnsureConfigMap(t *testing.T) {
-	scheme, fakeClient := GetFakeApiAndScheme()
-	api := GetApi(fakeClient, scheme)
+	scheme, fakeClient := GetFakeAPIAndScheme()
+	api := GetAPI(fakeClient, scheme)
 
 	cm := &corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
@@ -62,8 +61,8 @@ func TestEnsureConfigMap(t *testing.T) {
 }
 
 func TestEnsureConfigMapUpdatesExisting(t *testing.T) {
-	scheme, fakeClient := GetFakeApiAndScheme()
-	api := GetApi(fakeClient, scheme)
+	scheme, fakeClient := GetFakeAPIAndScheme()
+	api := GetAPI(fakeClient, scheme)
 
 	fakeClient.Create(context.TODO(), &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
@@ -75,7 +74,7 @@ func TestEnsureConfigMapUpdatesExisting(t *testing.T) {
 		},
 	})
 
-	err := api.EnsureObject(context.TODO(), &kubeserialv1alpha1.KubeSerial{}, &v1.ConfigMap{
+	err := api.EnsureObject(context.TODO(), &kubeserialv1alpha1.KubeSerial{}, &corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ConfigMap",
 			APIVersion: "v1",
@@ -98,12 +97,11 @@ func TestEnsureConfigMapUpdatesExisting(t *testing.T) {
 	)
 
 	assert.Equal(t, "overwritten", found.Data["data"])
-
 }
 
 func TestDeleteObject(t *testing.T) {
-	scheme, fakeClient := GetFakeApiAndScheme()
-	api := GetApi(fakeClient, scheme)
+	scheme, fakeClient := GetFakeAPIAndScheme()
+	api := GetAPI(fakeClient, scheme)
 
 	obj := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{

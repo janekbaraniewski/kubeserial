@@ -162,7 +162,7 @@ func (m *Manager) CreateService(cr types.NamespacedName, deviceName string) (*co
 	return svc, nil
 }
 
-func (m *Manager) Delete(ctx context.Context, cr *appv1alpha1.KubeSerial, device *appv1alpha1.SerialDevice_2, api api.API) error {
+func (m *Manager) Delete(ctx context.Context, cr *appv1alpha1.KubeSerial, device *appv1alpha1.SerialDevice2, api api.API) error {
 	name := m.GetName(cr.Name, device.Name)
 
 	if err := api.DeleteObject(ctx, &appsv1.Deployment{ObjectMeta: v1.ObjectMeta{Name: name, Namespace: cr.Namespace}}); err != nil {
@@ -181,7 +181,7 @@ func (m *Manager) Delete(ctx context.Context, cr *appv1alpha1.KubeSerial, device
 	return nil
 }
 
-// func (m *Manager) CreateIngress(cr *appv1alpha1.KubeSerial, device *appv1alpha1.SerialDevice_2, domain string) *networkingv1.Ingress {
+// func (m *Manager) CreateIngress(cr *appv1alpha1.KubeSerial, device *appv1alpha1.SerialDevice2, domain string) *networkingv1.Ingress {
 // 	name := m.GetName(cr.Name, device.Name)
 // 	labels := map[string]string{
 // 		"app": name,

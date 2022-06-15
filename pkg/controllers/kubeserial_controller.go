@@ -34,7 +34,7 @@ import (
 
 var ksLog = logf.Log.WithName("KubeSerialController")
 
-// KubeSerialReconciler reconciles a KubeSerial object
+// KubeSerialReconciler reconciles a KubeSerial object.
 type KubeSerialReconciler struct {
 	client.Client
 	Scheme               *runtime.Scheme
@@ -75,7 +75,6 @@ func (r *KubeSerialReconciler) ReconcileMonitor(ctx context.Context, cr *appv1al
 	}
 
 	monitorDaemon, err := monitor.CreateDaemonSet(r.FS)
-
 	if err != nil {
 		return err
 	}

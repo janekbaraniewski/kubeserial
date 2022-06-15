@@ -29,8 +29,8 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 		},
 		Spec: v1alpha1.SerialDeviceSpec{
 			Manager:   "test-manager",
-			IdVendor:  "123",
-			IdProduct: "456",
+			IDVendor:  "123",
+			IDProduct: "456",
 			Name:      "test-device",
 		},
 	}
@@ -63,7 +63,7 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			deviceReconciler := SerialDeviceReconciler{
 				Client:    fakeClient,
 				Scheme:    scheme,
-				APIClient: kubeapi.NewFakeApiClient(),
+				APIClient: kubeapi.NewFakeAPIClient(),
 			}
 
 			result, err := deviceReconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
@@ -94,7 +94,7 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			deviceReconciler := SerialDeviceReconciler{
 				Client:    fakeClient,
 				Scheme:    scheme,
-				APIClient: kubeapi.NewFakeApiClient(),
+				APIClient: kubeapi.NewFakeAPIClient(),
 			}
 
 			result, err := deviceReconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
@@ -126,7 +126,7 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			deviceReconciler := SerialDeviceReconciler{
 				Client:    fakeClient,
 				Scheme:    scheme,
-				APIClient: kubeapi.NewFakeApiClient(),
+				APIClient: kubeapi.NewFakeAPIClient(),
 			}
 
 			result, err := deviceReconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
@@ -159,7 +159,7 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			deviceReconciler := SerialDeviceReconciler{
 				Client:    fakeClient,
 				Scheme:    scheme,
-				APIClient: kubeapi.NewFakeApiClient(),
+				APIClient: kubeapi.NewFakeAPIClient(),
 			}
 
 			result, err := deviceReconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})

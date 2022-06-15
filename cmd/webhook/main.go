@@ -62,7 +62,6 @@ func main() {
 	hookServer.CertDir = params.certDir
 
 	config, err := rest.InClusterConfig()
-
 	if err != nil {
 		entryLog.Error(err, "Failed to get InClusterConfig")
 		panic(err.Error())

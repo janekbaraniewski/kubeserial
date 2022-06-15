@@ -7,7 +7,7 @@ import (
 
 var (
 	Devices = prometheus.NewGauge(prometheus.GaugeOpts{
-		Name: "devices_total",
+		Name: "devices",
 		Help: "Total number of devices",
 	})
 	AvailableDevices = prometheus.NewGauge(prometheus.GaugeOpts{

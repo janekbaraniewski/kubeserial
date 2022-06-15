@@ -20,7 +20,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// Image is spec for image to be used by manager
+// Image is spec for image to be used by manager.
 type Image struct {
 	// +required
 	// +kubebuilder:validation:Required
@@ -31,7 +31,7 @@ type Image struct {
 }
 
 // +k8s:openapi-gen=true
-// ManagerSpec defines the desired state of Manager
+// ManagerSpec defines the desired state of Manager.
 type ManagerSpec struct {
 	// +required
 	// +kubebuilder:validation:Required
@@ -48,7 +48,7 @@ type ManagerSpec struct {
 }
 
 // +k8s:openapi-gen=true
-// ManagerStatus defines the observed state of Manager
+// ManagerStatus defines the observed state of Manager.
 type ManagerStatus struct{}
 
 // +genclient
@@ -59,7 +59,7 @@ type ManagerStatus struct{}
 // +kubebuilder:resource:path=managers,scope=Cluster
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// Manager is the Schema for the managers API
+// Manager is the Schema for the managers API.
 type Manager struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -71,7 +71,7 @@ type Manager struct {
 //+kubebuilder:object:root=true
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// ManagerList contains a list of Manager
+// ManagerList contains a list of Manager.
 type ManagerList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`

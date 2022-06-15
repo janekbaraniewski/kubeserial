@@ -28,7 +28,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: ManagerScheduleRequest is the Schema for the managerschedulerequests API
+        description: ManagerScheduleRequest is the Schema for the managerschedulerequests API.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
@@ -39,7 +39,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: ManagerScheduleRequestSpec defines the desired state of ManagerScheduleRequest
+            description: ManagerScheduleRequestSpec defines the desired state of ManagerScheduleRequest.
             properties:
               device:
                 type: string
@@ -50,7 +50,7 @@ spec:
             - manager
             type: object
           status:
-            description: ManagerScheduleRequestStatus defines the observed state of ManagerScheduleRequest
+            description: ManagerScheduleRequestStatus defines the observed state of ManagerScheduleRequest.
             properties:
               fulfilled:
                 default: false

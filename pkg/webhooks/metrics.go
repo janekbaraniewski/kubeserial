@@ -12,7 +12,7 @@ var (
 	})
 
 	InjectedCommands = prometheus.NewCounter(prometheus.CounterOpts{
-		Name: "injected_commands",
+		Name: "injected_commands_total",
 		Help: "Number of injected commands",
 	})
 )

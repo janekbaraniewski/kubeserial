@@ -14,7 +14,7 @@
 First you'll need to add helm repository that stores KubeSerial charts
 
 ```bash
-$ helm repo add baraniewski https://baraniewski.com/charts/
+> helm repo add baraniewski https://baraniewski.com/charts/
 ```
 
 ### Install CRDs
@@ -22,7 +22,7 @@ $ helm repo add baraniewski https://baraniewski.com/charts/
 Due to way in which helm handles CRDs, they are managed using separate chart.
 
 ```bash
-$ helm upgrade --install kubeserial-crds baraniewski/kubeserial-crds
+> helm upgrade --install kubeserial-crds baraniewski/kubeserial-crds
 ```
 
 ### Create minimal values file
@@ -40,7 +40,7 @@ certManagerIssuer:
 ### Install Controller
 
 ```bash
-$ helm upgrade --install kubeserial baraniewski/kubeserial
+> helm upgrade --install kubeserial baraniewski/kubeserial
 ```
 
 ## Get device attributes
@@ -48,7 +48,7 @@ $ helm upgrade --install kubeserial baraniewski/kubeserial
 To find out values of `idVendor` and `idProduct` for your device, connect it to your computer, locate where it is (let's say `/dev/ttyUSB0`) and run:
 
 ```bash
-udevadm info -q all -n /dev/ttyUSB0 --attribute-walk
+> udevadm info -q all -n /dev/ttyUSB0 --attribute-walk
 ```
 
 Look for them from the top.
@@ -58,7 +58,6 @@ Look for them from the top.
 Now you're ready to create configuration for your devices. Here you can find example of 2 devices - one is using predefined manager, one doesn't. To learn about the difference, please refer to [manager configuration docs](configuration/managers/SUMMARY.md)
 
 Add this config to your values file:
-
 
 ```yaml
 kubeserial:
@@ -75,7 +74,7 @@ kubeserial:
 ## Update your helm release with new values
 
 ```bash
-$ helm upgrade kubeserial baraniewski/kubeserial -f my-values.yaml
+> helm upgrade kubeserial baraniewski/kubeserial -f my-values.yaml
 ```
 
 ## Validate that everything is working
@@ -83,7 +82,7 @@ $ helm upgrade kubeserial baraniewski/kubeserial -f my-values.yaml
 You should see 3 workloads in your cluster - controler manager, device injector webhook and device monitor:
 
 ```bash
-$ ➜  kubectl get pods                                                                  
+$ ➜  kubectl get pods
 NAME                                         READY   STATUS    RESTARTS   AGE
 kubeserial-7d58555d4c-97nqk                  1/1     Running   0          5m
 kubeserial-device-injector-cc7696b59-mfdn5   1/1     Running   0          5m
@@ -97,8 +96,8 @@ You should also see your devices:
 ```bash
 $ ➜  kubectl get serialdevice
 NAME            READY   AVAILABLE   NODE
-ender3          True    False       
-sonoff-zigbee   True    False       
+ender3          True    False
+sonoff-zigbee   True    False
 ```
 
 You're all set with basic configuration of KubeSerial. Please read through rest of docs to configure it to your needs.

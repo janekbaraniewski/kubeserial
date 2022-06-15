@@ -24,7 +24,6 @@ func main() {
 	log.Info("Start setup")
 
 	_, err := metrics.NewListener(":8080")
-
 	if err != nil {
 		log.Info("Failed setting up metrics listener")
 	}

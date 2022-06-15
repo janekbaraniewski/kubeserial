@@ -1,9 +1,10 @@
 package kubeserial
 
 type ResourceSpecPath string
+
 type ResourceLabel string
 
-// Resource config paths
+// Resource config paths.
 const (
 	GatewayCMSpecPath     ResourceSpecPath = "/config/gateway-configmap.yaml"
 	GatewayDeploySpecPath ResourceSpecPath = "/config/gateway-deployment.yaml"

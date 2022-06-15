@@ -54,7 +54,6 @@ func shoudInject(pod *corev1.Pod) string {
 
 func returnProperResponse(pod *corev1.Pod, req admission.Request) admission.Response {
 	marshaledPod, err := json.Marshal(pod)
-
 	if err != nil {
 		log.Info("cannot marshal")
 		return admission.Errored(http.StatusInternalServerError, err)
@@ -64,13 +63,12 @@ func returnProperResponse(pod *corev1.Pod, req admission.Request) admission.Resp
 }
 
 func concatCommandWithSocat(command []string, args []string, device string) (newCommand []string, newArgs []string) {
-
-	nCommand := []string{"/bin/sh"}
-	nArgs := []string{
+	newCommand = []string{"/bin/sh"}
+	newArgs = []string{
 		"-c",
 		fmt.Sprintf("socat -d -d pty,raw,echo=0,b115200,link=/dev/device,perm=0660,group=tty tcp:%v-gateway:3333 & %v", device, strings.Join(append(command, args...), " ")),
 	}
-	return nCommand, nArgs
+	return
 }
 
 func getContainerCommandArgs(container *corev1.Container) (command []string, args []string) {
@@ -104,7 +102,6 @@ func (si *SerialDeviceInjector) Handle(ctx context.Context, req admission.Reques
 	log.Info("Looking for device", "device", deviceToInject)
 
 	device, err := si.Clientset.AppV1alpha1().SerialDevices().Get(ctx, deviceToInject, metav1.GetOptions{})
-
 	if err != nil {
 		if errors.IsNotFound(err) {
 			log.Error(err, "Device not found!", "device", deviceToInject)
@@ -116,7 +113,7 @@ func (si *SerialDeviceInjector) Handle(ctx context.Context, req admission.Reques
 
 	condition := device.GetCondition(v1alpha1.SerialDeviceFree)
 
-	if condition.Status != metav1.ConditionTrue {
+	if condition == nil || condition.Status != metav1.ConditionTrue {
 		log.Info("Device is not free, not injecting", "device", device, "condition", condition)
 		return returnProperResponse(pod, req)
 	}
@@ -155,7 +152,7 @@ func (si *SerialDeviceInjector) Handle(ctx context.Context, req admission.Reques
 	container.Command = newCommand
 	container.Args = newArgs
 	InjectedCommands.Inc()
-	//TODO: mutate command and args, maybe the best would be to mount entrypoint from some CM?
+	// TODO: mutate command and args, maybe the best would be to mount entrypoint from some CM?
 	log.Info(
 		"Injected",
 		"Container command", pod.Spec.Containers[0].Command,

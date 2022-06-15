@@ -12,19 +12,19 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-type GatewayBuilder struct {
+type Builder struct {
 	Device *appv1alpha1.SerialDevice
 	FS     utils.FileSystem
 }
 
-func NewGatewayBuilder(device *appv1alpha1.SerialDevice, fs utils.FileSystem) *GatewayBuilder {
-	return &GatewayBuilder{
+func NewBuilder(device *appv1alpha1.SerialDevice, fs utils.FileSystem) *Builder {
+	return &Builder{
 		Device: device,
 		FS:     fs,
 	}
 }
 
-func (g *GatewayBuilder) Build() []client.Object {
+func (g *Builder) Build() []client.Object {
 	cm, err := CreateConfigMap(g.Device, g.FS)
 	if err != nil {
 		return nil
@@ -49,7 +49,10 @@ func CreateConfigMap(device metav1.Object, fs utils.FileSystem) (*corev1.ConfigM
 	cm := &corev1.ConfigMap{}
 	name := fmt.Sprintf("%v-gateway", device.GetName())
 
-	conf := fmt.Sprintf("3333:raw:600:/dev/%v:115200 8DATABITS NONE 1STOPBIT -XONXOFF LOCAL -RTSCTS HANGUP_WHEN_DONE\n", device.GetName())
+	conf := fmt.Sprintf(
+		"3333:raw:600:/dev/%v:115200 8DATABITS NONE 1STOPBIT -XONXOFF LOCAL -RTSCTS HANGUP_WHEN_DONE\n",
+		device.GetName(),
+	)
 
 	if err := utils.LoadResourceFromYaml(fs, kubeserial.GatewayCMSpecPath, cm); err != nil {
 		return cm, err

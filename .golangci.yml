@@ -1,6 +1,7 @@
 linters:
   enable-all: true
   disable:
+    - cyclop # remove
     - errcheck
     - exhaustruct
     - exhaustivestruct
@@ -9,11 +10,15 @@ linters:
     - gochecknoglobals
     - gochecknoinits
     - gomnd
+    - gosec
     - ireturn
+    - lll
     - maligned
+    - nestif # remove
     - nlreturn
     - nonamedreturns # fix maybe?
     - paralleltest # TODO: fix
+    - scopelint
     - testpackage # TODO: remove this
     - varnamelen
     - wrapcheck

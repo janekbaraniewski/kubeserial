@@ -6,8 +6,8 @@ metadata:
   labels:
     {{- include "kubeserial.labels" $ | nindent 4 }}
 spec:
-    idProduct: {{ .idProduct | quote }}
-    idVendor: {{ .idVendor | quote }}
+    IDProduct: {{ .IDProduct | quote }}
+    IDVendor: {{ .IDVendor | quote }}
     name: {{ .name | quote }}
     manager: {{ .manager | quote }}
 ---

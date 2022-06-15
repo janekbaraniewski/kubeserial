@@ -20,7 +20,6 @@ import (
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type SerialDeviceConditionType string
@@ -32,17 +31,17 @@ const (
 )
 
 // +k8s:openapi-gen=true
-// SerialDeviceSpec defines the desired state of SerialDevice
+// SerialDeviceSpec defines the desired state of SerialDevice.
 type SerialDeviceSpec struct {
 	// +required
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`
 	// +required
 	// +kubebuilder:validation:Required
-	IdVendor string `json:"idVendor"`
+	IDVendor string `json:"idVendor"`
 	// +required
 	// +kubebuilder:validation:Required
-	IdProduct string `json:"idProduct"`
+	IDProduct string `json:"idProduct"`
 	// +optional
 	// +kubebuilder:validation:Optional
 	Manager string `json:"manager,omitempty"`
@@ -83,7 +82,7 @@ type SerialDeviceCondition struct {
 }
 
 // +k8s:openapi-gen=true
-// SerialDeviceStatus defines the observed state of SerialDevice
+// SerialDeviceStatus defines the observed state of SerialDevice.
 type SerialDeviceStatus struct {
 	Conditions []SerialDeviceCondition `json:"conditions"`
 	NodeName   string                  `json:"nodeName,omitempty"`
@@ -100,7 +99,7 @@ type SerialDeviceStatus struct {
 // +kubebuilder:printcolumn:name="Available",type=string,JSONPath=`.status.conditions[?(@.type=="Available")].status`
 // +kubebuilder:printcolumn:name="Node",type=string,JSONPath=`.status.nodeName`
 
-// SerialDevice is the Schema for the SerialDevices API
+// SerialDevice is the Schema for the SerialDevices API.
 type SerialDevice struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -112,14 +111,14 @@ type SerialDevice struct {
 //+kubebuilder:object:root=true
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// SerialDeviceList contains a list of SerialDevice
+// SerialDeviceList contains a list of SerialDevice.
 type SerialDeviceList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []SerialDevice `json:"items"`
 }
 
-// NeedsManager checks if SerialDevice needs Manager
+// NeedsManager checks if SerialDevice needs Manager.
 func (d *SerialDevice) NeedsManager() bool {
 	return d.Spec.Manager != ""
 }
@@ -153,9 +152,9 @@ func (d *SerialDevice) SetCondition(newCondition SerialDeviceCondition) {
 
 	if existing == nil {
 		if newCondition.LastTransitionTime.IsZero() {
-			newCondition.LastTransitionTime = v1.NewTime(time.Now())
+			newCondition.LastTransitionTime = metav1.NewTime(time.Now())
 		}
-		newCondition.LastHeartbeatTime = v1.NewTime(time.Now())
+		newCondition.LastHeartbeatTime = metav1.NewTime(time.Now())
 		d.Status.Conditions = append(d.Status.Conditions, newCondition)
 		return
 	}
@@ -165,12 +164,12 @@ func (d *SerialDevice) SetCondition(newCondition SerialDeviceCondition) {
 		if !newCondition.LastTransitionTime.IsZero() {
 			existing.LastTransitionTime = newCondition.LastTransitionTime
 		} else {
-			existing.LastTransitionTime = v1.NewTime(time.Now())
+			existing.LastTransitionTime = metav1.NewTime(time.Now())
 		}
 	}
 
 	existing.Reason = newCondition.Reason
 	existing.Message = newCondition.Message
 	existing.ObservedGeneration = newCondition.ObservedGeneration
-	existing.LastHeartbeatTime = v1.NewTime(time.Now())
+	existing.LastHeartbeatTime = metav1.NewTime(time.Now())
 }

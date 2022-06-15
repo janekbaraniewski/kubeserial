@@ -12,25 +12,25 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-var log = logf.Log.WithName("ApiClient")
+var log = logf.Log.WithName("APIClient")
 
 type API interface {
 	EnsureObject(ctx context.Context, cr metav1.Object, obj client.Object) error
 	DeleteObject(ctx context.Context, obj client.Object) error
 }
-type ApiClient struct {
+type APIClient struct {
 	Client client.Client
 	Scheme *runtime.Scheme
 }
 
-func NewApiClient(client client.Client, scheme *runtime.Scheme) *ApiClient {
-	return &ApiClient{
+func NewAPIClient(client client.Client, scheme *runtime.Scheme) *APIClient {
+	return &APIClient{
 		Client: client,
 		Scheme: scheme,
 	}
 }
 
-func (r *ApiClient) EnsureObject(ctx context.Context, cr metav1.Object, obj client.Object) error {
+func (r *APIClient) EnsureObject(ctx context.Context, cr metav1.Object, obj client.Object) error {
 	// TODO: test how this behaves when there is f.e. CM and Deploy with same namespacedname
 	log.V(2).Info("Setting controller reference", "owner", cr, "object", obj)
 	if err := controllerutil.SetControllerReference(cr, obj, r.Scheme); err != nil {
@@ -46,17 +46,17 @@ func (r *ApiClient) EnsureObject(ctx context.Context, cr metav1.Object, obj clie
 				log.Error(err, "Error updating object", "ObjectName", obj.GetName())
 				return err
 			}
-			log.Info("Successfuly updated object", "ObjectName", obj.GetName())
+			log.Info("Successfully updated object", "ObjectName", obj.GetName())
 			return nil
 		}
 		log.Error(err, "Error creating new Object", "ObjectName", obj.GetName(), "ObjectNamespace", obj.GetNamespace())
 		return err
 	}
-	log.Info("Successfuly created new Object", "ObjectName", obj.GetName())
+	log.Info("Successfully created new Object", "ObjectName", obj.GetName())
 	return nil
 }
 
-func (r *ApiClient) DeleteObject(ctx context.Context, obj client.Object) error {
+func (r *APIClient) DeleteObject(ctx context.Context, obj client.Object) error {
 	err := r.Client.Get(ctx, types.NamespacedName{Name: obj.GetName(), Namespace: obj.GetNamespace()}, obj)
 	if err != nil {
 		if !errors.IsNotFound(err) {

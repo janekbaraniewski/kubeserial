@@ -10,7 +10,8 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestGatewayBuilder_Build(t *testing.T) {
+func TestBuilder_Build(t *testing.T) {
+	t.Parallel()
 	fs := utils.NewInMemoryFS()
 
 	AddSpecFilesToFilesystem(t, fs)
@@ -21,13 +22,14 @@ func TestGatewayBuilder_Build(t *testing.T) {
 		},
 	}
 
-	objects := NewGatewayBuilder(device, fs).Build()
+	objects := NewBuilder(device, fs).Build()
 
 	assert.NotEqual(t, nil, objects)
 	assert.Equal(t, 3, len(objects))
 }
 
 func TestCreateConfigMap(t *testing.T) {
+	t.Parallel()
 	fs := utils.NewInMemoryFS()
 
 	AddSpecFilesToFilesystem(t, fs)
@@ -46,6 +48,7 @@ func TestCreateConfigMap(t *testing.T) {
 }
 
 func TestCreateDeployment(t *testing.T) {
+	t.Parallel()
 	fs := utils.NewInMemoryFS()
 
 	AddSpecFilesToFilesystem(t, fs)
@@ -74,6 +77,7 @@ func TestCreateDeployment(t *testing.T) {
 }
 
 func TestCreateService(t *testing.T) {
+	t.Parallel()
 	fs := utils.NewInMemoryFS()
 
 	AddSpecFilesToFilesystem(t, fs)
@@ -93,6 +97,7 @@ func TestCreateService(t *testing.T) {
 }
 
 func AddSpecFilesToFilesystem(t *testing.T, fs *utils.InMemoryFS) {
+	t.Helper()
 	if err := fs.AddFileFromHostPath(string(kubeserial.GatewayCMSpecPath)); err != nil {
 		t.Fatalf("Failed to load test asset: %v", err)
 	}

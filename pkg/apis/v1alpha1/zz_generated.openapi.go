@@ -328,7 +328,7 @@ func schema_kubeserial_pkg_apis_v1alpha1_SerialDeviceSpec(ref common.ReferenceCa
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "SerialDeviceSpec defines the desired state of SerialDevice",
+				Description: "SerialDeviceSpec defines the desired state of SerialDevice.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"name": {
@@ -369,7 +369,7 @@ func schema_kubeserial_pkg_apis_v1alpha1_SerialDeviceStatus(ref common.Reference
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "SerialDeviceStatus defines the observed state of SerialDevice",
+				Description: "SerialDeviceStatus defines the observed state of SerialDevice.",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"conditions": {

@@ -1,7 +1,6 @@
 linters:
   enable-all: true
   disable:
-    - cyclop # remove
     - errcheck
     - exhaustruct
     - exhaustivestruct

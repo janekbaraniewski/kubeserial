@@ -43,7 +43,7 @@ func TestCreateConfigMap(t *testing.T) {
 
 	assert.Equal(t, nil, err)
 
-	expectedUdevConfig := "SUBSYSTEM==\"tty\", ATTRS{IDVendor}==\"123\", ATTRS{IDProduct}==\"456\", SYMLINK+=\"testdevice\"\n"
+	expectedUdevConfig := "SUBSYSTEM==\"tty\", ATTRS{idVendor}==\"123\", ATTRS{idProduct}==\"456\", SYMLINK+=\"testdevice\"\n"
 
 	assert.Equal(t, expectedUdevConfig, result.Data["98-devices.rules"])
 }

@@ -14,7 +14,7 @@ func CreateConfigMap(fs utils.FileSystem, devices []appv1alpha1.SerialDevice2) (
 	rule := ""
 	for _, device := range devices {
 		rule += fmt.Sprintf(
-			"SUBSYSTEM==\"tty\", ATTRS{IDVendor}==\"%s\", ATTRS{IDProduct}==\"%s\", SYMLINK+=\"%s\"\n",
+			"SUBSYSTEM==\"tty\", ATTRS{idVendor}==\"%s\", ATTRS{idProduct}==\"%s\", SYMLINK+=\"%s\"\n",
 			device.IDVendor,
 			device.IDProduct,
 			device.Name,

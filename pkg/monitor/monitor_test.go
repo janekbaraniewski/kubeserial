@@ -33,7 +33,13 @@ func TestUpdateDeviceState_ConfigMap(t *testing.T) {
 	fakeClientset := testclient.NewSimpleClientset(cm)
 	fakeClientsetKubeserial := fake.NewSimpleClientset()
 	fs := utils.NewInMemoryFS()
-	monitor := NewMonitor(fakeClientset, fakeClientsetKubeserial, "test-ns", fs)
+	monitor := NewMonitor(
+		fakeClientset,
+		fakeClientsetKubeserial,
+		"test-ns",
+		"test-node",
+		fs,
+	)
 	monitor.UpdateDeviceState(ctx)
 }
 
@@ -67,7 +73,6 @@ func TestUpdateDeviceState_Device(t *testing.T) {
 			},
 		}
 	}
-	t.Setenv("NODE_NAME", "test-node")
 	testCases := []struct {
 		Name            string
 		InitReady       v1.ConditionStatus
@@ -115,7 +120,13 @@ func TestUpdateDeviceState_Device(t *testing.T) {
 			if testCase.CreateDevice {
 				fs.Create("/dev/" + device.Name)
 			}
-			monitor := NewMonitor(fakeClientset, fakeClientsetKubeserial, "test-ns", fs)
+			monitor := NewMonitor(
+				fakeClientset,
+				fakeClientsetKubeserial,
+				"test-ns",
+				"test-node",
+				fs,
+			)
 
 			monitor.UpdateDeviceState(ctx)
 

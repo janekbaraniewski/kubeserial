@@ -14,6 +14,7 @@ import (
 )
 
 func TestUpdateDeviceState_ConfigMap(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 
 	cm := &corev1.ConfigMap{
@@ -37,6 +38,7 @@ func TestUpdateDeviceState_ConfigMap(t *testing.T) {
 }
 
 func TestUpdateDeviceState_Device(t *testing.T) {
+	t.Parallel()
 	ctx := context.Background()
 	getDevice := func(ready, available v1.ConditionStatus, node string) *v1alpha1.SerialDevice {
 		return &v1alpha1.SerialDevice{
@@ -103,7 +105,9 @@ func TestUpdateDeviceState_Device(t *testing.T) {
 		},
 	}
 	for _, testCase := range testCases {
+		testCase := testCase
 		t.Run(testCase.Name, func(t *testing.T) {
+			t.Parallel()
 			device := getDevice(testCase.InitReady, testCase.InitAvailable, testCase.InitNode)
 			fakeClientset := testclient.NewSimpleClientset()
 			fakeClientsetKubeserial := fake.NewSimpleClientset(device)

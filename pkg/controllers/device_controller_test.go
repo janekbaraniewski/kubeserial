@@ -17,6 +17,7 @@ import (
 )
 
 func TestDeviceReconciler_Reconcile(t *testing.T) {
+	t.Parallel()
 	deviceName := types.NamespacedName{
 		Name:      "test-device",
 		Namespace: "test-ns",

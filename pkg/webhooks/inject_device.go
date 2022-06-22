@@ -18,6 +18,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
+//nolint:lll
 // +kubebuilder:webhook:path=/mutate-inject-device,mutating=true,failurePolicy=fail,groups="",resources=pods,verbs=create;update,versions=v1,name=device.kubeserial.com,admissionReviewVersions={v1, v1beta1},sideEffects=None
 
 var log = logf.Log.WithName("DeviceSidecarInjecttor")
@@ -66,7 +67,9 @@ func concatCommandWithSocat(command []string, args []string, device string) (new
 	newCommand = []string{"/bin/sh"}
 	newArgs = []string{
 		"-c",
-		fmt.Sprintf("socat -d -d pty,raw,echo=0,b115200,link=/dev/device,perm=0660,group=tty tcp:%v-gateway:3333 & %v", device, strings.Join(append(command, args...), " ")),
+		fmt.Sprintf(
+			"socat -d -d pty,raw,echo=0,b115200,link=/dev/device,perm=0660,group=tty tcp:%v-gateway:3333 & %v",
+			device, strings.Join(append(command, args...), " ")),
 	}
 	return
 }
@@ -120,8 +123,7 @@ func (si *SerialDeviceInjector) Handle(ctx context.Context, req admission.Reques
 
 	log.Info("Device is free", "device", device, "condition", condition) // TODO: check if device available, for now happy path
 
-	container := &pod.Spec.Containers[0] // TODO: what if there are multiple containers? probably should introduce some annotation to select one
-
+	container := &pod.Spec.Containers[0] // TODO: support multiple containers
 	command, args := getContainerCommandArgs(container)
 	log.Info(
 		"Manager pod command and args",

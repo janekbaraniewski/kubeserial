@@ -25,7 +25,12 @@ type Monitor struct {
 	fs            utils.FileSystem
 }
 
-func NewMonitor(clientSet client.Interface, clientsetKubeserial versioned.Interface, namespace string, fs utils.FileSystem) *Monitor {
+func NewMonitor(
+	clientSet client.Interface,
+	clientsetKubeserial versioned.Interface,
+	namespace string,
+	fs utils.FileSystem,
+) *Monitor {
 	return &Monitor{
 		cmClient:      clientSet.CoreV1().ConfigMaps(namespace),
 		devicesClient: clientsetKubeserial.AppV1alpha1().SerialDevices(),

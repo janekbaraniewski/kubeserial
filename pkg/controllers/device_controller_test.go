@@ -115,7 +115,7 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 		})
 	}
 	{
-		t.Run("device-available-manager-available", func(t *testing.T) {
+		t.Run("device-ready", func(t *testing.T) {
 			device.Status.Conditions = append(device.Status.Conditions, v1alpha1.SerialDeviceCondition{
 				Type:   v1alpha1.SerialDeviceAvailable,
 				Status: v1.ConditionTrue,

@@ -13,7 +13,11 @@ type OCIConfigExtractor struct {
 	client regclient.RegClient
 }
 
-func (e *OCIConfigExtractor) getManifestFromList(ctx context.Context, man manifest.Manifest, r ref.Ref) (manifest.Manifest, ref.Ref, error) {
+func (e *OCIConfigExtractor) getManifestFromList(
+	ctx context.Context,
+	man manifest.Manifest,
+	r ref.Ref,
+) (manifest.Manifest, ref.Ref, error) {
 	manifests, err := man.GetManifestList()
 	if err != nil {
 		return nil, r, err

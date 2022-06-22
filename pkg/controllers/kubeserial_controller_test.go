@@ -99,6 +99,7 @@ func TestReconcile(t *testing.T) {
 					Name:      "kubeserialtest",
 				},
 			}
+			//nolint:errcheck
 			fakeClient.Create(context.TODO(), cr)
 			result, err := reconciler.Reconcile(context.TODO(), reconcileReq)
 			assert.Equal(t, nil, err)

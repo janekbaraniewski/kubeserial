@@ -8,6 +8,7 @@ import (
 	"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	"github.com/janekbaraniewski/kubeserial/pkg/kubeapi"
 	"github.com/janekbaraniewski/kubeserial/pkg/utils"
+	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -29,7 +30,10 @@ func TestManagerScheduleRequestReconcile(t *testing.T) {
 		Scheme: scheme,
 	}
 
-	reconciler.Reconcile(context.TODO(), controllerruntime.Request{})
+	res, err := reconciler.Reconcile(context.TODO(), controllerruntime.Request{})
+	assert.NoError(t, err)
+
+	assert.Equal(t, false, res.Requeue)
 }
 
 func TestManagerScheduleRequestReconcile_DeviceFoundNoManager(t *testing.T) {
@@ -54,7 +58,9 @@ func TestManagerScheduleRequestReconcile_DeviceFoundNoManager(t *testing.T) {
 	}
 
 	fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).Build()
+	//nolint:errcheck
 	fakeClient.Create(context.TODO(), msr)
+	//nolint:errcheck
 	fakeClient.Create(context.TODO(), device)
 
 	reconciler := ManagerScheduleRequestReconciler{
@@ -62,9 +68,12 @@ func TestManagerScheduleRequestReconcile_DeviceFoundNoManager(t *testing.T) {
 		Scheme: scheme,
 	}
 
-	reconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: types.NamespacedName{
+	res, err := reconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: types.NamespacedName{
 		Name: "test-schedule-request",
 	}})
+
+	assert.NoError(t, err)
+	assert.Equal(t, false, res.Requeue)
 }
 
 func TestManagerScheduleRequestReconcile_DeviceManagerFound(t *testing.T) {
@@ -96,8 +105,11 @@ func TestManagerScheduleRequestReconcile_DeviceManagerFound(t *testing.T) {
 	}
 
 	fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).Build()
+	//nolint:errcheck
 	fakeClient.Create(context.TODO(), msr)
+	//nolint:errcheck
 	fakeClient.Create(context.TODO(), device)
+	//nolint:errcheck
 	fakeClient.Create(context.TODO(), manager)
 
 	fs := utils.NewInMemoryFS()
@@ -112,9 +124,12 @@ func TestManagerScheduleRequestReconcile_DeviceManagerFound(t *testing.T) {
 		APIClient: apiClient,
 	}
 
-	reconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: types.NamespacedName{
+	res, err := reconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: types.NamespacedName{
 		Name: "test-schedule-request",
 	}})
+
+	assert.NoError(t, err)
+	assert.Equal(t, false, res.Requeue)
 }
 
 func AddSpecFilesToFilesystem(t *testing.T, fs *utils.InMemoryFS) {

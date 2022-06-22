@@ -22,6 +22,7 @@ type Monitor struct {
 	cmClient      v1.ConfigMapInterface
 	devicesClient v1alpha1client.SerialDeviceInterface
 	namespace     string
+	nodeName      string
 	fs            utils.FileSystem
 }
 
@@ -29,12 +30,14 @@ func NewMonitor(
 	clientSet client.Interface,
 	clientsetKubeserial versioned.Interface,
 	namespace string,
+	nodeName string,
 	fs utils.FileSystem,
 ) *Monitor {
 	return &Monitor{
 		cmClient:      clientSet.CoreV1().ConfigMaps(namespace),
 		devicesClient: clientsetKubeserial.AppV1alpha1().SerialDevices(),
 		namespace:     namespace,
+		nodeName:      nodeName,
 		fs:            fs,
 	}
 }
@@ -86,14 +89,14 @@ func (m *Monitor) UpdateDeviceState(ctx context.Context) {
 					Status: metav1.ConditionTrue,
 					Reason: "DeviceFree",
 				})
-				device.Status.NodeName = os.Getenv("NODE_NAME")
+				device.Status.NodeName = m.nodeName
 				logger.WithValues("Node", device.Status.NodeName).Info("Setting device state to available")
 				_, err := m.devicesClient.UpdateStatus(ctx, &device, metav1.UpdateOptions{})
 				if err != nil {
 					log.Error(err, "Failed device status update")
 				}
 			}
-		} else if device.Status.NodeName == os.Getenv("NODE_NAME") && !m.isDeviceAvailable(device.Name) {
+		} else if device.Status.NodeName == m.nodeName && !m.isDeviceAvailable(device.Name) {
 			log.Info("Device unavailable, updating state.")
 			device.SetCondition(v1alpha1.SerialDeviceCondition{
 				Type:   v1alpha1.SerialDeviceAvailable,

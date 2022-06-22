@@ -52,6 +52,7 @@ func main() {
 		clientset,
 		clientsetKubeserial,
 		os.Getenv("OPERATOR_NAMESPACE"),
+		os.Getenv("NODE_NAME"),
 		utils.NewOSFS(),
 	)
 	log.Info("Starting monitor update loop")

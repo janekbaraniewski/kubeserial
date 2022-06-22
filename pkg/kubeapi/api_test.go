@@ -52,6 +52,7 @@ func TestEnsureConfigMap(t *testing.T) {
 
 	assert.Equal(t, nil, err)
 	found := &corev1.ConfigMap{}
+	//nolint:errcheck
 	fakeClient.Get(
 		context.TODO(),
 		types.NamespacedName{Name: "test-cm", Namespace: "test-namespace"},
@@ -65,7 +66,7 @@ func TestEnsureConfigMapUpdatesExisting(t *testing.T) {
 	t.Parallel()
 	scheme, fakeClient := GetFakeAPIAndScheme()
 	api := GetAPI(fakeClient, scheme)
-
+	//nolint:errcheck
 	fakeClient.Create(context.TODO(), &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "test-cm",
@@ -92,6 +93,7 @@ func TestEnsureConfigMapUpdatesExisting(t *testing.T) {
 
 	assert.Equal(t, nil, err)
 	found := &corev1.ConfigMap{}
+	//nolint:errcheck
 	fakeClient.Get(
 		context.TODO(),
 		types.NamespacedName{Name: "test-cm", Namespace: "test-namespace"},
@@ -116,13 +118,15 @@ func TestDeleteObject(t *testing.T) {
 		},
 	}
 
+	//nolint:errcheck
 	fakeClient.Create(context.TODO(), obj)
 
-	api.DeleteObject(context.TODO(), obj)
+	err := api.DeleteObject(context.TODO(), obj)
+	assert.NoError(t, err)
 
 	lookup := &corev1.ConfigMap{}
 
-	err := fakeClient.Get(
+	err = fakeClient.Get(
 		context.TODO(),
 		types.NamespacedName{Name: "test-cm", Namespace: "test-namespace"},
 		lookup,

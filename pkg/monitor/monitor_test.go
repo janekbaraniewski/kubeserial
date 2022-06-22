@@ -118,6 +118,7 @@ func TestUpdateDeviceState_Device(t *testing.T) {
 			fakeClientsetKubeserial := fake.NewSimpleClientset(device)
 			fs := utils.NewInMemoryFS()
 			if testCase.CreateDevice {
+				//nolint:errcheck
 				fs.Create("/dev/" + device.Name)
 			}
 			monitor := NewMonitor(

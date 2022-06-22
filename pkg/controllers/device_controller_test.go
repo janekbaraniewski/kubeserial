@@ -59,6 +59,7 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 
 	{
 		t.Run("device-new-manager-not-available", func(t *testing.T) {
+			//nolint:errcheck
 			fakeClient.Create(context.TODO(), device)
 
 			deviceReconciler := SerialDeviceReconciler{
@@ -89,7 +90,9 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 	}
 	{
 		t.Run("device-new-manager-available", func(t *testing.T) {
+			//nolint:errcheck
 			fakeClient.Create(context.TODO(), device)
+			//nolint:errcheck
 			fakeClient.Create(context.TODO(), manager)
 
 			deviceReconciler := SerialDeviceReconciler{
@@ -104,6 +107,7 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			assert.Equal(t, false, result.Requeue)
 
 			foundDevice := &v1alpha1.SerialDevice{}
+			//nolint:errcheck
 			fakeClient.Get(context.TODO(), deviceName, foundDevice)
 
 			availableCondition := foundDevice.GetCondition(v1alpha1.SerialDeviceAvailable)
@@ -121,7 +125,9 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 				Type:   v1alpha1.SerialDeviceAvailable,
 				Status: v1.ConditionTrue,
 			})
+			//nolint:errcheck
 			fakeClient.Create(context.TODO(), device)
+			//nolint:errcheck
 			fakeClient.Create(context.TODO(), manager)
 
 			deviceReconciler := SerialDeviceReconciler{
@@ -136,6 +142,7 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			assert.Equal(t, false, result.Requeue)
 
 			foundDevice := &v1alpha1.SerialDevice{}
+			//nolint:errcheck
 			fakeClient.Get(context.TODO(), deviceName, foundDevice)
 
 			availableCondition := foundDevice.GetCondition(v1alpha1.SerialDeviceAvailable)
@@ -147,6 +154,7 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			assert.Equal(t, "AllChecksPassed", readyCondition.Reason)
 
 			foundRequest := v1alpha1.ManagerScheduleRequest{}
+			//nolint:errcheck
 			fakeClient.Get(context.TODO(), types.NamespacedName{
 				Name:      device.Name + "-" + device.Spec.Manager,
 				Namespace: device.Name,

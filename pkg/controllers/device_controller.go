@@ -214,7 +214,11 @@ func (r *SerialDeviceReconciler) ValidateDeviceReady(
 }
 
 // ValidateDeviceManager validates if device manaager config is valid and upadates device state in case it's not.
-func (r *SerialDeviceReconciler) ValidateDeviceManager(ctx context.Context, device *kubeserialv1alpha1.SerialDevice, req reconcile.Request) (bool, error) {
+func (r *SerialDeviceReconciler) ValidateDeviceManager(
+	ctx context.Context,
+	device *kubeserialv1alpha1.SerialDevice,
+	req reconcile.Request,
+) (bool, error) {
 	if !device.NeedsManager() {
 		return true, nil
 	}
@@ -233,7 +237,11 @@ func (r *SerialDeviceReconciler) ValidateDeviceManager(ctx context.Context, devi
 }
 
 // ManagerIsAvailable checks if Manager object referenced by SerialDevice is available in the cluster.
-func (r *SerialDeviceReconciler) ManagerIsAvailable(ctx context.Context, device *kubeserialv1alpha1.SerialDevice, req ctrl.Request) bool {
+func (r *SerialDeviceReconciler) ManagerIsAvailable(
+	ctx context.Context,
+	device *kubeserialv1alpha1.SerialDevice,
+	req ctrl.Request,
+) bool {
 	logger := devLog.WithName("ManagerIsAvailable")
 	manager := &kubeserialv1alpha1.Manager{}
 

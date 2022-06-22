@@ -12,7 +12,7 @@ linters:
     - gomnd
     - gosec
     - ireturn
-    - lll
+    # - lll
     - maligned
     - nestif # remove
     - nlreturn

@@ -22,7 +22,7 @@ device-monitor:
 injector-webhook: ## Build sidecar injector webhook binary binary
 injector-webhook: BUILD_PATH=cmd/webhook/main.go
 injector-webhook: OUTPUT_PATH=${INJECTOR_WEBHOOK_BUILD_OUTPUT_PATH}
-injector-webhook: 
+injector-webhook:
 	go build ${BUILD_EXTRA_OPTS} -o ${OUTPUT_PATH} ${BUILD_PATH}
 
 .PHONY: all

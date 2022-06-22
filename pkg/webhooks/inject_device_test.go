@@ -104,6 +104,7 @@ package webhooks
 // 	wantNewCommand := []string{"/bin/sh"}
 // 	wantNewArgs := []string{
 // 		"-c",
+//nolint
 // 		"socat -d -d pty,raw,echo=0,b115200,link=/dev/device,perm=0660,group=tty tcp:test-device-gateway:3333 & testCommand test args",
 // 	}
 // 	if !reflect.DeepEqual(newCommand, wantNewCommand) {

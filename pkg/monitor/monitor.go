@@ -2,6 +2,7 @@ package monitor
 
 import (
 	"context"
+	"errors"
 	"os"
 	"time"
 
@@ -17,6 +18,8 @@ import (
 )
 
 var log = logf.Log.WithName("DeviceMonitor")
+
+var ErrNoCondition = errors.New("can't find device condition")
 
 type Monitor struct {
 	cmClient      v1.ConfigMapInterface
@@ -56,7 +59,6 @@ func (m *Monitor) RunUpdateLoop(ctx context.Context) {
 }
 
 func (m *Monitor) UpdateDeviceState(ctx context.Context) {
-	logger := log.WithName("updateCRDBasedDevice")
 	devices, err := m.devicesClient.List(ctx, metav1.ListOptions{})
 	readyDevices := []v1alpha1.SerialDevice{}
 	for _, device := range devices.Items {
@@ -69,51 +71,54 @@ func (m *Monitor) UpdateDeviceState(ctx context.Context) {
 		log.Error(err, "Failed listing SerialDevice CRs")
 	}
 	for _, device := range readyDevices {
-		logger.V(2).Info("Got device!", "device", device)
-		logger = logger.WithValues("Device", device.Name)
-		deviceCondition := device.GetCondition(v1alpha1.SerialDeviceAvailable)
-		if deviceCondition == nil {
-			log.Error(err, "Can't find device condition")
-			continue
+		m.processReadyDevice(ctx, device)
+	}
+}
+
+func (m *Monitor) processReadyDevice(ctx context.Context, device v1alpha1.SerialDevice) {
+	logger := log.WithName("updateCRDBasedDevice")
+	logger.V(2).Info("Got device!", "device", device)
+	logger = logger.WithValues("Device", device.Name)
+	deviceCondition := device.GetCondition(v1alpha1.SerialDeviceAvailable)
+	if deviceCondition == nil {
+		log.Error(ErrNoCondition, "Can't find device condition")
+		return
+	}
+	if deviceCondition.Status != metav1.ConditionTrue && m.isDeviceAvailable(device.Name) {
+		log.Info("Device available, updating state.")
+		device.SetCondition(v1alpha1.SerialDeviceCondition{
+			Type:   v1alpha1.SerialDeviceAvailable,
+			Status: metav1.ConditionTrue,
+			Reason: "DeviceAvailable",
+		})
+		device.SetCondition(v1alpha1.SerialDeviceCondition{
+			Type:   v1alpha1.SerialDeviceFree,
+			Status: metav1.ConditionTrue,
+			Reason: "DeviceFree",
+		})
+		device.Status.NodeName = m.nodeName
+		logger.WithValues("Node", device.Status.NodeName).Info("Setting device state to available")
+		_, err := m.devicesClient.UpdateStatus(ctx, &device, metav1.UpdateOptions{})
+		if err != nil {
+			log.Error(err, "Failed device status update")
 		}
-		if deviceCondition.Status != metav1.ConditionTrue {
-			if m.isDeviceAvailable(device.Name) {
-				log.Info("Device available, updating state.")
-				device.SetCondition(v1alpha1.SerialDeviceCondition{
-					Type:   v1alpha1.SerialDeviceAvailable,
-					Status: metav1.ConditionTrue,
-					Reason: "DeviceAvailable",
-				})
-				device.SetCondition(v1alpha1.SerialDeviceCondition{
-					Type:   v1alpha1.SerialDeviceFree,
-					Status: metav1.ConditionTrue,
-					Reason: "DeviceFree",
-				})
-				device.Status.NodeName = m.nodeName
-				logger.WithValues("Node", device.Status.NodeName).Info("Setting device state to available")
-				_, err := m.devicesClient.UpdateStatus(ctx, &device, metav1.UpdateOptions{})
-				if err != nil {
-					log.Error(err, "Failed device status update")
-				}
-			}
-		} else if device.Status.NodeName == m.nodeName && !m.isDeviceAvailable(device.Name) {
-			log.Info("Device unavailable, updating state.")
-			device.SetCondition(v1alpha1.SerialDeviceCondition{
-				Type:   v1alpha1.SerialDeviceAvailable,
-				Status: metav1.ConditionFalse,
-				Reason: "DeviceUnavailable",
-			})
-			device.SetCondition(v1alpha1.SerialDeviceCondition{
-				Type:   v1alpha1.SerialDeviceFree,
-				Status: metav1.ConditionUnknown,
-				Reason: "DeviceUnavailable",
-			})
-			device.Status.NodeName = ""
-			logger.Info("Setting device state to unavailable")
-			_, err := m.devicesClient.UpdateStatus(ctx, &device, metav1.UpdateOptions{})
-			if err != nil {
-				log.Error(err, "Failed device status update")
-			}
+	} else if device.Status.NodeName == m.nodeName && !m.isDeviceAvailable(device.Name) {
+		log.Info("Device unavailable, updating state.")
+		device.SetCondition(v1alpha1.SerialDeviceCondition{
+			Type:   v1alpha1.SerialDeviceAvailable,
+			Status: metav1.ConditionFalse,
+			Reason: "DeviceUnavailable",
+		})
+		device.SetCondition(v1alpha1.SerialDeviceCondition{
+			Type:   v1alpha1.SerialDeviceFree,
+			Status: metav1.ConditionUnknown,
+			Reason: "DeviceUnavailable",
+		})
+		device.Status.NodeName = ""
+		logger.Info("Setting device state to unavailable")
+		_, err := m.devicesClient.UpdateStatus(ctx, &device, metav1.UpdateOptions{})
+		if err != nil {
+			log.Error(err, "Failed device status update")
 		}
 	}
 }

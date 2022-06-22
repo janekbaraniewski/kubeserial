@@ -11,6 +11,7 @@ import (
 )
 
 func TestCreateDaemonSet(t *testing.T) {
+	t.Parallel()
 	fs := utils.NewInMemoryFS()
 	if err := fs.AddFileFromHostPath(string(kubeserial.MonitorDSSpecPath)); err != nil {
 		t.Fatalf("Failed to load test asset: %v", err)
@@ -24,6 +25,7 @@ func TestCreateDaemonSet(t *testing.T) {
 }
 
 func TestCreateConfigMap(t *testing.T) {
+	t.Parallel()
 	fs := utils.NewInMemoryFS()
 	if err := fs.AddFileFromHostPath(string(kubeserial.MonitorCMSpecPath)); err != nil {
 		t.Fatalf("Failed to load test asset: %v", err)

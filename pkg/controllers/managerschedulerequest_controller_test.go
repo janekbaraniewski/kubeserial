@@ -18,6 +18,7 @@ import (
 )
 
 func TestManagerScheduleRequestReconcile(t *testing.T) {
+	t.Parallel()
 	scheme := runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(v1alpha1.AddToScheme(scheme))
@@ -32,6 +33,7 @@ func TestManagerScheduleRequestReconcile(t *testing.T) {
 }
 
 func TestManagerScheduleRequestReconcile_DeviceFoundNoManager(t *testing.T) {
+	t.Parallel()
 	scheme := runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(v1alpha1.AddToScheme(scheme))
@@ -66,6 +68,7 @@ func TestManagerScheduleRequestReconcile_DeviceFoundNoManager(t *testing.T) {
 }
 
 func TestManagerScheduleRequestReconcile_DeviceManagerFound(t *testing.T) {
+	t.Parallel()
 	scheme := runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(v1alpha1.AddToScheme(scheme))

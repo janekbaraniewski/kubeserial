@@ -30,6 +30,7 @@ func GetAPI(fakeClient client.Client, scheme *runtime.Scheme) API {
 }
 
 func TestEnsureConfigMap(t *testing.T) {
+	t.Parallel()
 	scheme, fakeClient := GetFakeAPIAndScheme()
 	api := GetAPI(fakeClient, scheme)
 
@@ -61,6 +62,7 @@ func TestEnsureConfigMap(t *testing.T) {
 }
 
 func TestEnsureConfigMapUpdatesExisting(t *testing.T) {
+	t.Parallel()
 	scheme, fakeClient := GetFakeAPIAndScheme()
 	api := GetAPI(fakeClient, scheme)
 
@@ -100,6 +102,7 @@ func TestEnsureConfigMapUpdatesExisting(t *testing.T) {
 }
 
 func TestDeleteObject(t *testing.T) {
+	t.Parallel()
 	scheme, fakeClient := GetFakeAPIAndScheme()
 	api := GetAPI(fakeClient, scheme)
 

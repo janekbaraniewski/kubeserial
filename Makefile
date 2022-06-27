@@ -1,6 +1,6 @@
-KUBESERIAL_REGISTRY=janekbaraniewski/kubeserial
-DEVICE_MONITOR_REGISTRY=janekbaraniewski/kubeserial-device-monitor
-INJECTOR_WEBHOOK_REGISTRY=janekbaraniewski/kubeserial-injector-webhook
+KUBESERIAL_REGISTRY=ghcr.io/janekbaraniewski/kubeserial
+DEVICE_MONITOR_REGISTRY=ghcr.io/janekbaraniewski/kubeserial-device-monitor
+INJECTOR_WEBHOOK_REGISTRY=ghcr.iojanekbaraniewski/kubeserial-injector-webhook
 TARGET_PLATFORMS=$(shell cat TARGET_PLATFORMS)
 VERSION ?= 0.0.1-$(shell git rev-parse --short HEAD)
 DOCKERBUILD_EXTRA_OPTS ?=
@@ -110,13 +110,13 @@ kubeserial-docker-local: kubeserial-docker ## Build image for local development,
 .PHONY: kubeserial-docker-all
 kubeserial-docker-all: PLATFORMS=${TARGET_PLATFORMS}
 kubeserial-docker-all: DOCKERBUILD_ACTION?=--push
-kubeserial-docker-all: DOCKERBUILD_EXTRA_OPTS=--cache-to janekbaraniewski/kubeserial:cache --cache-from janekbaraniewski/kubeserial:cache
+kubeserial-docker-all: DOCKERBUILD_EXTRA_OPTS=--cache-to ghcr.io/janekbaraniewski/kubeserial:cache --cache-from ghcr.io/janekbaraniewski/kubeserial:cache
 kubeserial-docker-all: kubeserial-docker ## Build and push image for all target platforms
 
 .PHONY: kubeserial-docker
 kubeserial-docker: DOCKERFILE=Dockerfile
 kubeserial-docker: REGISTRY=${KUBESERIAL_REGISTRY}
-kubeserial-docker: DOCKERBUILD_EXTRA_OPTS=--cache-to janekbaraniewski/kubeserial:cache --cache-from janekbaraniewski/kubeserial:cache
+kubeserial-docker: DOCKERBUILD_EXTRA_OPTS=--cache-to ghcr.io/janekbaraniewski/kubeserial:cache --cache-from ghcr.io/janekbaraniewski/kubeserial:cache
 kubeserial-docker:
 	docker buildx build . -f ${DOCKERFILE} ${DOCKERBUILD_EXTRA_OPTS} ${DOCKERBUILD_PLATFORM_OPT} ${PLATFORMS} -t $(REGISTRY):$(VERSION) ${DOCKERBUILD_ACTION}
 
@@ -130,13 +130,13 @@ device-monitor-docker-local: device-monitor-docker ## Build image for local deve
 .PHONY: device-monitor-docker-all
 device-monitor-docker-all: PLATFORMS=$(TARGET_PLATFORMS)
 device-monitor-docker-all: DOCKERBUILD_ACTION?=--push
-device-monitor-docker-all: DOCKERBUILD_EXTRA_OPTS=--cache-to janekbaraniewski/kubeserial-device-monitor:cache --cache-from janekbaraniewski/kubeserial-device-monitor:cache
+device-monitor-docker-all: DOCKERBUILD_EXTRA_OPTS=--cache-to ghcr.io/janekbaraniewski/kubeserial-device-monitor:cache --cache-from ghcr.io/janekbaraniewski/kubeserial-device-monitor:cache
 device-monitor-docker-all: device-monitor-docker ## Build and push image for all target platforms
 
 .PHONY: device-monitor-docker
 device-monitor-docker: DOCKERFILE=Dockerfile.monitor
 device-monitor-docker: REGISTRY=${DEVICE_MONITOR_REGISTRY}
-device-monitor-docker: DOCKERBUILD_EXTRA_OPTS=--cache-to janekbaraniewski/kubeserial-device-monitor:cache --cache-from janekbaraniewski/kubeserial-device-monitor:cache
+device-monitor-docker: DOCKERBUILD_EXTRA_OPTS=--cache-to ghcr.io/janekbaraniewski/kubeserial-device-monitor:cache --cache-from ghcr.io/janekbaraniewski/kubeserial-device-monitor:cache
 device-monitor-docker:
 	docker buildx build . -f ${DOCKERFILE} ${DOCKERBUILD_EXTRA_OPTS} ${DOCKERBUILD_PLATFORM_OPT} ${PLATFORMS} -t $(REGISTRY):$(VERSION) ${DOCKERBUILD_ACTION}
 
@@ -150,13 +150,13 @@ injector-webhook-docker-local: injector-webhook-docker ## Build image for local 
 .PHONY: injector-webhook-docker-all
 injector-webhook-docker-all: PLATFORMS=$(TARGET_PLATFORMS)
 injector-webhook-docker-all: DOCKERBUILD_ACTION?=--push
-injector-webhook-docker-all: DOCKERBUILD_EXTRA_OPTS=--cache-to janekbaraniewski/kubeserial-injector-webhook:cache --cache-from janekbaraniewski/kubeserial-injector-webhook:cache
+injector-webhook-docker-all: DOCKERBUILD_EXTRA_OPTS=--cache-to ghcr.io/janekbaraniewski/kubeserial-injector-webhook:cache --cache-from ghcr.io/janekbaraniewski/kubeserial-injector-webhook:cache
 injector-webhook-docker-all: injector-webhook-docker ## Build and push image for all target platforms
 
 .PHONY: injector-webhook-docker
 injector-webhook-docker: DOCKERFILE=Dockerfile.webhook
 injector-webhook-docker: REGISTRY=${INJECTOR_WEBHOOK_REGISTRY}
-injector-webhook-docker: DOCKERBUILD_EXTRA_OPTS=--cache-to janekbaraniewski/kubeserial-injector-webhook:cache --cache-from janekbaraniewski/kubeserial-injector-webhook:cache
+injector-webhook-docker: DOCKERBUILD_EXTRA_OPTS=--cache-to ghcr.io/janekbaraniewski/kubeserial-injector-webhook:cache --cache-from ghcr.io/janekbaraniewski/kubeserial-injector-webhook:cache
 injector-webhook-docker:
 	docker buildx build . -f ${DOCKERFILE} ${DOCKERBUILD_EXTRA_OPTS} ${DOCKERBUILD_PLATFORM_OPT} ${PLATFORMS} -t $(REGISTRY):$(VERSION) ${DOCKERBUILD_ACTION}
 
@@ -199,9 +199,9 @@ kind-install-certmanager:
 	helm install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --version v1.8.0 --set installCRDs=true
 
 kind-load-images:
-	kind load docker-image --name kubeserial janekbaraniewski/kubeserial:${VERSION}
-	kind load docker-image --name kubeserial janekbaraniewski/kubeserial-device-monitor:${VERSION}
-	kind load docker-image --name kubeserial janekbaraniewski/kubeserial-injector-webhook:${VERSION}
+	kind load docker-image --name kubeserial ghcr.io/janekbaraniewski/kubeserial:${VERSION}
+	kind load docker-image --name kubeserial ghcr.io/janekbaraniewski/kubeserial-device-monitor:${VERSION}
+	kind load docker-image --name kubeserial ghcr.io/janekbaraniewski/kubeserial-injector-webhook:${VERSION}
 
 ##@ Minikube
 

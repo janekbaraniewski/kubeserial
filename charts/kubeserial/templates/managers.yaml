@@ -37,7 +37,7 @@ spec:
           default: _default
         serial:
           additionalPorts:
-          - /dev/devices/ender3
+          - /dev/device
           autoconnect: true
           baudrate: 0
           port: /dev/device

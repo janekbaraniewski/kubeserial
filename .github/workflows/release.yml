@@ -35,7 +35,7 @@ jobs:
           context: .
           platforms: ${{ env.PLATFORMS }}
           push: true
-          tags: janekbaraniewski/kubeserial:${{ env.RELEASE_VERSION }}
+          tags: ghcr.io/janekbaraniewski/kubeserial:${{ env.RELEASE_VERSION }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -68,7 +68,7 @@ jobs:
           context: .
           platforms: ${{ env.PLATFORMS }}
           push: true
-          tags: janekbaraniewski/kubeserial-device-monitor:${{ env.RELEASE_VERSION }}
+          tags: ghcr.io/janekbaraniewski/kubeserial-device-monitor:${{ env.RELEASE_VERSION }}
           file: Dockerfile.monitor
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -102,7 +102,7 @@ jobs:
           context: .
           platforms: ${{ env.PLATFORMS }}
           push: true
-          tags: janekbaraniewski/kubeserial-injector-webhook:${{ env.RELEASE_VERSION }}
+          tags: ghcr.io/janekbaraniewski/kubeserial-injector-webhook:${{ env.RELEASE_VERSION }}
           file: Dockerfile.webhook
           cache-from: type=gha
           cache-to: type=gha,mode=max

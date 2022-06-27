@@ -85,7 +85,7 @@ func CreateDeployment(device *appv1alpha1.SerialDevice, fs utils.FileSystem) (*a
 	volumes := []corev1.Volume{}
 
 	for _, volume := range deployment.Spec.Template.Spec.Volumes {
-		if volume.Name == "config" {
+		if volume.Name == "config" { // TODO: fix this, shouldn't be hardcoded string
 			volume.ConfigMap.Name = name
 		}
 		volumes = append(volumes, volume)

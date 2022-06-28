@@ -2,7 +2,8 @@ KUBESERIAL_REGISTRY=ghcr.io/janekbaraniewski/kubeserial
 DEVICE_MONITOR_REGISTRY=ghcr.io/janekbaraniewski/kubeserial-device-monitor
 INJECTOR_WEBHOOK_REGISTRY=ghcr.io/janekbaraniewski/kubeserial-injector-webhook
 TARGET_PLATFORMS=$(shell cat TARGET_PLATFORMS)
-VERSION ?= 0.0.1-$(shell git rev-parse --short HEAD)
+APP_VERSION?=$(shell git describe --dirty --tags --match "[0-9]*" )
+CRDS_VERSION?=$(shell git describe --dirty --tags --match "crds*" )
 DOCKERBUILD_EXTRA_OPTS ?=
 DOCKERBUILD_PLATFORM_OPT=--platform
 RELEASE_NAME ?= kubeserial
@@ -104,7 +105,7 @@ docker-all: kubeserial-docker-all device-monitor-docker-all injector-webhook-doc
 kubeserial-docker-local: PLATFORMS?=
 kubeserial-docker-local: DOCKERBUILD_PLATFORM_OPT?=
 kubeserial-docker-local: DOCKERBUILD_ACTION?=--load
-kubeserial-docker-local: VERSION ?= local
+kubeserial-docker-local: APP_VERSION ?= local
 kubeserial-docker-local: kubeserial-docker ## Build image for local development, tag local, supports only builder platform
 
 .PHONY: kubeserial-docker-all
@@ -118,13 +119,13 @@ kubeserial-docker: DOCKERFILE=Dockerfile
 kubeserial-docker: REGISTRY=${KUBESERIAL_REGISTRY}
 kubeserial-docker: DOCKERBUILD_EXTRA_OPTS?=--cache-to=type=registry,mode=max,ref=ghcr.io/janekbaraniewski/kubeserial:cache --cache-from ghcr.io/janekbaraniewski/kubeserial:cache
 kubeserial-docker:
-	docker buildx build . -f ${DOCKERFILE} ${DOCKERBUILD_EXTRA_OPTS} ${DOCKERBUILD_PLATFORM_OPT} ${PLATFORMS} -t $(REGISTRY):$(VERSION) ${DOCKERBUILD_ACTION}
+	docker buildx build . -f ${DOCKERFILE} ${DOCKERBUILD_EXTRA_OPTS} ${DOCKERBUILD_PLATFORM_OPT} ${PLATFORMS} -t $(REGISTRY):$(APP_VERSION) ${DOCKERBUILD_ACTION}
 
 .PHONY: device-monitor-docker-local
 device-monitor-docker-local: PLATFORMS?=
 device-monitor-docker-local: DOCKERBUILD_PLATFORM_OPT?=
 device-monitor-docker-local: DOCKERBUILD_ACTION?=--load
-device-monitor-docker-local: VERSION ?= local
+device-monitor-docker-local: APP_VERSION ?= local
 device-monitor-docker-local: device-monitor-docker ## Build image for local development, tag local, supports only builder platform
 
 .PHONY: device-monitor-docker-all
@@ -138,13 +139,13 @@ device-monitor-docker: DOCKERFILE=Dockerfile.monitor
 device-monitor-docker: REGISTRY=${DEVICE_MONITOR_REGISTRY}
 device-monitor-docker: DOCKERBUILD_EXTRA_OPTS=--cache-to=type=registry,mode=max,ref=ghcr.io/janekbaraniewski/kubeserial-device-monitor:cache --cache-from ghcr.io/janekbaraniewski/kubeserial-device-monitor:cache
 device-monitor-docker:
-	docker buildx build . -f ${DOCKERFILE} ${DOCKERBUILD_EXTRA_OPTS} ${DOCKERBUILD_PLATFORM_OPT} ${PLATFORMS} -t $(REGISTRY):$(VERSION) ${DOCKERBUILD_ACTION}
+	docker buildx build . -f ${DOCKERFILE} ${DOCKERBUILD_EXTRA_OPTS} ${DOCKERBUILD_PLATFORM_OPT} ${PLATFORMS} -t $(REGISTRY):$(APP_VERSION) ${DOCKERBUILD_ACTION}
 
 .PHONY: injector-webhook-docker-local
 injector-webhook-docker-local: PLATFORMS?=
 injector-webhook-docker-local: DOCKERBUILD_PLATFORM_OPT?=
 injector-webhook-docker-local: DOCKERBUILD_ACTION?=--load
-injector-webhook-docker-local: VERSION ?= local
+injector-webhook-docker-local: APP_VERSION ?= local
 injector-webhook-docker-local: injector-webhook-docker ## Build image for local development, tag local, supports only builder platform
 
 .PHONY: injector-webhook-docker-all
@@ -158,19 +159,19 @@ injector-webhook-docker: DOCKERFILE=Dockerfile.webhook
 injector-webhook-docker: REGISTRY=${INJECTOR_WEBHOOK_REGISTRY}
 injector-webhook-docker: DOCKERBUILD_EXTRA_OPTS=--cache-to=type=registry,mode=max,ref=ghcr.io/janekbaraniewski/kubeserial-injector-webhook:cache --cache-from ghcr.io/janekbaraniewski/kubeserial-injector-webhook:cache
 injector-webhook-docker:
-	docker buildx build . -f ${DOCKERFILE} ${DOCKERBUILD_EXTRA_OPTS} ${DOCKERBUILD_PLATFORM_OPT} ${PLATFORMS} -t $(REGISTRY):$(VERSION) ${DOCKERBUILD_ACTION}
+	docker buildx build . -f ${DOCKERFILE} ${DOCKERBUILD_EXTRA_OPTS} ${DOCKERBUILD_PLATFORM_OPT} ${PLATFORMS} -t $(REGISTRY):$(APP_VERSION) ${DOCKERBUILD_ACTION}
 
 ##@ Helm
 
 .PHONY: update-kubeserial-chart-version
 update-kubeserial-chart-version: CHART_PATH=./charts/kubeserial
-update-kubeserial-chart-version: ## Update version used in chart. Requires VERSION var to be set
-	@CHART_PATH=${CHART_PATH} VERSION=${VERSION} ./hack/update-chart-version.sh
+update-kubeserial-chart-version: ## Update version used in chart. Requires APP_VERSION var to be set
+	@CHART_PATH=${CHART_PATH} VERSION=${APP_VERSION} ./hack/update-chart-version.sh
 
 .PHONY: update-kubeserial-crds-chart-version
 update-kubeserial-crds-chart-version: CHART_PATH=./charts/kubeserial-crds
-update-kubeserial-crds-chart-version: ## Update version used in chart. Requires VERSION var to be set
-	@CHART_PATH=${CHART_PATH} VERSION=${VERSION} ./hack/update-chart-version.sh
+update-kubeserial-crds-chart-version: ## Update version used in chart. Requires CRDS_VERSION var to be set
+	@CHART_PATH=${CHART_PATH} VERSION=${CRDS_VERSION} ./hack/update-chart-version.sh
 
 .PHONY: helm-lint
 helm-lint: ## Run chart-testing to lint kubeserial chart.
@@ -199,9 +200,9 @@ kind-install-certmanager:
 	helm install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --version v1.8.0 --set installCRDs=true
 
 kind-load-images:
-	kind load docker-image --name kubeserial ghcr.io/janekbaraniewski/kubeserial:${VERSION}
-	kind load docker-image --name kubeserial ghcr.io/janekbaraniewski/kubeserial-device-monitor:${VERSION}
-	kind load docker-image --name kubeserial ghcr.io/janekbaraniewski/kubeserial-injector-webhook:${VERSION}
+	kind load docker-image --name kubeserial ghcr.io/janekbaraniewski/kubeserial:${APP_VERSION}
+	kind load docker-image --name kubeserial ghcr.io/janekbaraniewski/kubeserial-device-monitor:${APP_VERSION}
+	kind load docker-image --name kubeserial ghcr.io/janekbaraniewski/kubeserial-injector-webhook:${APP_VERSION}
 
 ##@ Minikube
 
@@ -230,8 +231,8 @@ minikube-build-monitor-image: minikube-build-image
 minikube-build-image: DOCKERBUILD_EXTRA_OPTS=--load
 minikube-build-image:
 	@eval $$(minikube -p ${MINIKUBE_PROFILE} docker-env) ;\
-	docker buildx build . -f ${DOCKERFILE} ${DOCKERBUILD_EXTRA_OPTS} -t $(REGISTRY):$(VERSION)
-	@echo "Finished building image ${REGISTRY}:${VERSION}"
+	docker buildx build . -f ${DOCKERFILE} ${DOCKERBUILD_EXTRA_OPTS} -t $(REGISTRY):$(APP_VERSION)
+	@echo "Finished building image ${REGISTRY}:${APP_VERSION}"
 	@echo "Available images:"
 	@eval $$(minikube -p ${MINIKUBE_PROFILE} docker-env) ;\
 	docker images

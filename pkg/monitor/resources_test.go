@@ -21,7 +21,7 @@ func TestCreateDaemonSet(t *testing.T) {
 	assert.Equal(t, nil, err)
 	assert.Equal(t, "kubeserial-monitor", result.ObjectMeta.Name)
 	imageAndTag := strings.Split(result.Spec.Template.Spec.Containers[0].Image, ":")
-	assert.Equal(t, "janekbaraniewski/kubeserial-device-monitor", imageAndTag[0])
+	assert.Equal(t, "ghcr.io/janekbaraniewski/kubeserial-device-monitor", imageAndTag[0])
 }
 
 func TestCreateConfigMap(t *testing.T) {

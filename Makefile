@@ -1,6 +1,6 @@
 KUBESERIAL_REGISTRY=ghcr.io/janekbaraniewski/kubeserial
 DEVICE_MONITOR_REGISTRY=ghcr.io/janekbaraniewski/kubeserial-device-monitor
-INJECTOR_WEBHOOK_REGISTRY=ghcr.iojanekbaraniewski/kubeserial-injector-webhook
+INJECTOR_WEBHOOK_REGISTRY=ghcr.io/janekbaraniewski/kubeserial-injector-webhook
 TARGET_PLATFORMS=$(shell cat TARGET_PLATFORMS)
 VERSION ?= 0.0.1-$(shell git rev-parse --short HEAD)
 DOCKERBUILD_EXTRA_OPTS ?=

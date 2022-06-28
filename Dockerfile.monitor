@@ -18,6 +18,7 @@ RUN GOOS=$TARGETOS GOARCH=$TARGETARCH \
     make device-monitor
 
 FROM debian:buster-slim
+LABEL org.opencontainers.image.source https://github.com/janekbaraniewski/kubeserial
 
 ENV container docker
 ENV LC_ALL C

@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:latest
+
 # Build the manager binary
 FROM --platform=$BUILDPLATFORM golang:1.18-alpine as builder
 RUN apk update
@@ -14,7 +16,7 @@ COPY pkg pkg
 ARG TARGETOS TARGETARCH TARGETVARIANT
 RUN if [[ -n "${TARGETVARIANT}" ]]; then export GOARM=${TARGETVARIANT}; fi
 # Build
-RUN GOOS=$TARGETOS GOARCH=$TARGETARCH \
+RUN --mount=type=cache,target=/root/.cache/go-build GOOS=$TARGETOS GOARCH=$TARGETARCH \
     KUBESERIAL_BUILD_OUTPUT_PATH=/build/bin/kubeserial \
     make kubeserial
 

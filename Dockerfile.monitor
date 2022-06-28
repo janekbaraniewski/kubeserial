@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:latest
+
 FROM --platform=$BUILDPLATFORM golang:1.18-buster AS builder
 
 WORKDIR /workspace
@@ -13,7 +15,7 @@ COPY pkg pkg
 ARG TARGETOS TARGETARCH TARGETVARIANT
 RUN if [[ -n "${TARGETVARIANT}" ]]; then export GOARM=${TARGETVARIANT}; fi
 # Build
-RUN GOOS=$TARGETOS GOARCH=$TARGETARCH \
+RUN --mount=type=cache,target=/root/.cache/go-build GOOS=$TARGETOS GOARCH=$TARGETARCH \
     DEVICE_MONITOR_BUILD_OUTPUT_PATH=/build/bin/device-monitor \
     make device-monitor
 

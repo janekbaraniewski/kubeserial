@@ -110,13 +110,13 @@ kubeserial-docker-local: kubeserial-docker ## Build image for local development,
 .PHONY: kubeserial-docker-all
 kubeserial-docker-all: PLATFORMS=${TARGET_PLATFORMS}
 kubeserial-docker-all: DOCKERBUILD_ACTION?=--push
-kubeserial-docker-all: DOCKERBUILD_EXTRA_OPTS=--cache-to ghcr.io/janekbaraniewski/kubeserial:cache --cache-from ghcr.io/janekbaraniewski/kubeserial:cache
+kubeserial-docker-all: DOCKERBUILD_EXTRA_OPTS=--cache-to=type=registry,mode=max,ref=ghcr.io/janekbaraniewski/kubeserial:cache --cache-from ghcr.io/janekbaraniewski/kubeserial:cache
 kubeserial-docker-all: kubeserial-docker ## Build and push image for all target platforms
 
 .PHONY: kubeserial-docker
 kubeserial-docker: DOCKERFILE=Dockerfile
 kubeserial-docker: REGISTRY=${KUBESERIAL_REGISTRY}
-kubeserial-docker: DOCKERBUILD_EXTRA_OPTS=--cache-to ghcr.io/janekbaraniewski/kubeserial:cache --cache-from ghcr.io/janekbaraniewski/kubeserial:cache
+kubeserial-docker: DOCKERBUILD_EXTRA_OPTS?=--cache-to=type=registry,mode=max,ref=ghcr.io/janekbaraniewski/kubeserial:cache --cache-from ghcr.io/janekbaraniewski/kubeserial:cache
 kubeserial-docker:
 	docker buildx build . -f ${DOCKERFILE} ${DOCKERBUILD_EXTRA_OPTS} ${DOCKERBUILD_PLATFORM_OPT} ${PLATFORMS} -t $(REGISTRY):$(VERSION) ${DOCKERBUILD_ACTION}
 
@@ -130,13 +130,13 @@ device-monitor-docker-local: device-monitor-docker ## Build image for local deve
 .PHONY: device-monitor-docker-all
 device-monitor-docker-all: PLATFORMS=$(TARGET_PLATFORMS)
 device-monitor-docker-all: DOCKERBUILD_ACTION?=--push
-device-monitor-docker-all: DOCKERBUILD_EXTRA_OPTS=--cache-to ghcr.io/janekbaraniewski/kubeserial-device-monitor:cache --cache-from ghcr.io/janekbaraniewski/kubeserial-device-monitor:cache
+device-monitor-docker-all: DOCKERBUILD_EXTRA_OPTS=--cache-to=type=registry,mode=max,ref=ghcr.io/janekbaraniewski/kubeserial-device-monitor:cache --cache-from ghcr.io/janekbaraniewski/kubeserial-device-monitor:cache
 device-monitor-docker-all: device-monitor-docker ## Build and push image for all target platforms
 
 .PHONY: device-monitor-docker
 device-monitor-docker: DOCKERFILE=Dockerfile.monitor
 device-monitor-docker: REGISTRY=${DEVICE_MONITOR_REGISTRY}
-device-monitor-docker: DOCKERBUILD_EXTRA_OPTS=--cache-to ghcr.io/janekbaraniewski/kubeserial-device-monitor:cache --cache-from ghcr.io/janekbaraniewski/kubeserial-device-monitor:cache
+device-monitor-docker: DOCKERBUILD_EXTRA_OPTS=--cache-to=type=registry,mode=max,ref=ghcr.io/janekbaraniewski/kubeserial-device-monitor:cache --cache-from ghcr.io/janekbaraniewski/kubeserial-device-monitor:cache
 device-monitor-docker:
 	docker buildx build . -f ${DOCKERFILE} ${DOCKERBUILD_EXTRA_OPTS} ${DOCKERBUILD_PLATFORM_OPT} ${PLATFORMS} -t $(REGISTRY):$(VERSION) ${DOCKERBUILD_ACTION}
 
@@ -150,13 +150,13 @@ injector-webhook-docker-local: injector-webhook-docker ## Build image for local 
 .PHONY: injector-webhook-docker-all
 injector-webhook-docker-all: PLATFORMS=$(TARGET_PLATFORMS)
 injector-webhook-docker-all: DOCKERBUILD_ACTION?=--push
-injector-webhook-docker-all: DOCKERBUILD_EXTRA_OPTS=--cache-to ghcr.io/janekbaraniewski/kubeserial-injector-webhook:cache --cache-from ghcr.io/janekbaraniewski/kubeserial-injector-webhook:cache
+injector-webhook-docker-all: DOCKERBUILD_EXTRA_OPTS=--cache-to=type=registry,mode=max,ref=ghcr.io/janekbaraniewski/kubeserial-injector-webhook:cache --cache-from ghcr.io/janekbaraniewski/kubeserial-injector-webhook:cache
 injector-webhook-docker-all: injector-webhook-docker ## Build and push image for all target platforms
 
 .PHONY: injector-webhook-docker
 injector-webhook-docker: DOCKERFILE=Dockerfile.webhook
 injector-webhook-docker: REGISTRY=${INJECTOR_WEBHOOK_REGISTRY}
-injector-webhook-docker: DOCKERBUILD_EXTRA_OPTS=--cache-to ghcr.io/janekbaraniewski/kubeserial-injector-webhook:cache --cache-from ghcr.io/janekbaraniewski/kubeserial-injector-webhook:cache
+injector-webhook-docker: DOCKERBUILD_EXTRA_OPTS=--cache-to=type=registry,mode=max,ref=ghcr.io/janekbaraniewski/kubeserial-injector-webhook:cache --cache-from ghcr.io/janekbaraniewski/kubeserial-injector-webhook:cache
 injector-webhook-docker:
 	docker buildx build . -f ${DOCKERFILE} ${DOCKERBUILD_EXTRA_OPTS} ${DOCKERBUILD_PLATFORM_OPT} ${PLATFORMS} -t $(REGISTRY):$(VERSION) ${DOCKERBUILD_ACTION}
 

@@ -23,11 +23,12 @@ jobs:
         run: echo "RELEASE_VERSION=${GITHUB_SHA}" >> $GITHUB_ENV
       - name: Set target platforms
         run: echo "PLATFORMS=$(cat TARGET_PLATFORMS)" >> $GITHUB_ENV
-      - name: Log into Dockerhub
-        uses: docker/login-action@v1
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build
         run: make kubeserial-docker-all
         env:
@@ -47,11 +48,13 @@ jobs:
         run: echo "RELEASE_VERSION=${GITHUB_SHA}" >> $GITHUB_ENV
       - name: Set target platforms
         run: echo "PLATFORMS=$(cat TARGET_PLATFORMS)" >> $GITHUB_ENV
-      - name: Log into Dockerhub
-        uses: docker/login-action@v1
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build
         run: make device-monitor-docker-all
         env:
@@ -71,11 +74,12 @@ jobs:
       - name: Set target platforms
         run: echo "PLATFORMS=$(cat TARGET_PLATFORMS)" >> $GITHUB_ENV
 
-      - name: Log into Dockerhub
-        uses: docker/login-action@v1
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build
         run: make injector-webhook-docker-all

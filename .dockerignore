@@ -13,3 +13,4 @@ cover.out
 LICENSE
 PROJECT
 README.mode
+**/*_test.go

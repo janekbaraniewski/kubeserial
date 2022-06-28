@@ -19,6 +19,7 @@ RUN GOOS=$TARGETOS GOARCH=$TARGETARCH \
     make kubeserial
 
 FROM alpine
+LABEL org.opencontainers.image.source https://github.com/janekbaraniewski/kubeserial
 WORKDIR /
 ENV USER_NAME=kubeserial \
     USER_UID=1001

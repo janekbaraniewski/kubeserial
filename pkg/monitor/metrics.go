@@ -10,9 +10,15 @@ var DevicesMonitored = prometheus.NewGauge(prometheus.GaugeOpts{
 	Help: "Total number of devices monitored",
 })
 
+var DevicesMonitoredDuplicate = prometheus.NewGauge(prometheus.GaugeOpts{
+	Name: "devices_monitored_duplicate",
+	Help: "Total number of devices monitored DUPLICATED",
+})
+
 func init() {
 	// Register custom metrics with the global prometheus registry
 	metrics.Registry.MustRegister(
 		DevicesMonitored,
+		DevicesMonitoredDuplicate,
 	)
 }

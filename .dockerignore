@@ -1,5 +1,6 @@
 Dockerfile
 Dockerfile.monitor
+Dockerfile.webhook
 charts/
 build/
 local/
@@ -12,5 +13,7 @@ coverage.txt
 cover.out
 LICENSE
 PROJECT
-README.mode
+README.md
 **/*_test.go
+.git/
+.gitignore

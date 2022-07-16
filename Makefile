@@ -3,11 +3,12 @@ DEVICE_MONITOR_REGISTRY=ghcr.io/janekbaraniewski/kubeserial-device-monitor
 INJECTOR_WEBHOOK_REGISTRY=ghcr.io/janekbaraniewski/kubeserial-injector-webhook
 TARGET_PLATFORMS=$(shell cat TARGET_PLATFORMS)
 APP_VERSION?=$(shell git describe --dirty --tags --match "[0-9]*" )
-CRDS_VERSION?=$(shell git describe --dirty --tags --match "crds*" )
+CRDS_VERSION?=$(shell git describe --dirty --tags --match "crds*" | sed 's/crds-//')
 DOCKERBUILD_PLATFORM_OPT=--platform
 RELEASE_NAME ?= kubeserial
 ENVTEST_K8S_VERSION = 1.23.3
 MINIKUBE_PROFILE=kubeserial
+ARM_PLATFORM=linux/arm64
 
 SHELL = /usr/bin/env bash -o pipefail
 .SHELLFLAGS = -ec
@@ -101,7 +102,7 @@ docker-local: kubeserial-docker-local device-monitor-docker-local injector-webho
 docker-all: kubeserial-docker-all device-monitor-docker-all injector-webhook-docker-all
 
 .PHONY: kubeserial-docker-local
-kubeserial-docker-local: PLATFORMS?=
+kubeserial-docker-local: PLATFORMS?=$(ARM_PLATFORM)
 kubeserial-docker-local: DOCKERBUILD_PLATFORM_OPT?=
 kubeserial-docker-local: DOCKERBUILD_ACTION?=--load
 kubeserial-docker-local: APP_VERSION ?= local
@@ -120,7 +121,7 @@ kubeserial-docker:
 	docker buildx build . -f ${DOCKERFILE} ${DOCKERBUILD_EXTRA_OPTS} ${DOCKERBUILD_PLATFORM_OPT} ${PLATFORMS} -t $(REGISTRY):$(APP_VERSION) ${DOCKERBUILD_ACTION}
 
 .PHONY: device-monitor-docker-local
-device-monitor-docker-local: PLATFORMS?=
+device-monitor-docker-local: PLATFORMS?=$(ARM_PLATFORM)
 device-monitor-docker-local: DOCKERBUILD_PLATFORM_OPT?=
 device-monitor-docker-local: DOCKERBUILD_ACTION?=--load
 device-monitor-docker-local: APP_VERSION ?= local
@@ -139,7 +140,7 @@ device-monitor-docker:
 	docker buildx build . -f ${DOCKERFILE} ${DOCKERBUILD_EXTRA_OPTS} ${DOCKERBUILD_PLATFORM_OPT} ${PLATFORMS} -t $(REGISTRY):$(APP_VERSION) ${DOCKERBUILD_ACTION}
 
 .PHONY: injector-webhook-docker-local
-injector-webhook-docker-local: PLATFORMS?=
+injector-webhook-docker-local: PLATFORMS?=$(ARM_PLATFORM)
 injector-webhook-docker-local: DOCKERBUILD_PLATFORM_OPT?=
 injector-webhook-docker-local: DOCKERBUILD_ACTION?=--load
 injector-webhook-docker-local: APP_VERSION ?= local
@@ -161,12 +162,12 @@ injector-webhook-docker:
 
 .PHONY: update-kubeserial-chart-version
 update-kubeserial-chart-version: CHART_PATH=./charts/kubeserial
-update-kubeserial-chart-version: ## Update version used in chart. Requires APP_VERSION var to be set
+update-kubeserial-chart-version:
 	@CHART_PATH=${CHART_PATH} VERSION=${APP_VERSION} ./hack/update-chart-version.sh
 
 .PHONY: update-kubeserial-crds-chart-version
 update-kubeserial-crds-chart-version: CHART_PATH=./charts/kubeserial-crds
-update-kubeserial-crds-chart-version: ## Update version used in chart. Requires CRDS_VERSION var to be set
+update-kubeserial-crds-chart-version:
 	@CHART_PATH=${CHART_PATH} VERSION=${CRDS_VERSION} ./hack/update-chart-version.sh
 
 .PHONY: helm-lint
@@ -182,12 +183,13 @@ update-webhook-template:
 	@python3 ./hack/update-webhook-template.py charts/kubeserial/templates/webhooks.yaml hack/webhook_template.yaml
 
 .PHONY: update-version
+update-version: ## Update charts version.
 update-version: update-kubeserial-crds-chart-version update-kubeserial-chart-version
 
 ##@ Kind
 
 .PHONY: kind
-kind: kind-create kind-install-certmanager kind-load-images
+kind: kind-create kind-install-certmanager docker-local kind-load-images install-dev ## Create kind cluster, install certmanager, build and load images, install dev release.
 
 kind-create:
 	kind create cluster --name kubeserial
@@ -233,9 +235,6 @@ minikube-build-image:
 	@eval $$(minikube -p ${MINIKUBE_PROFILE} docker-env) ;\
 	docker images
 
-.PHONY: minikube-deploy
-minikube-deploy: update-version deploy-dev ## Deploy the app to local minikube
-
 ##@ Deployment
 
 .PHONY: uninstall
@@ -243,9 +242,12 @@ uninstall: ## Uninstall release.
 	helm uninstall ${RELEASE_NAME}
 
 .PHONY: deploy-dev
-deploy-dev: manifests-gen update-kubeserial-chart-version update-kubeserial-crds-chart-version ## Install dev release in current context/namespace.
+deploy-dev: manifests-gen update-version
 	helm upgrade --create-namespace --namespace kubeserial --install ${RELEASE_NAME}-crds ./charts/kubeserial-crds
 	helm upgrade --create-namespace --namespace kubeserial --install ${RELEASE_NAME} ./charts/kubeserial -f ./charts/kubeserial/values-local.yaml
+
+.PHONY: install-dev
+install-dev: update-version deploy-dev ## Install dev release in current context/namespace.
 
 ##@ Docs
 

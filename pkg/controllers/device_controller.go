@@ -100,7 +100,7 @@ func (r *SerialDeviceReconciler) HandleDeviceAvailable(
 ) (reconcile.Result, error) {
 	err := r.RequestGateway(ctx, device)
 	if err != nil {
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, err
 	}
 	if !device.NeedsManager() {
 		return ctrl.Result{}, nil

@@ -75,7 +75,7 @@ func (r *ManagerScheduleRequestReconciler) Reconcile(ctx context.Context, req ct
 	}, manager)
 	if err != nil {
 		// TODO: handle missing manager spec
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, err
 	}
 	logger = logger.WithValues("manager", manager)
 	logger.Info("Got manager, starting ReconcileManager")

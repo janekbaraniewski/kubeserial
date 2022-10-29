@@ -59,6 +59,8 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 
 	{
 		t.Run("device-new-manager-not-available", func(t *testing.T) {
+			t.Parallel()
+
 			//nolint:errcheck
 			fakeClient.Create(context.TODO(), device)
 
@@ -90,6 +92,8 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 	}
 	{
 		t.Run("device-new-manager-available", func(t *testing.T) {
+			t.Parallel()
+
 			//nolint:errcheck
 			fakeClient.Create(context.TODO(), device)
 			//nolint:errcheck
@@ -121,6 +125,8 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 	}
 	{
 		t.Run("device-ready", func(t *testing.T) {
+			t.Parallel()
+
 			device.Status.Conditions = append(device.Status.Conditions, v1alpha1.SerialDeviceCondition{
 				Type:   v1alpha1.SerialDeviceAvailable,
 				Status: v1.ConditionTrue,
@@ -165,6 +171,8 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 	}
 	{
 		t.Run("device-not-found", func(t *testing.T) {
+			t.Parallel()
+
 			deviceReconciler := SerialDeviceReconciler{
 				Client:    fakeClient,
 				Scheme:    scheme,

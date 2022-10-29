@@ -189,13 +189,14 @@ update-version: update-kubeserial-crds-chart-version update-kubeserial-chart-ver
 ##@ Kind
 
 .PHONY: kind
-kind: kind-create kind-install-certmanager docker-local kind-load-images install-dev ## Create kind cluster, install certmanager, build and load images, install dev release.
+kind: kind-create install-certmanager docker-local kind-load-images install-dev ## Create kind cluster, install certmanager, build and load images, install dev release.
 
 kind-create:
 	kind create cluster --name kubeserial
 
-kind-install-certmanager:
-	helm install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --version v1.8.0 --set installCRDs=true
+.PHONY: install-certmanager
+install-certmanager:
+	helm upgrade --install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --version v1.10.0 --set installCRDs=true
 
 kind-load-images:
 	kind load docker-image --name kubeserial ghcr.io/janekbaraniewski/kubeserial:${APP_VERSION}
@@ -205,7 +206,7 @@ kind-load-images:
 ##@ Minikube
 
 .PHONY: minikube
-minikube: minikube-start minikube-build-controller-image minikube-build-monitor-image update-version minikube-deploy ## Start local cluster, build image and deploy
+minikube: minikube-start minikube-build-controller-image minikube-build-monitor-image install-certmanager install-dev ## Start local cluster, build image and deploy
 
 .PHONY: minikube-start
 minikube-start: ## Start minikube cluster

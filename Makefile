@@ -82,9 +82,13 @@ envtest-render-crds:
 	@rm -rf build/_output/kubeserial-crds || echo ""
 	@helm template charts/kubeserial-crds --name-template kubeserial --output-dir build/_output
 
-.PHONY: check
-check: check-generated
+.PHONY: lint
+lint:
 	golangci-lint run
+
+.PHONY: check
+check: check-generated lint
+check:
 
 # ENVTEST = $(shell pwd)/bin/setup-envtest
 # .PHONY: envtest

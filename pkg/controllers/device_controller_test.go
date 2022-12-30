@@ -4,8 +4,10 @@ import (
 	"context"
 	"testing"
 
+	kubeserial "github.com/janekbaraniewski/kubeserial/pkg"
 	"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	"github.com/janekbaraniewski/kubeserial/pkg/kubeapi"
+	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -63,11 +65,13 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 
 			//nolint:errcheck
 			fakeClient.Create(context.TODO(), device)
-
+			fs := utils.NewInMemoryFS()
+			AddGatewaySpecFilesToFilesystem(t, fs)
 			deviceReconciler := SerialDeviceReconciler{
 				Client:    fakeClient,
 				Scheme:    scheme,
 				APIClient: kubeapi.NewFakeAPIClient(),
+				FS:        fs,
 			}
 
 			result, err := deviceReconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
@@ -98,11 +102,13 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			fakeClient.Create(context.TODO(), device)
 			//nolint:errcheck
 			fakeClient.Create(context.TODO(), manager)
-
+			fs := utils.NewInMemoryFS()
+			AddGatewaySpecFilesToFilesystem(t, fs)
 			deviceReconciler := SerialDeviceReconciler{
 				Client:    fakeClient,
 				Scheme:    scheme,
 				APIClient: kubeapi.NewFakeAPIClient(),
+				FS:        fs,
 			}
 
 			result, err := deviceReconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
@@ -135,11 +141,13 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			fakeClient.Create(context.TODO(), device)
 			//nolint:errcheck
 			fakeClient.Create(context.TODO(), manager)
-
+			fs := utils.NewInMemoryFS()
+			AddGatewaySpecFilesToFilesystem(t, fs)
 			deviceReconciler := SerialDeviceReconciler{
 				Client:    fakeClient,
 				Scheme:    scheme,
 				APIClient: kubeapi.NewFakeAPIClient(),
+				FS:        fs,
 			}
 
 			result, err := deviceReconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
@@ -150,10 +158,6 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			foundDevice := &v1alpha1.SerialDevice{}
 			//nolint:errcheck
 			fakeClient.Get(context.TODO(), deviceName, foundDevice)
-
-			availableCondition := foundDevice.GetCondition(v1alpha1.SerialDeviceAvailable)
-			assert.Equal(t, v1.ConditionFalse, availableCondition.Status)
-			assert.Equal(t, "NotValidated", availableCondition.Reason)
 
 			readyCondition := foundDevice.GetCondition(v1alpha1.SerialDeviceReady)
 			assert.Equal(t, v1.ConditionTrue, readyCondition.Status)
@@ -183,5 +187,18 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 			assert.Equal(t, nil, err)
 			assert.Equal(t, false, result.Requeue)
 		})
+	}
+}
+
+func AddGatewaySpecFilesToFilesystem(t *testing.T, fs *utils.InMemoryFS) {
+	t.Helper()
+	if err := fs.AddFileFromHostPath(string(kubeserial.GatewayCMSpecPath)); err != nil {
+		t.Fatalf("Failed to load test asset: %v", err)
+	}
+	if err := fs.AddFileFromHostPath(string(kubeserial.GatewayDeploySpecPath)); err != nil {
+		t.Fatalf("Failed to load test asset: %v", err)
+	}
+	if err := fs.AddFileFromHostPath(string(kubeserial.GatewaySvcSpecPath)); err != nil {
+		t.Fatalf("Failed to load test asset: %v", err)
 	}
 }

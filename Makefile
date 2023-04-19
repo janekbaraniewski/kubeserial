@@ -48,7 +48,7 @@ code-gen-script:
 	@COPY_OR_DIFF=${COPY_OR_DIFF} ./hack/code-gen.sh
 
 .PHONY: generate
-generate: manifests-gen code-gen
+generate: manifests-gen code-gen  ## Generate files
 
 .PHONY: check-generated
 check-generated: check-code-gen check-manifests-gen
@@ -104,7 +104,7 @@ run: generate fmt vet ## Run codegen and start controller from your host.
 ##@ Docker
 
 .PHONY: docker-local
-docker-local: kubeserial-docker-local device-monitor-docker-local injector-webhook-docker-local
+docker-local: kubeserial-docker-local device-monitor-docker-local injector-webhook-docker-local ## Build images for local dev
 
 .PHONY: docker-all
 docker-all: kubeserial-docker-all device-monitor-docker-all injector-webhook-docker-all

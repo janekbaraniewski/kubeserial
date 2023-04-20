@@ -20,6 +20,16 @@ linters:
     - varnamelen
     - wrapcheck
     - wsl
+    - varcheck
+    - deadcode
+    - nosnakecase
+    - golint
+    - structcheck
+    - ifshort
+    - interfacer
+    - rowserrcheck
+    - sqlclosecheck
+    - wastedassign
 linters-settings:
   godox:
     keywords:

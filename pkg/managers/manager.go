@@ -181,7 +181,7 @@ func (m *Manager) Delete(ctx context.Context, cr *appv1alpha1.KubeSerial, device
 	if err := api.DeleteObject(ctx, &corev1.Service{ObjectMeta: v1.ObjectMeta{Name: name, Namespace: cr.Namespace}}); err != nil {
 		return err
 	}
-	if err := api.DeleteObject(
+	if err := api.DeleteObject( //nolint:if-return
 		ctx, &networkingv1.Ingress{ObjectMeta: v1.ObjectMeta{Name: name, Namespace: cr.Namespace}}); err != nil {
 		return err
 	}

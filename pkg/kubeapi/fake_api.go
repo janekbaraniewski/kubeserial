@@ -23,12 +23,12 @@ func NewFakeAPIClient() *FakeAPIClient {
 	}
 }
 
-func (a *FakeAPIClient) EnsureObject(ctx context.Context, cr metav1.Object, obj client.Object) error {
+func (a *FakeAPIClient) EnsureObject(_ context.Context, _ metav1.Object, obj client.Object) error {
 	a.Operations = append(a.Operations, Operation{"EnsureObject", obj.GetObjectKind().GroupVersionKind()})
 	return nil
 }
 
-func (a *FakeAPIClient) DeleteObject(ctx context.Context, obj client.Object) error {
+func (a *FakeAPIClient) DeleteObject(_ context.Context, obj client.Object) error {
 	a.Operations = append(a.Operations, Operation{"DeleteObject", obj.GetObjectKind().GroupVersionKind()})
 	return nil
 }

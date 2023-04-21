@@ -96,7 +96,7 @@ func (r *SerialDeviceReconciler) Reconcile(ctx context.Context, req ctrl.Request
 func (r *SerialDeviceReconciler) HandleDeviceAvailable(
 	ctx context.Context,
 	device *kubeserialv1alpha1.SerialDevice,
-	logger logr.Logger,
+	_ logr.Logger,
 ) (reconcile.Result, error) {
 	err := r.RequestGateway(ctx, device)
 	if err != nil {
@@ -113,7 +113,7 @@ func (r *SerialDeviceReconciler) HandleDeviceAvailable(
 func (r *SerialDeviceReconciler) HandleDeviceUnavailable(
 	ctx context.Context,
 	device *kubeserialv1alpha1.SerialDevice,
-	logger logr.Logger,
+	_ logr.Logger,
 ) (reconcile.Result, error) {
 	err := r.EnsureNoGatewayRunning(ctx, device)
 	if err != nil {
@@ -154,7 +154,7 @@ func (r *SerialDeviceReconciler) EnsureNoGatewayRunning(ctx context.Context, dev
 	); err != nil {
 		return err
 	}
-	if err := r.APIClient.DeleteObject(
+	if err := r.APIClient.DeleteObject( //nolint:if-return
 		ctx,
 		&corev1.Service{ObjectMeta: v1.ObjectMeta{Name: name, Namespace: r.Namespace}},
 	); err != nil {
@@ -180,10 +180,7 @@ func (r *SerialDeviceReconciler) EnsureConditions(ctx context.Context, device *k
 			})
 		}
 	}
-	if err := r.Client.Status().Update(ctx, device); err != nil {
-		return err
-	}
-	return nil
+	return r.Client.Status().Update(ctx, device)
 }
 
 // ValidateDeviceReady validates if device config is ready to be used.
@@ -303,10 +300,7 @@ func (r *SerialDeviceReconciler) EnsureNoManagerRequested(ctx context.Context, d
 		}
 		return err
 	}
-	if err := r.Client.Delete(ctx, request); err != nil {
-		return err
-	}
-	return nil
+	return r.Client.Delete(ctx, request)
 }
 
 // SetupWithManager sets up the controller with the Manager.

@@ -68,7 +68,7 @@ func (r *KubeSerialReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	return reconcile.Result{}, nil
 }
 
-func (r *KubeSerialReconciler) ReconcileMonitor(ctx context.Context, cr *appv1alpha1.KubeSerial, monitorVersion string) error {
+func (r *KubeSerialReconciler) ReconcileMonitor(ctx context.Context, cr *appv1alpha1.KubeSerial, _ string) error {
 	cm, err := monitor.CreateConfigMap(r.FS, cr.Spec.SerialDevices)
 	if err != nil {
 		return err
@@ -83,7 +83,7 @@ func (r *KubeSerialReconciler) ReconcileMonitor(ctx context.Context, cr *appv1al
 		return err
 	}
 
-	if err := r.APIClient.EnsureObject(ctx, cr, monitorDaemon); err != nil {
+	if err := r.APIClient.EnsureObject(ctx, cr, monitorDaemon); err != nil { //nolint:if-return
 		return err
 	}
 

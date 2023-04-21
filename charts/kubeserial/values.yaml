@@ -19,6 +19,15 @@ monitor:
     pullPolicy: IfNotPresent
     tag: "APP_VERSION"
   resources: {}
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: topology.kubernetes.io/zone
+          operator: In
+          values:
+          - antarctica-east1
+          - antarctica-west1
 
 image:
   repository: ghcr.io/janekbaraniewski/kubeserial

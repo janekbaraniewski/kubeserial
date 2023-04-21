@@ -89,12 +89,9 @@ func (r *ManagerScheduleRequestReconciler) ReconcileManager(
 	ctx context.Context,
 	instance *kubeserialv1alpha1.ManagerScheduleRequest,
 	mgr *kubeserialv1alpha1.Manager,
-	req ctrl.Request,
+	_ ctrl.Request,
 ) error {
-	if err := managers.Schedule(ctx, r.FS, instance, mgr, r.Namespace, r.APIClient); err != nil {
-		return err
-	}
-	return nil
+	return managers.Schedule(ctx, r.FS, instance, mgr, r.Namespace, r.APIClient)
 }
 
 // SetupWithManager sets up the controller with the Manager.

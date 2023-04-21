@@ -12,6 +12,8 @@ spec:
       labels: {{ include "kubeserial.monitorLabels" . | nindent 12 }}
       name: {{ include "kubeserial.monitorFullname" . }}
     spec:
+      affinity:
+        nodeAffinity: {{ include "kubeserial.monitor.nodeAffinity" | nindent 10 }}
       containers:
       - image: {{ .Values.monitor.image.repository }}:{{ .Values.monitor.image.tag }}
         imagePullPolicy: {{ .Values.monitor.image.pullPolicy }}

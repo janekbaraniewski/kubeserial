@@ -16,6 +16,6 @@ replace_or_compare () {
             exit 1
         fi
     elif [[ "${COPY_OR_DIFF}" == "diff" ]]; then
-        diff -qr --exclude="_helpers.tpl" $1 $2 || exit_on_error "To fix run:\n    make generate"
+        diff -r --exclude="_helpers.tpl" $1 $2 || exit_on_error "To fix run:\n    make generate"
     fi
 }

@@ -88,7 +88,7 @@ lint:
 
 .PHONY: check
 check: check-generated lint
-check:
+check: ## Run linters and check code gen
 
 # ENVTEST = $(shell pwd)/bin/setup-envtest
 # .PHONY: envtest
@@ -203,10 +203,10 @@ kind-create:
 	kind create cluster --name kubeserial
 
 .PHONY: install-certmanager
-install-certmanager:
+install-certmanager: ## Install cert-manager from jetstack/cert-manager
 	helm upgrade --install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --version v1.10.0 --set installCRDs=true
 
-kind-load-images:
+kind-load-images: ## Load images to kind cluster
 	kind load docker-image --name kubeserial ghcr.io/janekbaraniewski/kubeserial:${APP_VERSION}
 	kind load docker-image --name kubeserial ghcr.io/janekbaraniewski/kubeserial-device-monitor:${APP_VERSION}
 	kind load docker-image --name kubeserial ghcr.io/janekbaraniewski/kubeserial-injector-webhook:${APP_VERSION}

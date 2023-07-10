@@ -51,11 +51,11 @@ func getCR() *kubeserialv1alpha1.KubeSerial {
 }
 
 func TestReconcile(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 
 	{
 		t.Run("object-not-found", func(t *testing.T) {
-			t.Parallel()
+			// t.Parallel()
 
 			scheme := runtime.NewScheme()
 			utilruntime.Must(clientgoscheme.AddToScheme(scheme))
@@ -82,7 +82,7 @@ func TestReconcile(t *testing.T) {
 	}
 	{
 		t.Run("object-found", func(t *testing.T) {
-			t.Parallel()
+			// t.Parallel()
 
 			scheme := runtime.NewScheme()
 			utilruntime.Must(clientgoscheme.AddToScheme(scheme))
@@ -126,7 +126,7 @@ func GetFileSystem(t *testing.T) utils.FileSystem {
 }
 
 func TestReconcileMonitor(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 	scheme := runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(kubeserialv1alpha1.AddToScheme(scheme))

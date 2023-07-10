@@ -18,8 +18,8 @@ import (
 	runtimefake "sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
-func TestDeviceReconciler_Reconcile(t *testing.T) {
-	t.Parallel()
+func TestDeviceReconciler_Reconcile(t *testing.T) { //nolint:paralleltest
+	// t.Parallel()
 	deviceName := types.NamespacedName{
 		Name:      "test-device",
 		Namespace: "test-ns",
@@ -62,8 +62,8 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 	AddGatewaySpecFilesToFilesystem(t, fs)
 	{
 		t.Run("device-new-manager-not-available", func(t *testing.T) {
-			t.Parallel()
-			t.Skip()
+			// t.Parallel()
+
 			//nolint:errcheck
 			fakeClient.Create(context.TODO(), device)
 
@@ -96,8 +96,8 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 	}
 	{
 		t.Run("device-new-manager-available", func(t *testing.T) {
-			t.Parallel()
-			t.Skip()
+			// t.Parallel()
+
 			//nolint:errcheck
 			fakeClient.Create(context.TODO(), device)
 			//nolint:errcheck
@@ -130,8 +130,8 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 	}
 	{
 		t.Run("device-ready", func(t *testing.T) {
-			t.Parallel()
-			t.Skip()
+			// t.Parallel()
+			// t.Skip()
 			device.Status.Conditions = append(device.Status.Conditions, v1alpha1.SerialDeviceCondition{
 				Type:   v1alpha1.SerialDeviceAvailable,
 				Status: v1.ConditionTrue,
@@ -173,8 +173,8 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 	}
 	{
 		t.Run("device-not-found", func(t *testing.T) {
-			t.Parallel()
-
+			// t.Parallel()
+			// t.Skip()
 			deviceReconciler := SerialDeviceReconciler{
 				Client:    fakeClient,
 				Scheme:    scheme,

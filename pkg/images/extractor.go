@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/regclient/regclient/regclient"
-	"github.com/regclient/regclient/types/manifest"
+	regMan "github.com/regclient/regclient/types/manifest"
 	v1 "github.com/regclient/regclient/types/oci/v1"
 	"github.com/regclient/regclient/types/ref"
 )
@@ -15,10 +15,10 @@ type OCIConfigExtractor struct {
 
 func (e *OCIConfigExtractor) getManifestFromList(
 	ctx context.Context,
-	man manifest.Manifest,
+	man regMan.Manifest,
 	r ref.Ref,
-) (manifest.Manifest, ref.Ref, error) {
-	manifests, err := man.GetManifestList()
+) (regMan.Manifest, ref.Ref, error) {
+	manifests, err := man.(regMan.Indexer).GetManifestList()
 	if err != nil {
 		return nil, r, err
 	}
@@ -52,7 +52,7 @@ func (e *OCIConfigExtractor) GetImageConfig(ctx context.Context, image string) (
 		referance = ref
 	}
 
-	config, err := manifest.GetConfig()
+	config, err := manifest.(regMan.Imager).GetConfig()
 	if err != nil {
 		return v1.ImageConfig{}, err
 	}

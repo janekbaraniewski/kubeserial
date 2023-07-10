@@ -15,6 +15,7 @@ linters:
     - nestif # remove
     - nlreturn
     - nonamedreturns # fix maybe?
+    - paralleltest
     - scopelint
     - testpackage # TODO: remove this
     - varnamelen

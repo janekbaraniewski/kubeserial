@@ -1,6 +1,6 @@
 module github.com/janekbaraniewski/kubeserial
 
-go 1.19
+go 1.22
 
 require (
 	github.com/regclient/regclient v0.4.8

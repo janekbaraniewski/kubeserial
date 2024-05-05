@@ -7,7 +7,6 @@ import (
 	"k8s.io/client-go/rest"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
-	metrics "sigs.k8s.io/controller-runtime/pkg/metrics"
 
 	"github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned"
 	"github.com/janekbaraniewski/kubeserial/pkg/monitor"
@@ -23,10 +22,10 @@ func main() {
 
 	log.Info("Start setup")
 
-	_, err := metrics.NewListener(":8080")
-	if err != nil {
-		log.Info("Failed setting up metrics listener")
-	}
+	// _, err := metrics.NewListener(":8080")
+	// if err != nil {
+	// 	log.Info("Failed setting up metrics listener")
+	// }
 
 	config, err := rest.InClusterConfig()
 	if err != nil {

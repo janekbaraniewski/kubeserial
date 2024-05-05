@@ -32,7 +32,7 @@ type SerialDeviceInjector struct {
 	Name            string
 	Clientset       versioned.Interface
 	ConfigExtractor *images.OCIConfigExtractor
-	decoder         *admission.Decoder
+	decoder         admission.Decoder
 }
 
 func shoudInject(pod *corev1.Pod) string {
@@ -168,7 +168,7 @@ func (si *SerialDeviceInjector) Handle(ctx context.Context, req admission.Reques
 // A decoder will be automatically inj1ected.
 
 // InjectDecoder injects the decoder.
-func (si *SerialDeviceInjector) InjectDecoder(d *admission.Decoder) error {
+func (si *SerialDeviceInjector) InjectDecoder(d admission.Decoder) error {
 	si.decoder = d
 	return nil
 }

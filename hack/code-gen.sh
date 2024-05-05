@@ -19,8 +19,8 @@ GO111MODULE=on "$GO" install \
     k8s.io/code-generator/cmd/register-gen \
     k8s.io/code-generator/cmd/client-gen \
     k8s.io/code-generator/cmd/lister-gen \
-    k8s.io/code-generator/cmd/informer-gen \
-    k8s.io/code-generator/cmd/openapi-gen
+    k8s.io/code-generator/cmd/informer-gen
+    # k8s.io/code-generator/cmd/openapi-gen
 
 printf "deepcopy-gen... "
 

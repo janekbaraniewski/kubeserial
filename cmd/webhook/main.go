@@ -11,6 +11,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
+	"sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	"github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned"
@@ -42,8 +43,14 @@ func main() {
 	// Setup a Manager
 	entryLog.Info("setting up manager")
 	mgr, err := manager.New(config.GetConfigOrDie(), manager.Options{
-		MetricsBindAddress:     ":8080",
+		Metrics: server.Options{
+			BindAddress: ":8080",
+		},
 		HealthProbeBindAddress: ":8081",
+		WebhookServer: webhook.NewServer(webhook.Options{
+			Port:    params.port,
+			CertDir: params.certDir,
+		}),
 	})
 	if err != nil {
 		entryLog.Error(err, "unable to set up overall controller manager")
@@ -56,10 +63,8 @@ func main() {
 
 	// Setup webhooks
 	entryLog.Info("setting up webhook server")
-	hookServer := mgr.GetWebhookServer()
 
-	hookServer.Port = params.port
-	hookServer.CertDir = params.certDir
+	hookServer := mgr.GetWebhookServer()
 
 	config, err := rest.InClusterConfig()
 	if err != nil {

@@ -24,6 +24,8 @@ GO111MODULE=on "$GO" install \
 # Ensure proper package tags are in place (See: https://pkg.go.dev/k8s.io/code-generator/cmd/deepcopy-gen)
 printf "Running code generators...\n"
 
+chmod +x "$GOPATH"/pkg/mod/k8s.io/code-generator@v0.30.0/kube_codegen.sh
+
 # Use generate-groups.sh helper script to run all code generators
 "$GOPATH"/pkg/mod/k8s.io/code-generator@v0.30.0/kube_codegen.sh all \
     github.com/janekbaraniewski/kubeserial/pkg/generated \

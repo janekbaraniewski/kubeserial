@@ -100,7 +100,7 @@ func (m *Monitor) processReadyDevice(ctx context.Context, device v1alpha1.Serial
 		logger.WithValues("Node", device.Status.NodeName).Info("Setting device state to available")
 		_, err := m.devicesClient.UpdateStatus(ctx, &device, metav1.UpdateOptions{})
 		if err != nil {
-			log.Error(err, "Failed device status update")
+			log.Error(err, "Failed device status update.")
 		}
 	} else if device.Status.NodeName == m.nodeName && !m.isDeviceAvailable(device.Name) {
 		log.Info("Device unavailable, updating state.")
@@ -115,7 +115,7 @@ func (m *Monitor) processReadyDevice(ctx context.Context, device v1alpha1.Serial
 			Reason: "DeviceUnavailable",
 		})
 		device.Status.NodeName = ""
-		logger.Info("Setting device state to unavailable")
+		logger.Info("Setting device state to unavailable.")
 		_, err := m.devicesClient.UpdateStatus(ctx, &device, metav1.UpdateOptions{})
 		if err != nil {
 			log.Error(err, "Failed device status update")

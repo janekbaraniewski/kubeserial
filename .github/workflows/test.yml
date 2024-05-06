@@ -102,6 +102,12 @@ jobs:
         with:
           go-version: 1.22
 
+      - name: debug paths and dirs
+        run: |
+          ls -la .
+          pwd
+          ls -la /home/runner/go/src/github.com/janekbaraniewski/kubeserial/pkg/generated/ || echo "NO DIR"
+
       - name: Check codegen
         run: make check-generated
 

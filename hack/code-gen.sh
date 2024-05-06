@@ -13,13 +13,12 @@ export PATH=$PATH:$GOPATH/bin
 
 source hack/utils.sh
 
+printf "Start code-gen script \n"
+
 # Install the required binaries with modules enabled
-GO111MODULE=on "$GO" install \
-    k8s.io/code-generator/cmd/deepcopy-gen \
-    k8s.io/code-generator/cmd/register-gen \
-    k8s.io/code-generator/cmd/client-gen \
-    k8s.io/code-generator/cmd/lister-gen \
-    k8s.io/code-generator/cmd/informer-gen
+go install k8s.io/code-generator
+
+printf "Got all dependencies \n"
 
 # Ensure proper package tags are in place (See: https://pkg.go.dev/k8s.io/code-generator/cmd/deepcopy-gen)
 printf "Running code generators...\n"

@@ -12,7 +12,6 @@ func LoadResourceFromYaml(fs FileSystem, filepath kubeserial.ResourceSpecPath, d
 	}
 	defer reader.Close()
 	err = yaml.NewYAMLOrJSONDecoder(reader, 4096).Decode(data)
-
 	if err != nil {
 		return err
 	}

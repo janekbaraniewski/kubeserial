@@ -13,6 +13,7 @@ linters:
     - gosec
     - ireturn
     - maligned
+    - mnd
     - nestif # remove
     - nlreturn
     - nonamedreturns # fix maybe?

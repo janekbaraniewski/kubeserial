@@ -7,6 +7,7 @@ import (
 	"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -24,8 +25,8 @@ func TestBuilder_Build(t *testing.T) {
 
 	objects := NewBuilder(device, fs).Build()
 
-	assert.NotEqual(t, nil, objects)
-	assert.Equal(t, 3, len(objects))
+	assert.NotNil(t, objects)
+	assert.Len(t, objects, 3)
 }
 
 func TestCreateConfigMap(t *testing.T) {
@@ -43,7 +44,7 @@ func TestCreateConfigMap(t *testing.T) {
 		fs,
 	)
 
-	assert.Equal(t, nil, err)
+	require.NoError(t, err)
 	assert.Equal(t, "test-device-gateway", cm.ObjectMeta.Name)
 }
 
@@ -65,7 +66,7 @@ func TestCreateDeployment(t *testing.T) {
 		fs,
 	)
 
-	assert.Equal(t, nil, err)
+	require.NoError(t, err)
 	assert.Equal(t, map[string]string{
 		"kubernetes.io/hostname": "test-node",
 	}, deployment.Spec.Template.Spec.NodeSelector)
@@ -92,7 +93,7 @@ func TestCreateService(t *testing.T) {
 		fs,
 	)
 
-	assert.Equal(t, nil, err)
+	require.NoError(t, err)
 	assert.Equal(t, "test-device-gateway", svc.ObjectMeta.Name)
 }
 

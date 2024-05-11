@@ -6,6 +6,7 @@ import (
 
 	kubeserialv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -50,7 +51,7 @@ func TestEnsureConfigMap(t *testing.T) {
 
 	err := api.EnsureObject(context.TODO(), &kubeserialv1alpha1.KubeSerial{}, cm)
 
-	assert.Equal(t, nil, err)
+	require.NoError(t, err)
 	found := &corev1.ConfigMap{}
 	//nolint:errcheck
 	fakeClient.Get(
@@ -91,7 +92,7 @@ func TestEnsureConfigMapUpdatesExisting(t *testing.T) {
 		},
 	})
 
-	assert.Equal(t, nil, err)
+	require.NoError(t, err)
 	found := &corev1.ConfigMap{}
 	//nolint:errcheck
 	fakeClient.Get(
@@ -122,7 +123,7 @@ func TestDeleteObject(t *testing.T) {
 	fakeClient.Create(context.TODO(), obj)
 
 	err := api.DeleteObject(context.TODO(), obj)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	lookup := &corev1.ConfigMap{}
 
@@ -132,5 +133,5 @@ func TestDeleteObject(t *testing.T) {
 		lookup,
 	)
 
-	assert.Equal(t, true, errors.IsNotFound(err))
+	assert.True(t, errors.IsNotFound(err))
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/janekbaraniewski/kubeserial/pkg/kubeapi"
 	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -76,7 +77,7 @@ func TestReconcile(t *testing.T) {
 			}
 
 			result, err := reconciler.Reconcile(context.TODO(), reconcileReq)
-			assert.Equal(t, nil, err)
+			require.NoError(t, err)
 			assert.Equal(t, reconcile.Result{}, result)
 		})
 	}
@@ -107,7 +108,7 @@ func TestReconcile(t *testing.T) {
 			//nolint:errcheck
 			fakeClient.Create(context.TODO(), cr)
 			result, err := reconciler.Reconcile(context.TODO(), reconcileReq)
-			assert.Equal(t, nil, err)
+			require.NoError(t, err)
 			assert.Equal(t, reconcile.Result{}, result)
 		})
 	}
@@ -153,6 +154,6 @@ func TestReconcileMonitor(t *testing.T) {
 		},
 	}
 
-	assert.Equal(t, nil, err)
+	require.NoError(t, err)
 	assert.Equal(t, expected, apiClient.Operations)
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/janekbaraniewski/kubeserial/pkg/kubeapi"
 	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -78,13 +79,13 @@ func TestDeviceReconciler_Reconcile(t *testing.T) { //nolint:paralleltest
 
 			result, err := deviceReconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
 
-			assert.Equal(t, nil, err)
-			assert.Equal(t, false, result.Requeue)
+			require.NoError(t, err)
+			assert.False(t, result.Requeue)
 
 			foundDevice := &v1alpha1.SerialDevice{}
 			err = fakeClient.Get(context.TODO(), deviceName, foundDevice)
 
-			assert.Equal(t, nil, err)
+			require.NoError(t, err)
 			// assert.Equal(t, 3, len(foundDevice.Status.Conditions))
 
 			availableCondition := foundDevice.GetCondition(v1alpha1.SerialDeviceAvailable)
@@ -101,12 +102,11 @@ func TestDeviceReconciler_Reconcile(t *testing.T) { //nolint:paralleltest
 			// t.Parallel()
 			t.Skip()
 
-			//nolint:errcheck
 			if err := fakeClient.Create(context.TODO(), device); err != nil {
 				t.Logf("Error returned -> %v", err)
 				t.Fail()
 			}
-			//nolint:errcheck
+
 			if err := fakeClient.Create(context.TODO(), manager); err != nil {
 				t.Logf("Error returned -> %v", err)
 				t.Fail()
@@ -121,8 +121,8 @@ func TestDeviceReconciler_Reconcile(t *testing.T) { //nolint:paralleltest
 
 			result, err := deviceReconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
 
-			assert.Equal(t, nil, err)
-			assert.Equal(t, false, result.Requeue)
+			require.NoError(t, err)
+			assert.False(t, result.Requeue)
 
 			foundDevice := &v1alpha1.SerialDevice{}
 			//nolint:errcheck
@@ -145,7 +145,7 @@ func TestDeviceReconciler_Reconcile(t *testing.T) { //nolint:paralleltest
 				Type:   v1alpha1.SerialDeviceAvailable,
 				Status: v1.ConditionTrue,
 			})
-			//nolint:errcheck
+
 			err := fakeClient.Create(context.TODO(), device)
 			t.Logf("Error returned -> %v", err)
 			if err != nil {
@@ -164,8 +164,8 @@ func TestDeviceReconciler_Reconcile(t *testing.T) { //nolint:paralleltest
 
 			result, err := deviceReconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
 
-			assert.Equal(t, nil, err)
-			assert.Equal(t, false, result.Requeue)
+			require.NoError(t, err)
+			assert.False(t, result.Requeue)
 
 			foundDevice := &v1alpha1.SerialDevice{}
 			//nolint:errcheck
@@ -182,7 +182,7 @@ func TestDeviceReconciler_Reconcile(t *testing.T) { //nolint:paralleltest
 				Namespace: device.Name,
 			}, &foundRequest)
 
-			assert.Equal(t, false, foundRequest.Status.Fulfilled)
+			assert.False(t, foundRequest.Status.Fulfilled)
 		})
 	}
 	{
@@ -197,8 +197,8 @@ func TestDeviceReconciler_Reconcile(t *testing.T) { //nolint:paralleltest
 			}
 
 			result, err := deviceReconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
-			assert.Equal(t, nil, err)
-			assert.Equal(t, false, result.Requeue)
+			require.NoError(t, err)
+			assert.False(t, result.Requeue)
 		})
 	}
 }

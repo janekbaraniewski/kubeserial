@@ -8,6 +8,7 @@ import (
 	"github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned/fake"
 	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	testclient "k8s.io/client-go/kubernetes/fake"
@@ -110,7 +111,6 @@ func TestUpdateDeviceState_Device(t *testing.T) {
 		},
 	}
 	for _, testCase := range testCases {
-		testCase := testCase
 		t.Run(testCase.Name, func(t *testing.T) {
 			t.Parallel()
 			device := getDevice(testCase.InitReady, testCase.InitAvailable, testCase.InitNode)
@@ -134,7 +134,7 @@ func TestUpdateDeviceState_Device(t *testing.T) {
 			foundDevice, err := fakeClientsetKubeserial.AppV1alpha1().SerialDevices().Get(
 				ctx, device.Name, v1.GetOptions{})
 
-			assert.Equal(t, nil, err)
+			require.NoError(t, err)
 			availableCondition := foundDevice.GetCondition(v1alpha1.SerialDeviceAvailable)
 			assert.Equal(t, testCase.ResultAvailable, availableCondition.Status)
 			assert.Equal(t, testCase.ResultNode, foundDevice.Status.NodeName)

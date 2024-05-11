@@ -9,6 +9,7 @@ import (
 	"github.com/janekbaraniewski/kubeserial/pkg/kubeapi"
 	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -31,9 +32,9 @@ func TestManagerScheduleRequestReconcile(t *testing.T) {
 	}
 
 	res, err := reconciler.Reconcile(context.TODO(), controllerruntime.Request{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.Equal(t, false, res.Requeue)
+	assert.False(t, res.Requeue)
 }
 
 func TestManagerScheduleRequestReconcile_DeviceFoundNoManager(t *testing.T) {
@@ -96,8 +97,8 @@ func TestManagerScheduleRequestReconcile_DeviceFoundNoManager(t *testing.T) {
 		Name: "test-schedule-request",
 	}})
 
-	assert.NoError(t, err)
-	assert.Equal(t, false, res.Requeue)
+	require.NoError(t, err)
+	assert.False(t, res.Requeue)
 }
 
 func TestManagerScheduleRequestReconcile_DeviceManagerFound(t *testing.T) {
@@ -152,8 +153,8 @@ func TestManagerScheduleRequestReconcile_DeviceManagerFound(t *testing.T) {
 		Name: "test-schedule-request",
 	}})
 
-	assert.NoError(t, err)
-	assert.Equal(t, false, res.Requeue)
+	require.NoError(t, err)
+	assert.False(t, res.Requeue)
 }
 
 func AddSpecFilesToFilesystem(t *testing.T, fs *utils.InMemoryFS) {

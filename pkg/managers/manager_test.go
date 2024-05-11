@@ -27,7 +27,7 @@ func TestSchedule(t *testing.T) {
 
 	err := Schedule(context.TODO(), fs, req, manager, "kubeserial", api)
 
-	assert.Equal(t, nil, err)
+	assert.NoError(t, err)
 }
 
 func TestDelete(t *testing.T) {
@@ -36,7 +36,7 @@ func TestDelete(t *testing.T) {
 
 	err := manager.Delete(context.TODO(), &v1alpha1.KubeSerial{}, &v1alpha1.SerialDevice2{}, kubeapi.NewFakeAPIClient())
 
-	assert.Equal(t, nil, err)
+	assert.NoError(t, err)
 }
 
 func AddSpecFilesToFilesystem(t *testing.T, fs *utils.InMemoryFS) {

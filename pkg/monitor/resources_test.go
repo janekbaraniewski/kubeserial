@@ -8,6 +8,7 @@ import (
 	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	"github.com/janekbaraniewski/kubeserial/pkg/utils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCreateDaemonSet(t *testing.T) {
@@ -18,7 +19,7 @@ func TestCreateDaemonSet(t *testing.T) {
 	}
 
 	result, err := CreateDaemonSet(fs)
-	assert.Equal(t, nil, err)
+	require.NoError(t, err)
 	assert.Equal(t, "kubeserial-monitor", result.ObjectMeta.Name)
 	imageAndTag := strings.Split(result.Spec.Template.Spec.Containers[0].Image, ":")
 	assert.Equal(t, "ghcr.io/janekbaraniewski/kubeserial-device-monitor", imageAndTag[0])
@@ -41,7 +42,7 @@ func TestCreateConfigMap(t *testing.T) {
 
 	result, err := CreateConfigMap(fs, devices)
 
-	assert.Equal(t, nil, err)
+	require.NoError(t, err)
 
 	expectedUdevConfig := "SUBSYSTEM==\"tty\", ATTRS{idVendor}==\"123\", ATTRS{idProduct}==\"456\", SYMLINK+=\"testdevice\"\n"
 

@@ -39,7 +39,8 @@ if [[ "${COPY_OR_DIFF}" == "copy" ]]; then
     printf "Populating with new generated files...\n"
     mkdir -p ./pkg/generated
     cp -r "$GOPATH/src/github.com/janekbaraniewski/kubeserial/pkg/generated/"* ./pkg/generated/
-    printf "New files populated with:\n"
+    printf "Populating DONE\n"
+    printf "New files populated with: \n"
     ls -la ./pkg/generated/
 fi
 

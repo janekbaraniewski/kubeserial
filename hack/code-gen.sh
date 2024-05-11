@@ -34,17 +34,13 @@ printf "Finished kube_codegen.sh, updating source files...\n"
 
 # Manual copy might be required if output paths are incorrectly set by the tools, adjust paths as needed
 if [[ "${COPY_OR_DIFF}" == "copy" ]]; then
-    printf "Removing old generated files...\n"
     rm -rf ./pkg/generated
-    printf "Populating with new generated files...\n"
     mkdir -p ./pkg/generated
     cp -r "$GOPATH/src/github.com/janekbaraniewski/kubeserial/pkg/generated/"* ./pkg/generated/
-    printf "Populating DONE\n"
-    printf "New files populated with: \n"
-    ls -la ./pkg/generated/
 fi
 
-printf "Final checks...\n"
+git diff
+
 replace_or_compare "$GOPATH/src/github.com/janekbaraniewski/kubeserial/pkg/generated/" ./pkg/generated/
 
 printf "All generators have completed.\n"

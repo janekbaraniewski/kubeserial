@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:latest
 
 # Build the manager binary
-FROM --platform=$BUILDPLATFORM golang:1.18-alpine as builder
+FROM --platform=$BUILDPLATFORM golang:1.22-alpine as builder
 RUN apk update
 RUN apk add make bash
 WORKDIR /workspace

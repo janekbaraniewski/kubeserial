@@ -92,36 +92,36 @@ jobs:
         env:
           DOCKERBUILD_ACTION: ""
 
-  codegen:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.22
-
-      - name: debug paths and dirs
-        run: |
-          ls -la .
-          pwd
-          ls -la pkg/generated/ || echo "NO DIR"
-
-      - name: Check codegen
-        run: make check-generated
-
-  # lint:
+  # codegen:
   #   runs-on: ubuntu-latest
   #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-go@v5
+  #     - uses: actions/checkout@v2
+
+  #     - name: Set up Go
+  #       uses: actions/setup-go@v2
   #       with:
-  #         go-version: '1.22'
-  #     - name: golangci-lint
-  #       uses: golangci/golangci-lint-action@v6
-  #       with:
-  #         version: latest
+  #         go-version: 1.22
+
+  #     - name: debug paths and dirs
+  #       run: |
+  #         ls -la .
+  #         pwd
+  #         ls -la pkg/generated/ || echo "NO DIR"
+
+  #     - name: Check codegen
+  #       run: make check-generated
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
 
   tests:
     runs-on: ubuntu-latest

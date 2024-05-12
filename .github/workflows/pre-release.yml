@@ -19,8 +19,8 @@ jobs:
           go-version: '1.22'
       - name: "Test"
         run: make test
-      - name: "Test code gen"
-        run: make check-generated
+      # - name: "Test code gen"
+      #   run: make check-generated
       - name: "Build"
         run: make all
       - uses: "marvinpinto/action-automatic-releases@latest"

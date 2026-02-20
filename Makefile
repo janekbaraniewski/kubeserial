@@ -6,7 +6,7 @@ APP_VERSION?=$(shell git describe --dirty --tags --match "[0-9]*" )
 CRDS_VERSION?=$(shell git describe --dirty --tags --match "crds*" | sed 's/crds-//')
 DOCKERBUILD_PLATFORM_OPT=--platform
 RELEASE_NAME ?= kubeserial
-ENVTEST_K8S_VERSION = 1.23.3
+ENVTEST_K8S_VERSION = 1.35.0
 MINIKUBE_PROFILE=kubeserial
 ARM_PLATFORM=linux/arm64
 
@@ -204,7 +204,7 @@ kind-create:
 
 .PHONY: install-certmanager
 install-certmanager: ## Install cert-manager from jetstack/cert-manager
-	helm upgrade --install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --version v1.10.0 --set installCRDs=true
+	helm upgrade --install cert-manager jetstack/cert-manager --namespace cert-manager --create-namespace --version v1.17.2 --set crds.enabled=true
 
 kind-load-images: ## Load images to kind cluster
 	kind load docker-image --name kubeserial ghcr.io/janekbaraniewski/kubeserial:${APP_VERSION}

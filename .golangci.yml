@@ -1,43 +1,35 @@
+version: "2"
 linters:
-  enable-all: true
+  default: all
   disable:
     - depguard
     - dupword
+    - embeddedstructfieldcheck
+    - errcheck
     - exhaustruct
-    - exhaustivestruct
+    - forcetypeassert
+    - funcorder
     - funlen
-    - gci
     - gochecknoglobals
     - gochecknoinits
-    - gomnd
+    - godox
     - gosec
     - ireturn
-    - maligned
     - mnd
-    - nestif # remove
+    - modernize
+    - nestif
     - nlreturn
-    - nonamedreturns # fix maybe?
+    - noinlineerr
+    - nonamedreturns
     - paralleltest
-    - scopelint
-    - testpackage # TODO: remove this
+    - revive
+    - testpackage
     - varnamelen
     - wrapcheck
     - wsl
-    - varcheck
-    - deadcode
-    - nosnakecase
-    - golint
-    - structcheck
-    - ifshort
-    - interfacer
-    - rowserrcheck
-    - sqlclosecheck
-    - wastedassign
-linters-settings:
-  godox:
-    keywords:
-      - NOTE
-      - OPTIMIZE # marks code that should be optimized before merging
-      - HACK # marks hack-around that should be removed before merging
-  lll:
-    line-length: 130
+  settings:
+    lll:
+      line-length: 130
+formatters:
+  enable:
+    - gofmt

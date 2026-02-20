@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:latest
 
-FROM --platform=$BUILDPLATFORM golang:1.23-bullseye AS builder
+FROM --platform=$BUILDPLATFORM golang:1.25-bookworm AS builder
 
 WORKDIR /workspace
 COPY go.mod go.sum ./
@@ -19,13 +19,11 @@ RUN --mount=type=cache,target=/root/.cache/go-build GOOS=$TARGETOS GOARCH=$TARGE
     DEVICE_MONITOR_BUILD_OUTPUT_PATH=/build/bin/device-monitor \
     make device-monitor
 
-FROM debian:buster-slim
+FROM debian:bookworm-slim
 LABEL org.opencontainers.image.source https://github.com/janekbaraniewski/kubeserial
 
 ENV container docker
 ENV LC_ALL C
-
-RUN sed -i 's/# dev/dev/g' /etc/apt/sources.list
 
 RUN apt-get update \
     && apt-get install -y systemd udev \

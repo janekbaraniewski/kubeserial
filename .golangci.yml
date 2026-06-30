@@ -1,43 +1,26 @@
 linters:
-  enable-all: true
-  disable:
-    - depguard
-    - dupword
-    - exhaustruct
-    - exhaustivestruct
-    - funlen
-    - gci
-    - gochecknoglobals
-    - gochecknoinits
-    - gomnd
-    - gosec
-    - ireturn
-    - maligned
-    - mnd
-    - nestif # remove
-    - nlreturn
-    - nonamedreturns # fix maybe?
-    - paralleltest
-    - scopelint
-    - testpackage # TODO: remove this
-    - varnamelen
-    - wrapcheck
-    - wsl
-    - varcheck
-    - deadcode
-    - nosnakecase
-    - golint
-    - structcheck
-    - ifshort
-    - interfacer
-    - rowserrcheck
-    - sqlclosecheck
-    - wastedassign
-linters-settings:
-  godox:
-    keywords:
-      - NOTE
-      - OPTIMIZE # marks code that should be optimized before merging
-      - HACK # marks hack-around that should be removed before merging
-  lll:
-    line-length: 130
+  enable:
+    - govet
+    - errcheck
+    - staticcheck
+    - gofmt
+    - goimports
+    - revive
+    - gosimple
+    - unconvert
+    - unused
+
+issues:
+  exclude-use-default: false
+  exclude-rules:
+    - linters:
+        - gofmt
+      text: "File is not `gofmt`-ed"
+
+output:
+  formats:
+    - format: colored-line-number
+    - format: json
+
+  print-issued-lines: true
+  print-linter-name: true

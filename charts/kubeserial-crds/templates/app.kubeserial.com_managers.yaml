@@ -48,6 +48,8 @@ spec:
                 type: string
               configPath:
                 type: string
+              dupa:
+                type: string
               image:
                 description: Image is spec for image to be used by manager.
                 properties:
@@ -62,6 +64,7 @@ spec:
               runCmd:
                 type: string
             required:
+            - dupa
             - image
             - runCmd
             type: object

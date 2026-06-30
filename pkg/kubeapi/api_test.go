@@ -21,7 +21,7 @@ import (
 func GetFakeAPIAndScheme() (*runtime.Scheme, client.Client) {
 	scheme := runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-	utilruntime.Must(kubeserialv1alpha1.AddToScheme(scheme))
+	utilruntime.Must(kubeserialv1alpha1.Install(scheme))
 	fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).Build()
 	return scheme, fakeClient
 }

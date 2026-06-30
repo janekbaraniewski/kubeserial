@@ -23,7 +23,7 @@ func TestManagerScheduleRequestReconcile(t *testing.T) {
 	t.Parallel()
 	scheme := runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-	utilruntime.Must(v1alpha1.AddToScheme(scheme))
+	utilruntime.Must(v1alpha1.Install(scheme))
 	fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).Build()
 
 	reconciler := ManagerScheduleRequestReconciler{
@@ -34,14 +34,14 @@ func TestManagerScheduleRequestReconcile(t *testing.T) {
 	res, err := reconciler.Reconcile(context.TODO(), controllerruntime.Request{})
 	require.NoError(t, err)
 
-	assert.False(t, res.Requeue)
+	assert.Equal(t, controllerruntime.Result{}, res)
 }
 
 func TestManagerScheduleRequestReconcile_DeviceFoundNoManager(t *testing.T) {
 	t.Parallel()
 	scheme := runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-	utilruntime.Must(v1alpha1.AddToScheme(scheme))
+	utilruntime.Must(v1alpha1.Install(scheme))
 
 	mgr := &v1alpha1.Manager{
 		ObjectMeta: v1.ObjectMeta{
@@ -98,14 +98,14 @@ func TestManagerScheduleRequestReconcile_DeviceFoundNoManager(t *testing.T) {
 	}})
 
 	require.NoError(t, err)
-	assert.False(t, res.Requeue)
+	assert.Equal(t, controllerruntime.Result{}, res)
 }
 
 func TestManagerScheduleRequestReconcile_DeviceManagerFound(t *testing.T) {
 	t.Parallel()
 	scheme := runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-	utilruntime.Must(v1alpha1.AddToScheme(scheme))
+	utilruntime.Must(v1alpha1.Install(scheme))
 
 	msr := &v1alpha1.ManagerScheduleRequest{
 		ObjectMeta: v1.ObjectMeta{
@@ -154,7 +154,7 @@ func TestManagerScheduleRequestReconcile_DeviceManagerFound(t *testing.T) {
 	}})
 
 	require.NoError(t, err)
-	assert.False(t, res.Requeue)
+	assert.Equal(t, controllerruntime.Result{}, res)
 }
 
 func AddSpecFilesToFilesystem(t *testing.T, fs *utils.InMemoryFS) {

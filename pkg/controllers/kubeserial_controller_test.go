@@ -60,7 +60,7 @@ func TestReconcile(t *testing.T) {
 
 			scheme := runtime.NewScheme()
 			utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-			utilruntime.Must(kubeserialv1alpha1.AddToScheme(scheme))
+			utilruntime.Must(kubeserialv1alpha1.Install(scheme))
 			fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).Build()
 
 			reconciler := KubeSerialReconciler{
@@ -87,7 +87,7 @@ func TestReconcile(t *testing.T) {
 
 			scheme := runtime.NewScheme()
 			utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-			utilruntime.Must(kubeserialv1alpha1.AddToScheme(scheme))
+			utilruntime.Must(kubeserialv1alpha1.Install(scheme))
 			fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).Build()
 			cr := getCR()
 			fs := GetFileSystem(t)
@@ -130,7 +130,7 @@ func TestReconcileMonitor(t *testing.T) {
 	// t.Parallel()
 	scheme := runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-	utilruntime.Must(kubeserialv1alpha1.AddToScheme(scheme))
+	utilruntime.Must(kubeserialv1alpha1.Install(scheme))
 	fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).Build()
 	fs := GetFileSystem(t)
 	apiClient := kubeapi.NewFakeAPIClient()

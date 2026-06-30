@@ -60,7 +60,7 @@ func (r *SerialDeviceReconciler) Reconcile(ctx context.Context, req ctrl.Request
 	logger.Info("Starting device reconcile", "req", req)
 
 	device := &kubeserialv1alpha1.SerialDevice{}
-	err := r.Client.Get(ctx, req.NamespacedName, device)
+	err := r.Get(ctx, req.NamespacedName, device)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			logger.Error(err, "Device not found", "req", req)
@@ -180,7 +180,7 @@ func (r *SerialDeviceReconciler) EnsureConditions(ctx context.Context, device *k
 			})
 		}
 	}
-	return r.Client.Status().Update(ctx, device)
+	return r.Status().Update(ctx, device)
 }
 
 // ValidateDeviceReady validates if device config is ready to be used.
@@ -204,7 +204,7 @@ func (r *SerialDeviceReconciler) ValidateDeviceReady(
 			Status: v1.ConditionTrue,
 			Reason: "AllChecksPassed",
 		})
-		if err := r.Client.Status().Update(ctx, device); err != nil {
+		if err := r.Status().Update(ctx, device); err != nil {
 			return err
 		}
 	}
@@ -226,7 +226,7 @@ func (r *SerialDeviceReconciler) ValidateDeviceManager(
 			Status: v1.ConditionFalse,
 			Reason: "ManagerNotAvailable",
 		})
-		if err := r.Client.Status().Update(ctx, device); err != nil {
+		if err := r.Status().Update(ctx, device); err != nil {
 			return false, err
 		}
 		return false, nil
@@ -243,7 +243,7 @@ func (r *SerialDeviceReconciler) ManagerIsAvailable(
 	logger := devLog.WithName("ManagerIsAvailable")
 	manager := &kubeserialv1alpha1.Manager{}
 
-	err := r.Client.Get(ctx, types.NamespacedName{
+	err := r.Get(ctx, types.NamespacedName{
 		Name:      device.Spec.Manager,
 		Namespace: req.Namespace,
 	}, manager)
@@ -278,7 +278,7 @@ func (r *SerialDeviceReconciler) RequestManager(ctx context.Context, device *kub
 		logger.Info("Can't set reference")
 		return err
 	}
-	err := r.Client.Create(ctx, request)
+	err := r.Create(ctx, request)
 	if err != nil {
 		return err
 	}
@@ -291,7 +291,7 @@ func (r *SerialDeviceReconciler) EnsureNoManagerRequested(ctx context.Context, d
 		return nil
 	}
 	request := &kubeserialv1alpha1.ManagerScheduleRequest{}
-	if err := r.Client.Get(ctx, types.NamespacedName{
+	if err := r.Get(ctx, types.NamespacedName{
 		Name:      device.Name + "-" + device.Spec.Manager,
 		Namespace: device.Namespace,
 	}, request); err != nil {
@@ -300,7 +300,7 @@ func (r *SerialDeviceReconciler) EnsureNoManagerRequested(ctx context.Context, d
 		}
 		return err
 	}
-	return r.Client.Delete(ctx, request)
+	return r.Delete(ctx, request)
 }
 
 // SetupWithManager sets up the controller with the Manager.

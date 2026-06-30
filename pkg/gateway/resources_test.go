@@ -45,7 +45,7 @@ func TestCreateConfigMap(t *testing.T) {
 	)
 
 	require.NoError(t, err)
-	assert.Equal(t, "test-device-gateway", cm.ObjectMeta.Name)
+	assert.Equal(t, "test-device-gateway", cm.Name)
 }
 
 func TestCreateDeployment(t *testing.T) {
@@ -94,7 +94,7 @@ func TestCreateService(t *testing.T) {
 	)
 
 	require.NoError(t, err)
-	assert.Equal(t, "test-device-gateway", svc.ObjectMeta.Name)
+	assert.Equal(t, "test-device-gateway", svc.Name)
 }
 
 func AddSpecFilesToFilesystem(t *testing.T, fs *utils.InMemoryFS) {

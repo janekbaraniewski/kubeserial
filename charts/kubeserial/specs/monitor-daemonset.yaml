@@ -19,6 +19,18 @@ spec:
         resources: {{ .Values.monitor.resources | toYaml | nindent 14 }}
         securityContext:
           privileged: true
+        lifecycle:
+          preStop:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  rules=/etc/udev/rules.d/98-devices.rules
+                  [ -f "$rules" ] && sed -n 's/.*SYMLINK+="\([^"]*\)".*/\1/p' "$rules" | while read -r name; do
+                    rm -f "/dev/$name"
+                  done
+                  udevadm control --reload-rules 2>/dev/null || true
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
@@ -29,7 +41,7 @@ spec:
             subPath: 98-devices.rules
       - args:
           - -c
-          - ./go/bin/device-monitor
+          - ./go/bin/device-monitor --namespace=$(OPERATOR_NAMESPACE) --node-name=$(NODE_NAME)
         command:
           - /bin/sh
         env:

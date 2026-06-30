@@ -43,8 +43,6 @@ spec:
         - mountPath: /etc/ser2net.conf
           name: config
           subPath: ser2net.conf
-      nodeSelector:
-        kubernetes.io/hostname: TODO
       volumes:
       - hostPath:
           path: /dev

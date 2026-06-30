@@ -29,17 +29,16 @@ import (
 	kubeserialv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 )
 
-// Device specs (E4/E5) require the Option B device-simulation harness (a
-// privileged pod that creates /dev/<name> on the node). They are skipped unless
-// E2E_SKIP_DEVICE_SIM=false, because the simulator image/privilege wiring is
-// scaffolded but UNVERIFIED on a live node. See docs/e2e-testing.md section 2.
+// E4/E5 use the device-simulation harness (a privileged pod that creates
+// /dev/<name> on the node); set E2E_SKIP_DEVICE_SIM=true to skip them on
+// substrates without hostPath /dev.
 var _ = Describe("device-monitor presence detection", Ordered, func() {
 	ctx := context.Background()
 	const deviceName = "e2e-sim-device"
 
 	BeforeEach(func() {
 		if cfg.SkipDeviceSim {
-			Skip("E2E_SKIP_DEVICE_SIM is true: device-simulation harness not yet verified (see docs/e2e-testing.md)")
+			Skip("E2E_SKIP_DEVICE_SIM is true")
 		}
 	})
 
@@ -51,10 +50,7 @@ var _ = Describe("device-monitor presence detection", Ordered, func() {
 		}
 		dev = newSerialDevice(deviceName)
 		Expect(k8sClient.Create(ctx, dev)).To(Succeed())
-		// The monitor only processes devices whose Ready condition is True
-		// (see pkg/monitor/monitor.go). The controller normally sets Ready; in
-		// case it does not for a manager-less device, set it explicitly so the
-		// monitor will evaluate presence.
+		// The monitor only evaluates presence for Ready devices.
 		Expect(setDeviceCondition(ctx, deviceName, kubeserialv1alpha1.SerialDeviceCondition{
 			Type:   kubeserialv1alpha1.SerialDeviceReady,
 			Status: metav1.ConditionTrue,
@@ -72,7 +68,6 @@ var _ = Describe("device-monitor presence detection", Ordered, func() {
 		}
 	})
 
-	// E4: device appears -> Available + Free flip to True, NodeName set.
 	It("flips Available and Free to True when the device appears [E4]", func() {
 		simulateDeviceAttach(ctx, cfg.Namespace, deviceName)
 
@@ -87,7 +82,6 @@ var _ = Describe("device-monitor presence detection", Ordered, func() {
 		}).Should(Succeed())
 	})
 
-	// E5: device disappears -> Available flips back to False, NodeName cleared.
 	It("flips Available back to False when the device disappears [E5]", func() {
 		simulateDeviceDetach(ctx, cfg.Namespace, deviceName)
 

@@ -32,15 +32,6 @@ import (
 	kubeserialv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 )
 
-// Webhook specs (E6/E7) need NO real hardware: the webhook decides based on the
-// SerialDevice's Free condition, which we set directly on the status subresource.
-// This is the highest-value path that is fully testable in hosted CI.
-//
-// These are scaffolded but gated behind E2E_SKIP_DEVICE_SIM only insofar as they
-// require the webhook + its MutatingWebhookConfiguration to be installed and the
-// TLS/caBundle wiring to work under kind, which is UNVERIFIED here. They run
-// whenever the webhook is present; if pod creation never gets mutated because
-// the webhook is not wired, E6 fails loudly (which is the signal to fix wiring).
 const (
 	injectAnnotation = "app.kubeserial.com/inject-device"
 	socatMarker      = "socat"
@@ -50,6 +41,8 @@ const (
 var _ = Describe("device-injection webhook", func() {
 	ctx := context.Background()
 
+	// A command is required so the webhook wraps it rather than taking the
+	// image-config extraction path (which needs registry access).
 	makePod := func(name, device string) *corev1.Pod {
 		return &corev1.Pod{
 			ObjectMeta: metav1.ObjectMeta{
@@ -58,9 +51,6 @@ var _ = Describe("device-injection webhook", func() {
 				Annotations: map[string]string{injectAnnotation: device},
 			},
 			Spec: corev1.PodSpec{
-				// A command is required so the webhook has something to wrap; an
-				// empty command would force the webhook down the image-config
-				// extraction path which needs registry access.
 				Containers: []corev1.Container{{
 					Name:    "app",
 					Image:   "busybox:latest",
@@ -71,9 +61,6 @@ var _ = Describe("device-injection webhook", func() {
 		}
 	}
 
-	// E6: when the requested device is Free=True, the webhook rewrites
-	// containers[0] to wrap the original command with a socat bridge to the
-	// device gateway.
 	It("injects a socat bridge when the device is Free [E6]", func() {
 		const deviceName = "e2e-webhook-free"
 		dev := newSerialDevice(deviceName)
@@ -100,14 +87,12 @@ var _ = Describe("device-injection webhook", func() {
 			"expected the socat bridge to target the device gateway")
 	})
 
-	// E7: when the device is NOT Free, the webhook must leave the pod unchanged.
 	It("does not inject when the device is not Free [E7]", func() {
 		const deviceName = "e2e-webhook-busy"
 		dev := newSerialDevice(deviceName)
 		Expect(k8sClient.Create(ctx, dev)).To(Succeed())
 		DeferCleanup(func() { _ = k8sClient.Delete(ctx, dev) })
 
-		// Explicitly mark Free=False.
 		Expect(setDeviceCondition(ctx, deviceName, kubeserialv1alpha1.SerialDeviceCondition{
 			Type:   kubeserialv1alpha1.SerialDeviceFree,
 			Status: metav1.ConditionFalse,
@@ -126,8 +111,6 @@ var _ = Describe("device-injection webhook", func() {
 			"webhook must not inject a socat bridge when the device is not Free")
 	})
 
-	// E7b: a pod with no inject-device annotation must be left untouched, even
-	// though the webhook intercepts every pod CREATE.
 	It("does not inject when the pod has no inject annotation [E7]", func() {
 		pod := &corev1.Pod{
 			ObjectMeta: metav1.ObjectMeta{

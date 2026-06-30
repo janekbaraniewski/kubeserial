@@ -60,7 +60,7 @@ spec:
                 type: object
               serialDevices:
                 items:
-                  description: SerialDevice defines monitored device
+                  description: ManagedDevice defines a serial device entry managed by a KubeSerial resource.
                   properties:
                     idProduct:
                       type: string

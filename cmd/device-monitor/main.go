@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"os"
 
 	"k8s.io/client-go/kubernetes"
@@ -14,18 +15,22 @@ import (
 )
 
 func main() {
+	var (
+		namespace string
+		nodeName  string
+	)
+	flag.StringVar(&namespace, "namespace", os.Getenv("OPERATOR_NAMESPACE"), "Namespace the device monitor watches")
+	flag.StringVar(&nodeName, "node-name", os.Getenv("NODE_NAME"), "Name of the node this monitor runs on")
 	opts := zap.Options{
 		Development: true,
 	}
+	opts.BindFlags(flag.CommandLine)
+	flag.Parse()
+
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 	log := ctrl.Log.WithName("monitor")
 
 	log.Info("Start setup")
-
-	// _, err := metrics.NewListener(":8080")
-	// if err != nil {
-	// 	log.Info("Failed setting up metrics listener")
-	// }
 
 	config, err := rest.InClusterConfig()
 	if err != nil {
@@ -50,8 +55,8 @@ func main() {
 	deviceMonitor := monitor.NewMonitor(
 		clientset,
 		clientsetKubeserial,
-		os.Getenv("OPERATOR_NAMESPACE"),
-		os.Getenv("NODE_NAME"),
+		namespace,
+		nodeName,
 		utils.NewOSFS(),
 	)
 	log.Info("Starting monitor update loop")

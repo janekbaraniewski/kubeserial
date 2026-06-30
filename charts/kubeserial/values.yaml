@@ -1,5 +1,7 @@
 replicaCount: 1
 
+logLevel: info
+
 kubeserial:
   serialDevices: []
 
@@ -29,6 +31,9 @@ image:
 monitoring:
   prometheusMonitors:
     enabled: false
+
+dashboard:
+  enabled: false
 
 ingress:
   enabled: false

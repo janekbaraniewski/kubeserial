@@ -2,10 +2,12 @@ name: E2E
 
 # End-to-end tests against a kind cluster. See docs/e2e-testing.md.
 #
-# Gated on workflow_dispatch (manual) initially so it does not block every PR.
+# Runs on every PR to master (a required check, gating merge) and on demand.
 # The whole flow (cluster create, image build/load, cert-manager, helm install,
 # run, teardown) lives in hack/e2e.sh so it is identical locally and in CI.
 on:
+  pull_request:
+    branches: [ master ]
   workflow_dispatch:
     inputs:
       skip_device_sim:

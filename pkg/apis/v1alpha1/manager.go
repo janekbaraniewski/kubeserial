@@ -39,9 +39,6 @@ type ManagerSpec struct {
 	// +required
 	// +kubebuilder:validation:Required
 	RunCmd string `json:"runCmd"`
-	// +required
-	// +kubebuilder:validation:Required
-	Dupa string `json:"dupa"`
 	// +optional
 	// +kubebuilder:validation:Optional
 	Config string `json:"config"`

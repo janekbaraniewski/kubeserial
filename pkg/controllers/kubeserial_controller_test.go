@@ -39,7 +39,7 @@ func getCR() *kubeserialv1alpha1.KubeSerial {
 			Namespace: "kubeserial",
 		},
 		Spec: kubeserialv1alpha1.KubeSerialSpec{
-			SerialDevices: []kubeserialv1alpha1.SerialDevice2{
+			SerialDevices: []kubeserialv1alpha1.ManagedDevice{
 				{
 					Name:      "testDevice",
 					IDVendor:  "0",

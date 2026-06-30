@@ -20,9 +20,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// SerialDevice defines monitored device
+// ManagedDevice defines a serial device entry managed by a KubeSerial resource.
 // +k8s:openapi-gen=true
-type SerialDevice2 struct {
+type ManagedDevice struct {
 	// +required
 	// +kubebuilder:validation:Required
 	Name string `json:"name"`
@@ -56,7 +56,7 @@ type IngressSpec struct {
 type KubeSerialSpec struct {
 	// +required
 	// +kubebuilder:validation:Required
-	SerialDevices []SerialDevice2 `json:"serialDevices"`
+	SerialDevices []ManagedDevice `json:"serialDevices"`
 	// +required
 	// +kubebuilder:validation:Required
 	Ingress IngressSpec `json:"ingress"`

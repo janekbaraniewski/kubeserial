@@ -60,15 +60,16 @@ func (m *Monitor) RunUpdateLoop(ctx context.Context) {
 
 func (m *Monitor) UpdateDeviceState(ctx context.Context) {
 	devices, err := m.devicesClient.List(ctx, metav1.ListOptions{})
+	if err != nil {
+		log.Error(err, "Failed listing SerialDevice CRs")
+		return
+	}
 	readyDevices := []v1alpha1.SerialDevice{}
 	for _, device := range devices.Items {
 		readyCondition := device.GetCondition(v1alpha1.SerialDeviceReady)
 		if readyCondition != nil && readyCondition.Status == metav1.ConditionTrue {
 			readyDevices = append(readyDevices, device)
 		}
-	}
-	if err != nil {
-		log.Error(err, "Failed listing SerialDevice CRs")
 	}
 	for _, device := range readyDevices {
 		m.processReadyDevice(ctx, device)

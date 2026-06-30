@@ -57,7 +57,7 @@ func TestDeviceReconciler_Reconcile(t *testing.T) { //nolint:paralleltest
 
 	scheme := runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-	utilruntime.Must(v1alpha1.AddToScheme(scheme))
+	utilruntime.Must(v1alpha1.Install(scheme))
 	fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).Build()
 	fs := utils.NewInMemoryFS()
 	AddGatewaySpecFilesToFilesystem(t, fs)
@@ -80,7 +80,7 @@ func TestDeviceReconciler_Reconcile(t *testing.T) { //nolint:paralleltest
 			result, err := deviceReconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
 
 			require.NoError(t, err)
-			assert.False(t, result.Requeue)
+			assert.Equal(t, controllerruntime.Result{}, result)
 
 			foundDevice := &v1alpha1.SerialDevice{}
 			err = fakeClient.Get(context.TODO(), deviceName, foundDevice)
@@ -122,7 +122,7 @@ func TestDeviceReconciler_Reconcile(t *testing.T) { //nolint:paralleltest
 			result, err := deviceReconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
 
 			require.NoError(t, err)
-			assert.False(t, result.Requeue)
+			assert.Equal(t, controllerruntime.Result{}, result)
 
 			foundDevice := &v1alpha1.SerialDevice{}
 			//nolint:errcheck
@@ -165,7 +165,7 @@ func TestDeviceReconciler_Reconcile(t *testing.T) { //nolint:paralleltest
 			result, err := deviceReconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
 
 			require.NoError(t, err)
-			assert.False(t, result.Requeue)
+			assert.Equal(t, controllerruntime.Result{}, result)
 
 			foundDevice := &v1alpha1.SerialDevice{}
 			//nolint:errcheck
@@ -198,7 +198,7 @@ func TestDeviceReconciler_Reconcile(t *testing.T) { //nolint:paralleltest
 
 			result, err := deviceReconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
 			require.NoError(t, err)
-			assert.False(t, result.Requeue)
+			assert.Equal(t, controllerruntime.Result{}, result)
 		})
 	}
 }

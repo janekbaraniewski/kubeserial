@@ -27,7 +27,7 @@ var (
 
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-	utilruntime.Must(kubeserialv1alpha1.AddToScheme(scheme))
+	utilruntime.Must(kubeserialv1alpha1.Install(scheme))
 }
 
 type HookParamters struct {

@@ -52,7 +52,7 @@ func (r *KubeSerialReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	reqLogger.Info("Reconciling KubeSerial")
 
 	instance := &appv1alpha1.KubeSerial{}
-	err := r.Client.Get(ctx, req.NamespacedName, instance)
+	err := r.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return reconcile.Result{}, nil

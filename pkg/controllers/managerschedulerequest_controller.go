@@ -53,7 +53,7 @@ type ManagerScheduleRequestReconciler struct {
 func (r *ManagerScheduleRequestReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := msrcLog.WithName("Reconcile")
 	instance := &kubeserialv1alpha1.ManagerScheduleRequest{}
-	err := r.Client.Get(ctx, req.NamespacedName, instance)
+	err := r.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			devLog.Error(err, "Device not found", "req", req)
@@ -69,7 +69,7 @@ func (r *ManagerScheduleRequestReconciler) Reconcile(ctx context.Context, req ct
 	logger = logger.WithValues("request", instance)
 
 	manager := &kubeserialv1alpha1.Manager{}
-	err = r.Client.Get(ctx, types.NamespacedName{
+	err = r.Get(ctx, types.NamespacedName{
 		Name:      instance.Spec.Manager,
 		Namespace: req.Namespace,
 	}, manager)

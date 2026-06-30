@@ -88,8 +88,8 @@ func (m *Manager) CreateConfigMap(cr types.NamespacedName, deviceName string) (*
 	}
 	name := m.GetName(cr.Name, deviceName)
 
-	cm.ObjectMeta.Labels[string(kubeserial.AppNameLabel)] = name
-	cm.ObjectMeta.Name = name
+	cm.Labels[string(kubeserial.AppNameLabel)] = name
+	cm.Name = name
 
 	cm.Data = map[string]string{
 		filepath.Base(m.ConfigPath): m.Config,
@@ -104,11 +104,11 @@ func (m *Manager) CreateDeployment(cr types.NamespacedName, deviceName string, i
 		return deployment, err
 	}
 	name := m.GetName(cr.Name, deviceName)
-	deployment.ObjectMeta.Name = name
-	deployment.ObjectMeta.Labels[string(kubeserial.AppNameLabel)] = name
+	deployment.Name = name
+	deployment.Labels[string(kubeserial.AppNameLabel)] = name
 	deployment.Spec.Selector.MatchLabels[string(kubeserial.AppNameLabel)] = name
-	deployment.Spec.Template.ObjectMeta.Labels[string(kubeserial.AppNameLabel)] = name
-	deployment.Spec.Template.ObjectMeta.Name = name
+	deployment.Spec.Template.Labels[string(kubeserial.AppNameLabel)] = name
+	deployment.Spec.Template.Name = name
 
 	deployment.Spec.Template.Spec.Containers[0].Image = m.Image
 	deployment.Spec.Template.Spec.Containers[0].Args = []string{
@@ -162,8 +162,8 @@ func (m *Manager) CreateService(cr types.NamespacedName, deviceName string) (*co
 	}
 
 	name := m.GetName(cr.Name, deviceName)
-	svc.ObjectMeta.Name = name
-	svc.ObjectMeta.Labels[string(kubeserial.AppNameLabel)] = name
+	svc.Name = name
+	svc.Labels[string(kubeserial.AppNameLabel)] = name
 	svc.Spec.Selector[string(kubeserial.AppNameLabel)] = name
 
 	return svc, nil
@@ -181,7 +181,7 @@ func (m *Manager) Delete(ctx context.Context, cr *appv1alpha1.KubeSerial, device
 	if err := api.DeleteObject(ctx, &corev1.Service{ObjectMeta: v1.ObjectMeta{Name: name, Namespace: cr.Namespace}}); err != nil {
 		return err
 	}
-	if err := api.DeleteObject( //nolint:if-return
+	if err := api.DeleteObject(
 		ctx, &networkingv1.Ingress{ObjectMeta: v1.ObjectMeta{Name: name, Namespace: cr.Namespace}}); err != nil {
 		return err
 	}

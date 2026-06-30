@@ -20,7 +20,7 @@ func TestCreateDaemonSet(t *testing.T) {
 
 	result, err := CreateDaemonSet(fs)
 	require.NoError(t, err)
-	assert.Equal(t, "kubeserial-monitor", result.ObjectMeta.Name)
+	assert.Equal(t, "kubeserial-monitor", result.Name)
 	imageAndTag := strings.Split(result.Spec.Template.Spec.Containers[0].Image, ":")
 	assert.Equal(t, "ghcr.io/janekbaraniewski/kubeserial-device-monitor", imageAndTag[0])
 }

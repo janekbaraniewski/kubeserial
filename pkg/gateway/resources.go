@@ -58,8 +58,8 @@ func CreateConfigMap(device metav1.Object, fs utils.FileSystem) (*corev1.ConfigM
 		return cm, err
 	}
 
-	cm.ObjectMeta.Labels[string(kubeserial.AppNameLabel)] = name
-	cm.ObjectMeta.Name = name
+	cm.Labels[string(kubeserial.AppNameLabel)] = name
+	cm.Name = name
 	cm.Data["ser2net.conf"] = conf
 
 	return cm, nil
@@ -73,11 +73,11 @@ func CreateDeployment(device *appv1alpha1.SerialDevice, fs utils.FileSystem) (*a
 	}
 	name := fmt.Sprintf("%v-gateway", device.GetName())
 
-	deployment.ObjectMeta.Name = name
-	deployment.ObjectMeta.Labels[string(kubeserial.AppNameLabel)] = name
+	deployment.Name = name
+	deployment.Labels[string(kubeserial.AppNameLabel)] = name
 	deployment.Spec.Selector.MatchLabels[string(kubeserial.AppNameLabel)] = name
-	deployment.Spec.Template.ObjectMeta.Labels[string(kubeserial.AppNameLabel)] = name
-	deployment.Spec.Template.ObjectMeta.Name = name
+	deployment.Spec.Template.Labels[string(kubeserial.AppNameLabel)] = name
+	deployment.Spec.Template.Name = name
 
 	deployment.Spec.Template.Spec.NodeSelector = map[string]string{
 		"kubernetes.io/hostname": device.Status.NodeName,
@@ -101,8 +101,8 @@ func CreateService(device *appv1alpha1.SerialDevice, fs utils.FileSystem) (*core
 		return svc, err
 	}
 	name := fmt.Sprintf("%v-gateway", device.GetName())
-	svc.ObjectMeta.Name = name
-	svc.ObjectMeta.Labels[string(kubeserial.AppNameLabel)] = name
+	svc.Name = name
+	svc.Labels[string(kubeserial.AppNameLabel)] = name
 	svc.Spec.Selector[string(kubeserial.AppNameLabel)] = name
 	return svc, nil
 }

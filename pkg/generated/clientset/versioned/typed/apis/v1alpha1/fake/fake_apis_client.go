@@ -28,19 +28,19 @@ type FakeAppV1alpha1 struct {
 }
 
 func (c *FakeAppV1alpha1) KubeSerials(namespace string) v1alpha1.KubeSerialInterface {
-	return &FakeKubeSerials{c, namespace}
+	return newFakeKubeSerials(c, namespace)
 }
 
 func (c *FakeAppV1alpha1) Managers() v1alpha1.ManagerInterface {
-	return &FakeManagers{c}
+	return newFakeManagers(c)
 }
 
 func (c *FakeAppV1alpha1) ManagerScheduleRequests() v1alpha1.ManagerScheduleRequestInterface {
-	return &FakeManagerScheduleRequests{c}
+	return newFakeManagerScheduleRequests(c)
 }
 
 func (c *FakeAppV1alpha1) SerialDevices() v1alpha1.SerialDeviceInterface {
-	return &FakeSerialDevices{c}
+	return newFakeSerialDevices(c)
 }
 
 // RESTClient returns a RESTClient that is used to communicate

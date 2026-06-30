@@ -6,39 +6,46 @@ set -o pipefail
 
 cd "$(git rev-parse --show-toplevel)"
 
-: ${GO=go}
+: "${GO:=go}"
+: "${COPY_OR_DIFF:=copy}"
 
-export GOPATH=$("$GO" env GOPATH | awk -F ':' '{print $1}')
-export PATH=$PATH:$GOPATH/bin
+SCRIPT_ROOT="$(pwd)"
+MODULE="github.com/janekbaraniewski/kubeserial"
+BOILERPLATE="${SCRIPT_ROOT}/hack/boilerplate.go.txt"
 
-source hack/utils.sh
+# Resolve the code-generator package from the module graph so the generator
+# version always tracks go.mod instead of being hard-coded.
+CODEGEN_PKG="$("${GO}" list -m -f '{{.Dir}}' k8s.io/code-generator)"
 
-printf "Start code-gen script \n"
+# shellcheck source=/dev/null
+source "${CODEGEN_PKG}/kube_codegen.sh"
 
-# Install the required binaries with modules enabled
-go install k8s.io/code-generator
-chmod +x "$GOPATH"/pkg/mod/k8s.io/code-generator@v0.30.0/kube_codegen.sh
+printf "Generating deepcopy helpers...\n"
+kube::codegen::gen_helpers \
+    --boilerplate "${BOILERPLATE}" \
+    "${SCRIPT_ROOT}/pkg/apis"
 
-printf "Got all dependencies \n"
+printf "Generating register...\n"
+kube::codegen::gen_register \
+    --boilerplate "${BOILERPLATE}" \
+    "${SCRIPT_ROOT}/pkg/apis"
 
-# Ensure proper package tags are in place (See: https://pkg.go.dev/k8s.io/code-generator/cmd/deepcopy-gen)
-printf "Running code generators...\n"
+printf "Generating clientset, listers and informers...\n"
+# The input dir is pkg (not pkg/apis): kube_codegen derives the client group
+# name from the parent directory of the version package, so pkg/apis/v1alpha1
+# yields the "apis" group that existing consumers import
+# (pkg/generated/clientset/versioned/typed/apis/v1alpha1).
+kube::codegen::gen_client \
+    --with-watch \
+    --output-dir "${SCRIPT_ROOT}/pkg/generated" \
+    --output-pkg "${MODULE}/pkg/generated" \
+    --boilerplate "${BOILERPLATE}" \
+    "${SCRIPT_ROOT}/pkg"
 
-# Use generate-groups.sh helper script to run all code generators
-"$GOPATH"/pkg/mod/k8s.io/code-generator@v0.30.0/kube_codegen.sh all \
-    github.com/janekbaraniewski/kubeserial/pkg/generated \
-    github.com/janekbaraniewski/kubeserial/pkg/apis \
-    v1alpha1
+printf "Code generation complete.\n"
 
-printf "Finished kube_codegen.sh, updating source files...\n"
-
-# Manual copy might be required if output paths are incorrectly set by the tools, adjust paths as needed
-if [[ "${COPY_OR_DIFF}" == "copy" ]]; then
-    rm -rf ./pkg/generated
-    mkdir -p ./pkg/generated
-    cp -r "$GOPATH/src/github.com/janekbaraniewski/kubeserial/pkg/generated/"* ./pkg/generated/
+# In CI (diff mode) fail if regeneration produced uncommitted changes.
+if [[ "${COPY_OR_DIFF}" == "diff" ]]; then
+    printf "Verifying generated code is up to date...\n"
+    git diff --exit-code -- pkg/apis pkg/generated
 fi
-
-replace_or_compare "$GOPATH/src/github.com/janekbaraniewski/kubeserial/pkg/generated/" ./pkg/generated/
-
-printf "All generators have completed.\n"

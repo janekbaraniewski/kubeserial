@@ -18,115 +18,34 @@ limitations under the License.
 package fake
 
 import (
-	"context"
-
 	v1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	labels "k8s.io/apimachinery/pkg/labels"
-	schema "k8s.io/apimachinery/pkg/runtime/schema"
-	types "k8s.io/apimachinery/pkg/types"
-	watch "k8s.io/apimachinery/pkg/watch"
-	testing "k8s.io/client-go/testing"
+	apisv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned/typed/apis/v1alpha1"
+	gentype "k8s.io/client-go/gentype"
 )
 
-// FakeSerialDevices implements SerialDeviceInterface
-type FakeSerialDevices struct {
+// fakeSerialDevices implements SerialDeviceInterface
+type fakeSerialDevices struct {
+	*gentype.FakeClientWithList[*v1alpha1.SerialDevice, *v1alpha1.SerialDeviceList]
 	Fake *FakeAppV1alpha1
 }
 
-var serialdevicesResource = schema.GroupVersionResource{Group: "app.kubeserial.com", Version: "v1alpha1", Resource: "serialdevices"}
-
-var serialdevicesKind = schema.GroupVersionKind{Group: "app.kubeserial.com", Version: "v1alpha1", Kind: "SerialDevice"}
-
-// Get takes name of the serialDevice, and returns the corresponding serialDevice object, and an error if there is any.
-func (c *FakeSerialDevices) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.SerialDevice, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewRootGetAction(serialdevicesResource, name), &v1alpha1.SerialDevice{})
-	if obj == nil {
-		return nil, err
+func newFakeSerialDevices(fake *FakeAppV1alpha1) apisv1alpha1.SerialDeviceInterface {
+	return &fakeSerialDevices{
+		gentype.NewFakeClientWithList[*v1alpha1.SerialDevice, *v1alpha1.SerialDeviceList](
+			fake.Fake,
+			"",
+			v1alpha1.SchemeGroupVersion.WithResource("serialdevices"),
+			v1alpha1.SchemeGroupVersion.WithKind("SerialDevice"),
+			func() *v1alpha1.SerialDevice { return &v1alpha1.SerialDevice{} },
+			func() *v1alpha1.SerialDeviceList { return &v1alpha1.SerialDeviceList{} },
+			func(dst, src *v1alpha1.SerialDeviceList) { dst.ListMeta = src.ListMeta },
+			func(list *v1alpha1.SerialDeviceList) []*v1alpha1.SerialDevice {
+				return gentype.ToPointerSlice(list.Items)
+			},
+			func(list *v1alpha1.SerialDeviceList, items []*v1alpha1.SerialDevice) {
+				list.Items = gentype.FromPointerSlice(items)
+			},
+		),
+		fake,
 	}
-	return obj.(*v1alpha1.SerialDevice), err
-}
-
-// List takes label and field selectors, and returns the list of SerialDevices that match those selectors.
-func (c *FakeSerialDevices) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.SerialDeviceList, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewRootListAction(serialdevicesResource, serialdevicesKind, opts), &v1alpha1.SerialDeviceList{})
-	if obj == nil {
-		return nil, err
-	}
-
-	label, _, _ := testing.ExtractFromListOptions(opts)
-	if label == nil {
-		label = labels.Everything()
-	}
-	list := &v1alpha1.SerialDeviceList{ListMeta: obj.(*v1alpha1.SerialDeviceList).ListMeta}
-	for _, item := range obj.(*v1alpha1.SerialDeviceList).Items {
-		if label.Matches(labels.Set(item.Labels)) {
-			list.Items = append(list.Items, item)
-		}
-	}
-	return list, err
-}
-
-// Watch returns a watch.Interface that watches the requested serialDevices.
-func (c *FakeSerialDevices) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
-	return c.Fake.
-		InvokesWatch(testing.NewRootWatchAction(serialdevicesResource, opts))
-}
-
-// Create takes the representation of a serialDevice and creates it.  Returns the server's representation of the serialDevice, and an error, if there is any.
-func (c *FakeSerialDevices) Create(ctx context.Context, serialDevice *v1alpha1.SerialDevice, opts v1.CreateOptions) (result *v1alpha1.SerialDevice, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewRootCreateAction(serialdevicesResource, serialDevice), &v1alpha1.SerialDevice{})
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1alpha1.SerialDevice), err
-}
-
-// Update takes the representation of a serialDevice and updates it. Returns the server's representation of the serialDevice, and an error, if there is any.
-func (c *FakeSerialDevices) Update(ctx context.Context, serialDevice *v1alpha1.SerialDevice, opts v1.UpdateOptions) (result *v1alpha1.SerialDevice, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewRootUpdateAction(serialdevicesResource, serialDevice), &v1alpha1.SerialDevice{})
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1alpha1.SerialDevice), err
-}
-
-// UpdateStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeSerialDevices) UpdateStatus(ctx context.Context, serialDevice *v1alpha1.SerialDevice, opts v1.UpdateOptions) (*v1alpha1.SerialDevice, error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewRootUpdateSubresourceAction(serialdevicesResource, "status", serialDevice), &v1alpha1.SerialDevice{})
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1alpha1.SerialDevice), err
-}
-
-// Delete takes name of the serialDevice and deletes it. Returns an error if one occurs.
-func (c *FakeSerialDevices) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
-	_, err := c.Fake.
-		Invokes(testing.NewRootDeleteActionWithOptions(serialdevicesResource, name, opts), &v1alpha1.SerialDevice{})
-	return err
-}
-
-// DeleteCollection deletes a collection of objects.
-func (c *FakeSerialDevices) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	action := testing.NewRootDeleteCollectionAction(serialdevicesResource, listOpts)
-
-	_, err := c.Fake.Invokes(action, &v1alpha1.SerialDeviceList{})
-	return err
-}
-
-// Patch applies the patch and returns the patched serialDevice.
-func (c *FakeSerialDevices) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.SerialDevice, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewRootPatchSubresourceAction(serialdevicesResource, name, pt, data, subresources...), &v1alpha1.SerialDevice{})
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1alpha1.SerialDevice), err
 }

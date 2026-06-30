@@ -18,15 +18,14 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"context"
-	"time"
+	context "context"
 
-	v1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
+	apisv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	scheme "github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
-	rest "k8s.io/client-go/rest"
+	gentype "k8s.io/client-go/gentype"
 )
 
 // ManagerScheduleRequestsGetter has a method to return a ManagerScheduleRequestInterface.
@@ -37,147 +36,34 @@ type ManagerScheduleRequestsGetter interface {
 
 // ManagerScheduleRequestInterface has methods to work with ManagerScheduleRequest resources.
 type ManagerScheduleRequestInterface interface {
-	Create(ctx context.Context, managerScheduleRequest *v1alpha1.ManagerScheduleRequest, opts v1.CreateOptions) (*v1alpha1.ManagerScheduleRequest, error)
-	Update(ctx context.Context, managerScheduleRequest *v1alpha1.ManagerScheduleRequest, opts v1.UpdateOptions) (*v1alpha1.ManagerScheduleRequest, error)
-	UpdateStatus(ctx context.Context, managerScheduleRequest *v1alpha1.ManagerScheduleRequest, opts v1.UpdateOptions) (*v1alpha1.ManagerScheduleRequest, error)
+	Create(ctx context.Context, managerScheduleRequest *apisv1alpha1.ManagerScheduleRequest, opts v1.CreateOptions) (*apisv1alpha1.ManagerScheduleRequest, error)
+	Update(ctx context.Context, managerScheduleRequest *apisv1alpha1.ManagerScheduleRequest, opts v1.UpdateOptions) (*apisv1alpha1.ManagerScheduleRequest, error)
+	// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
+	UpdateStatus(ctx context.Context, managerScheduleRequest *apisv1alpha1.ManagerScheduleRequest, opts v1.UpdateOptions) (*apisv1alpha1.ManagerScheduleRequest, error)
 	Delete(ctx context.Context, name string, opts v1.DeleteOptions) error
 	DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error
-	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1alpha1.ManagerScheduleRequest, error)
-	List(ctx context.Context, opts v1.ListOptions) (*v1alpha1.ManagerScheduleRequestList, error)
+	Get(ctx context.Context, name string, opts v1.GetOptions) (*apisv1alpha1.ManagerScheduleRequest, error)
+	List(ctx context.Context, opts v1.ListOptions) (*apisv1alpha1.ManagerScheduleRequestList, error)
 	Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error)
-	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.ManagerScheduleRequest, err error)
+	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *apisv1alpha1.ManagerScheduleRequest, err error)
 	ManagerScheduleRequestExpansion
 }
 
 // managerScheduleRequests implements ManagerScheduleRequestInterface
 type managerScheduleRequests struct {
-	client rest.Interface
+	*gentype.ClientWithList[*apisv1alpha1.ManagerScheduleRequest, *apisv1alpha1.ManagerScheduleRequestList]
 }
 
 // newManagerScheduleRequests returns a ManagerScheduleRequests
 func newManagerScheduleRequests(c *AppV1alpha1Client) *managerScheduleRequests {
 	return &managerScheduleRequests{
-		client: c.RESTClient(),
+		gentype.NewClientWithList[*apisv1alpha1.ManagerScheduleRequest, *apisv1alpha1.ManagerScheduleRequestList](
+			"managerschedulerequests",
+			c.RESTClient(),
+			scheme.ParameterCodec,
+			"",
+			func() *apisv1alpha1.ManagerScheduleRequest { return &apisv1alpha1.ManagerScheduleRequest{} },
+			func() *apisv1alpha1.ManagerScheduleRequestList { return &apisv1alpha1.ManagerScheduleRequestList{} },
+		),
 	}
-}
-
-// Get takes name of the managerScheduleRequest, and returns the corresponding managerScheduleRequest object, and an error if there is any.
-func (c *managerScheduleRequests) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.ManagerScheduleRequest, err error) {
-	result = &v1alpha1.ManagerScheduleRequest{}
-	err = c.client.Get().
-		Resource("managerschedulerequests").
-		Name(name).
-		VersionedParams(&options, scheme.ParameterCodec).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// List takes label and field selectors, and returns the list of ManagerScheduleRequests that match those selectors.
-func (c *managerScheduleRequests) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.ManagerScheduleRequestList, err error) {
-	var timeout time.Duration
-	if opts.TimeoutSeconds != nil {
-		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
-	}
-	result = &v1alpha1.ManagerScheduleRequestList{}
-	err = c.client.Get().
-		Resource("managerschedulerequests").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Timeout(timeout).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Watch returns a watch.Interface that watches the requested managerScheduleRequests.
-func (c *managerScheduleRequests) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
-	var timeout time.Duration
-	if opts.TimeoutSeconds != nil {
-		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
-	}
-	opts.Watch = true
-	return c.client.Get().
-		Resource("managerschedulerequests").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Timeout(timeout).
-		Watch(ctx)
-}
-
-// Create takes the representation of a managerScheduleRequest and creates it.  Returns the server's representation of the managerScheduleRequest, and an error, if there is any.
-func (c *managerScheduleRequests) Create(ctx context.Context, managerScheduleRequest *v1alpha1.ManagerScheduleRequest, opts v1.CreateOptions) (result *v1alpha1.ManagerScheduleRequest, err error) {
-	result = &v1alpha1.ManagerScheduleRequest{}
-	err = c.client.Post().
-		Resource("managerschedulerequests").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(managerScheduleRequest).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Update takes the representation of a managerScheduleRequest and updates it. Returns the server's representation of the managerScheduleRequest, and an error, if there is any.
-func (c *managerScheduleRequests) Update(ctx context.Context, managerScheduleRequest *v1alpha1.ManagerScheduleRequest, opts v1.UpdateOptions) (result *v1alpha1.ManagerScheduleRequest, err error) {
-	result = &v1alpha1.ManagerScheduleRequest{}
-	err = c.client.Put().
-		Resource("managerschedulerequests").
-		Name(managerScheduleRequest.Name).
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(managerScheduleRequest).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// UpdateStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *managerScheduleRequests) UpdateStatus(ctx context.Context, managerScheduleRequest *v1alpha1.ManagerScheduleRequest, opts v1.UpdateOptions) (result *v1alpha1.ManagerScheduleRequest, err error) {
-	result = &v1alpha1.ManagerScheduleRequest{}
-	err = c.client.Put().
-		Resource("managerschedulerequests").
-		Name(managerScheduleRequest.Name).
-		SubResource("status").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(managerScheduleRequest).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Delete takes name of the managerScheduleRequest and deletes it. Returns an error if one occurs.
-func (c *managerScheduleRequests) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
-	return c.client.Delete().
-		Resource("managerschedulerequests").
-		Name(name).
-		Body(&opts).
-		Do(ctx).
-		Error()
-}
-
-// DeleteCollection deletes a collection of objects.
-func (c *managerScheduleRequests) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	var timeout time.Duration
-	if listOpts.TimeoutSeconds != nil {
-		timeout = time.Duration(*listOpts.TimeoutSeconds) * time.Second
-	}
-	return c.client.Delete().
-		Resource("managerschedulerequests").
-		VersionedParams(&listOpts, scheme.ParameterCodec).
-		Timeout(timeout).
-		Body(&opts).
-		Do(ctx).
-		Error()
-}
-
-// Patch applies the patch and returns the patched managerScheduleRequest.
-func (c *managerScheduleRequests) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.ManagerScheduleRequest, err error) {
-	result = &v1alpha1.ManagerScheduleRequest{}
-	err = c.client.Patch(pt).
-		Resource("managerschedulerequests").
-		Name(name).
-		SubResource(subresources...).
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(data).
-		Do(ctx).
-		Into(result)
-	return
 }

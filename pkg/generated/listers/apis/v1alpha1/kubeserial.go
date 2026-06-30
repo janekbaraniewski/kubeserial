@@ -18,10 +18,10 @@ limitations under the License.
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/client-go/tools/cache"
+	apisv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
+	labels "k8s.io/apimachinery/pkg/labels"
+	listers "k8s.io/client-go/listers"
+	cache "k8s.io/client-go/tools/cache"
 )
 
 // KubeSerialLister helps list KubeSerials.
@@ -29,7 +29,7 @@ import (
 type KubeSerialLister interface {
 	// List lists all KubeSerials in the indexer.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1alpha1.KubeSerial, err error)
+	List(selector labels.Selector) (ret []*apisv1alpha1.KubeSerial, err error)
 	// KubeSerials returns an object that can list and get KubeSerials.
 	KubeSerials(namespace string) KubeSerialNamespaceLister
 	KubeSerialListerExpansion
@@ -37,25 +37,17 @@ type KubeSerialLister interface {
 
 // kubeSerialLister implements the KubeSerialLister interface.
 type kubeSerialLister struct {
-	indexer cache.Indexer
+	listers.ResourceIndexer[*apisv1alpha1.KubeSerial]
 }
 
 // NewKubeSerialLister returns a new KubeSerialLister.
 func NewKubeSerialLister(indexer cache.Indexer) KubeSerialLister {
-	return &kubeSerialLister{indexer: indexer}
-}
-
-// List lists all KubeSerials in the indexer.
-func (s *kubeSerialLister) List(selector labels.Selector) (ret []*v1alpha1.KubeSerial, err error) {
-	err = cache.ListAll(s.indexer, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.KubeSerial))
-	})
-	return ret, err
+	return &kubeSerialLister{listers.New[*apisv1alpha1.KubeSerial](indexer, apisv1alpha1.Resource("kubeserial"))}
 }
 
 // KubeSerials returns an object that can list and get KubeSerials.
 func (s *kubeSerialLister) KubeSerials(namespace string) KubeSerialNamespaceLister {
-	return kubeSerialNamespaceLister{indexer: s.indexer, namespace: namespace}
+	return kubeSerialNamespaceLister{listers.NewNamespaced[*apisv1alpha1.KubeSerial](s.ResourceIndexer, namespace)}
 }
 
 // KubeSerialNamespaceLister helps list and get KubeSerials.
@@ -63,36 +55,15 @@ func (s *kubeSerialLister) KubeSerials(namespace string) KubeSerialNamespaceList
 type KubeSerialNamespaceLister interface {
 	// List lists all KubeSerials in the indexer for a given namespace.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1alpha1.KubeSerial, err error)
+	List(selector labels.Selector) (ret []*apisv1alpha1.KubeSerial, err error)
 	// Get retrieves the KubeSerial from the indexer for a given namespace and name.
 	// Objects returned here must be treated as read-only.
-	Get(name string) (*v1alpha1.KubeSerial, error)
+	Get(name string) (*apisv1alpha1.KubeSerial, error)
 	KubeSerialNamespaceListerExpansion
 }
 
 // kubeSerialNamespaceLister implements the KubeSerialNamespaceLister
 // interface.
 type kubeSerialNamespaceLister struct {
-	indexer   cache.Indexer
-	namespace string
-}
-
-// List lists all KubeSerials in the indexer for a given namespace.
-func (s kubeSerialNamespaceLister) List(selector labels.Selector) (ret []*v1alpha1.KubeSerial, err error) {
-	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.KubeSerial))
-	})
-	return ret, err
-}
-
-// Get retrieves the KubeSerial from the indexer for a given namespace and name.
-func (s kubeSerialNamespaceLister) Get(name string) (*v1alpha1.KubeSerial, error) {
-	obj, exists, err := s.indexer.GetByKey(s.namespace + "/" + name)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return nil, errors.NewNotFound(v1alpha1.Resource("kubeserial"), name)
-	}
-	return obj.(*v1alpha1.KubeSerial), nil
+	listers.ResourceIndexer[*apisv1alpha1.KubeSerial]
 }

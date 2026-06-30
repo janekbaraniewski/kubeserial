@@ -21,7 +21,7 @@ import (
 //nolint:lll
 // +kubebuilder:webhook:path=/mutate-inject-device,mutating=true,failurePolicy=fail,groups="",resources=pods,verbs=create;update,versions=v1,name=device.kubeserial.com,admissionReviewVersions={v1, v1beta1},sideEffects=None
 
-var log = logf.Log.WithName("DeviceSidecarInjecttor")
+var log = logf.Log.WithName("DeviceSidecarInjector")
 
 const (
 	requestDeviceSidecarAnnotation   = "app.kubeserial.com/inject-device"
@@ -32,7 +32,7 @@ type SerialDeviceInjector struct {
 	Name            string
 	Clientset       versioned.Interface
 	ConfigExtractor *images.OCIConfigExtractor
-	decoder         admission.Decoder
+	Decoder         admission.Decoder
 }
 
 func shoudInject(pod *corev1.Pod) string {
@@ -84,9 +84,9 @@ func (si *SerialDeviceInjector) Handle(ctx context.Context, req admission.Reques
 	PodsHandled.Inc()
 	pod := &corev1.Pod{}
 
-	err := si.decoder.Decode(req, pod)
+	err := si.Decoder.Decode(req, pod)
 	if err != nil {
-		log.Info("Sdecar-Injector: cannot decode")
+		log.Info("Sidecar-Injector: cannot decode")
 		return admission.Errored(http.StatusBadRequest, err)
 	}
 
@@ -136,7 +136,8 @@ func (si *SerialDeviceInjector) Handle(ctx context.Context, req admission.Reques
 
 		imageConfig, err := si.ConfigExtractor.GetImageConfig(ctx, container.Image)
 		if err != nil {
-			panic(err)
+			log.Error(err, "Failed to extract image config", "image", container.Image)
+			return admission.Errored(http.StatusInternalServerError, err)
 		}
 
 		log.Info(
@@ -162,13 +163,4 @@ func (si *SerialDeviceInjector) Handle(ctx context.Context, req admission.Reques
 	)
 
 	return returnProperResponse(pod, req)
-}
-
-// SerialDeviceInjector implements admission.DecoderInjector.
-// A decoder will be automatically inj1ected.
-
-// InjectDecoder injects the decoder.
-func (si *SerialDeviceInjector) InjectDecoder(d admission.Decoder) error {
-	si.decoder = d
-	return nil
 }

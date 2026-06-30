@@ -34,7 +34,7 @@ func TestDelete(t *testing.T) {
 	t.Parallel()
 	manager := Manager{}
 
-	err := manager.Delete(context.TODO(), &v1alpha1.KubeSerial{}, &v1alpha1.SerialDevice2{}, kubeapi.NewFakeAPIClient())
+	err := manager.Delete(context.TODO(), &v1alpha1.KubeSerial{}, &v1alpha1.ManagedDevice{}, kubeapi.NewFakeAPIClient())
 
 	assert.NoError(t, err)
 }

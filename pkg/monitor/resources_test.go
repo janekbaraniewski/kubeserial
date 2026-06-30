@@ -32,7 +32,7 @@ func TestCreateConfigMap(t *testing.T) {
 		t.Fatalf("Failed to load test asset: %v", err)
 	}
 
-	devices := []appv1alpha1.SerialDevice2{
+	devices := []appv1alpha1.ManagedDevice{
 		{
 			Name:      "testdevice",
 			IDVendor:  "123",

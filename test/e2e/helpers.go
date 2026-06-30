@@ -40,9 +40,6 @@ import (
 	kubeserialv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 )
 
-// config holds the knobs that select where and how the suite runs. All values
-// come from the environment so the same specs run locally and in CI. See the
-// table in docs/e2e-testing.md.
 type config struct {
 	SkipClusterSetup bool
 	SkipDeviceSim    bool
@@ -53,15 +50,14 @@ type config struct {
 }
 
 var (
-	cfg    config
-	scheme = runtime.NewScheme()
-	// k8sClient is a controller-runtime client wired with the kubeserial scheme.
+	cfg       config
+	scheme    = runtime.NewScheme()
 	k8sClient client.Client
 )
 
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-	utilruntime.Must(kubeserialv1alpha1.AddToScheme(scheme))
+	utilruntime.Must(kubeserialv1alpha1.Install(scheme))
 }
 
 func envOr(key, def string) string {
@@ -86,20 +82,15 @@ func envBool(key string, def bool) bool {
 func loadConfig() config {
 	cfg = config{
 		SkipClusterSetup: envBool("E2E_SKIP_CLUSTER_SETUP", false),
-		// Device simulation (Option B: privileged socat-PTY pod on hostPath /dev)
-		// is verified working on kind; enabled by default. Set true to skip the
-		// device specs (E4/E5) on substrates where hostPath /dev is unavailable.
-		SkipDeviceSim: envBool("E2E_SKIP_DEVICE_SIM", false),
-		KindCluster:   envOr("E2E_KIND_CLUSTER", "kubeserial-e2e"),
-		KubeContext:   envOr("E2E_KUBECONTEXT", "kind-kubeserial-e2e"),
-		Namespace:     envOr("E2E_NAMESPACE", "kubeserial"),
-		ImageTag:      envOr("E2E_IMAGE_TAG", "local"),
+		SkipDeviceSim:    envBool("E2E_SKIP_DEVICE_SIM", false),
+		KindCluster:      envOr("E2E_KIND_CLUSTER", "kubeserial-e2e"),
+		KubeContext:      envOr("E2E_KUBECONTEXT", "kind-kubeserial-e2e"),
+		Namespace:        envOr("E2E_NAMESPACE", "kubeserial"),
+		ImageTag:         envOr("E2E_IMAGE_TAG", "local"),
 	}
 	return cfg
 }
 
-// restConfigForContext builds a *rest.Config. In CI/kind the kubeconfig current
-// context is set by the workflow; locally we honor E2E_KUBECONTEXT.
 func restConfigForContext(kubeContext string) (*rest.Config, error) {
 	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
 	overrides := &clientcmd.ConfigOverrides{}
@@ -118,8 +109,6 @@ func initClient(c config) {
 	k8sClient = cl
 }
 
-// ensureChartInstalled is a light precondition check used when the suite did not
-// itself install the chart. It verifies the SerialDevice CRD is registered.
 func ensureChartInstalled(_ config) {
 	Eventually(func() error {
 		list := &kubeserialv1alpha1.SerialDeviceList{}
@@ -127,12 +116,7 @@ func ensureChartInstalled(_ config) {
 	}).Should(Succeed(), "SerialDevice CRD should be installed by the kubeserial chart")
 }
 
-// ---------------------------------------------------------------------------
-// SerialDevice helpers
-// ---------------------------------------------------------------------------
-
-// newSerialDevice returns a minimal SerialDevice CR. The monitor stats
-// /dev/<metadata.name>, so the name doubles as the device-node name.
+// The monitor stats /dev/<metadata.name>, so the name doubles as the device-node name.
 func newSerialDevice(name string) *kubeserialv1alpha1.SerialDevice {
 	return &kubeserialv1alpha1.SerialDevice{
 		ObjectMeta: metav1.ObjectMeta{Name: name},
@@ -144,7 +128,6 @@ func newSerialDevice(name string) *kubeserialv1alpha1.SerialDevice {
 	}
 }
 
-// conditionStatus returns the status of the named condition, or "" if absent.
 func conditionStatus(
 	dev *kubeserialv1alpha1.SerialDevice,
 	t kubeserialv1alpha1.SerialDeviceConditionType,
@@ -155,18 +138,14 @@ func conditionStatus(
 	return ""
 }
 
-// getDevice fetches a fresh copy of a SerialDevice by name.
 func getDevice(ctx context.Context, name string) (*kubeserialv1alpha1.SerialDevice, error) {
 	dev := &kubeserialv1alpha1.SerialDevice{}
 	err := k8sClient.Get(ctx, client.ObjectKey{Name: name}, dev)
 	return dev, err
 }
 
-// setDeviceCondition patches a condition onto a SerialDevice's status. Used by
-// webhook specs (E6/E7) to put a device into a known Free state without real
-// hardware. It retries on conflict because the SerialDevice controller
-// reconciles the same object concurrently (e.g. setting Ready), which otherwise
-// races our read-modify-write and yields a 409.
+// Retries on conflict because the SerialDevice controller reconciles the same
+// object concurrently.
 func setDeviceCondition(
 	ctx context.Context,
 	name string,
@@ -182,25 +161,11 @@ func setDeviceCondition(
 	})
 }
 
-// ---------------------------------------------------------------------------
-// Device-simulation harness (Option B). See docs/e2e-testing.md section 2.
-// ---------------------------------------------------------------------------
-
-// simulatorImage is the container image used by the device-simulator pod. It
-// must contain `socat` and a shell. alpine/socat satisfies both. hack/e2e.sh
-// pre-loads this image into the kind node so the pod starts without registry
-// access.
 const simulatorImage = "alpine/socat:latest"
 
-// deviceSimulatorPod returns a privileged pod that creates a PTY-backed char
-// device symlinked at /dev/<deviceName> on the node's host /dev (which the
-// monitor DaemonSet mounts via hostPath), then blocks. Deleting the pod closes
-// the PTY, so the symlink target disappears and the monitor's os.Stat (which
-// follows the symlink) reports the device gone, simulating unplug.
-//
-// VERIFIED on kind v0.18 (kindest/node v1.27.1): the device created here is
-// visible inside the monitor pod via the shared hostPath /dev with no extra
-// mount-propagation handling, and the monitor flips Available/Free accordingly.
+// deviceSimulatorPod runs socat to create a PTY-backed char device at
+// /dev/<deviceName> on the node's hostPath /dev, then blocks. Deleting the pod
+// closes the PTY, so the device disappears.
 func deviceSimulatorPod(namespace, deviceName string) *corev1.Pod {
 	privileged := true
 	return &corev1.Pod{
@@ -218,7 +183,6 @@ func deviceSimulatorPod(namespace, deviceName string) *corev1.Pod {
 				SecurityContext: &corev1.SecurityContext{Privileged: &privileged},
 				Command:         []string{"/bin/sh", "-c"},
 				Args: []string{fmt.Sprintf(
-					// Create a PTY char device symlinked at /dev/<name>, then block.
 					"socat -d -d PTY,raw,echo=0,link=/dev/%s PTY,raw,echo=0 & "+
 						"while true; do sleep 3600; done",
 					deviceName,
@@ -235,8 +199,6 @@ func deviceSimulatorPod(namespace, deviceName string) *corev1.Pod {
 	}
 }
 
-// simulateDeviceAttach schedules the simulator pod so /dev/<name> appears on the
-// node. simulateDeviceDetach deletes it so the device disappears.
 func simulateDeviceAttach(ctx context.Context, namespace, deviceName string) {
 	pod := deviceSimulatorPod(namespace, deviceName)
 	Expect(k8sClient.Create(ctx, pod)).To(Succeed(), "create device simulator pod")
@@ -250,8 +212,6 @@ func simulateDeviceAttach(ctx context.Context, namespace, deviceName string) {
 func simulateDeviceDetach(ctx context.Context, namespace, deviceName string) {
 	pod := deviceSimulatorPod(namespace, deviceName)
 	_ = k8sClient.Delete(ctx, pod)
-	// Block until the pod is fully gone so the PTY is closed before callers
-	// assert the device disappeared.
 	Eventually(func() bool {
 		got := &corev1.Pod{}
 		err := k8sClient.Get(ctx, client.ObjectKeyFromObject(pod), got)

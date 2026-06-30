@@ -5,7 +5,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
 
-func LoadResourceFromYaml(fs FileSystem, filepath kubeserial.ResourceSpecPath, data interface{}) error {
+func LoadResourceFromYaml(fs FileSystem, filepath kubeserial.ResourceSpecPath, data any) error {
 	reader, err := fs.Open(string(filepath))
 	if err != nil {
 		return err

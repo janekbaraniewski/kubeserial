@@ -1,7 +1,9 @@
 version: "2"
 
 run:
-  go: "1.26"
+  # Pin to the highest Go language version that current golangci-lint releases
+  # are built against; the linter refuses a target newer than its own build.
+  go: "1.25"
 
 linters:
   enable:

@@ -6,29 +6,38 @@ on:
     branches:
       - "master"
 
+permissions:
+  contents: read
+
+concurrency:
+  group: pre-release-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   pre-release:
     name: "Pre Release"
     runs-on: "ubuntu-latest"
+    permissions:
+      contents: write
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v5
       - name: Set up Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
-          go-version: '1.23'
+          go-version-file: go.mod
+          cache: true
       - name: "Test"
         run: make test
       # - name: "Test code gen"
       #   run: make check-generated
       - name: "Build"
         run: make all
-      - uses: "marvinpinto/action-automatic-releases@latest"
+      - uses: softprops/action-gh-release@v2
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "latest"
+          tag_name: "latest"
           prerelease: true
-          title: "Dev build"
+          name: "Dev build"
           files: |
             LICENSE
             build/_output/bin/kubeserial

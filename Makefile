@@ -6,9 +6,13 @@ APP_VERSION?=$(shell git describe --dirty --tags --match "[0-9]*" )
 CRDS_VERSION?=$(shell git describe --dirty --tags --match "crds*" | sed 's/crds-//')
 DOCKERBUILD_PLATFORM_OPT=--platform
 RELEASE_NAME ?= kubeserial
-ENVTEST_K8S_VERSION = 1.23.3
+ENVTEST_K8S_VERSION = 1.31.0
 MINIKUBE_PROFILE=kubeserial
 ARM_PLATFORM=linux/arm64
+
+LOCALBIN ?= $(shell pwd)/bin
+ENVTEST ?= $(LOCALBIN)/setup-envtest
+ENVTEST_VERSION ?= release-0.21
 
 SHELL = /usr/bin/env bash -o pipefail
 .SHELLFLAGS = -ec
@@ -67,8 +71,9 @@ get-test-assets:
 	@./hack/get-test-assets.sh
 
 .PHONY: test
-test: fmt vet envtest-render-crds get-test-assets ## Run tests.
-	go test ./... -coverprofile coverage.txt.tmp -covermode atomic
+test: fmt vet envtest envtest-render-crds get-test-assets ## Run tests.
+	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(LOCALBIN) -p path)" \
+		go test ./... -coverprofile coverage.txt.tmp -covermode atomic
 	@cat coverage.txt.tmp | grep -v "fake_api.go" > coverage.txt
 	@rm coverage.txt.tmp
 	@rm -r test-assets
@@ -90,10 +95,13 @@ lint:
 check: check-generated lint
 check: ## Run linters and check code gen
 
-# ENVTEST = $(shell pwd)/bin/setup-envtest
-# .PHONY: envtest
-# envtest: ## Download envtest-setup locally if necessary.
-# 	$(call go-get-tool,$(ENVTEST),sigs.k8s.io/controller-runtime/tools/setup-envtest@latest)
+$(LOCALBIN):
+	mkdir -p $(LOCALBIN)
+
+.PHONY: envtest
+envtest: $(ENVTEST) ## Download setup-envtest locally if necessary.
+$(ENVTEST): $(LOCALBIN)
+	test -s $(ENVTEST) || GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-runtime/tools/setup-envtest@$(ENVTEST_VERSION)
 
 ##@ Run
 

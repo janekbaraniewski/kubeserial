@@ -2,15 +2,21 @@ coverage:
   status:
     patch:
       default:
-        target: 0% # FIXME: This should be auto
-        threshold: 100% # FIXME: this should be as small as possible
+        target: auto
+        threshold: 1%
         base: auto
+        informational: true
     project:
       default:
         target: auto
-        threshold: 100%
+        threshold: 1%
         base: auto
         paths:
           - "pkg"
         if_not_found: success
         if_ci_failed: error
+
+ignore:
+  - "pkg/generated/**"
+  - "**/zz_generated.*.go"
+  - "**/fake_api.go"

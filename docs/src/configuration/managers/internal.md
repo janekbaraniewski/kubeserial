@@ -1,69 +1,48 @@
 # Manager scheduled by KubeSerial
 
+A `Manager` describes a piece of management software to run for a device. Reference it from a `SerialDevice` (`spec.manager`) and KubeSerial schedules it automatically while the device is connected. See the [Manager component docs](../../components/manager.md) for how the workload is built and bridged to the device.
+
+<!-- toc -->
+
+## Spec
+
+| Field | Required | Description |
+| --- | --- | --- |
+| `image.repository` | yes | Manager image repository. |
+| `image.tag` | yes | Manager image tag. |
+| `runCmd` | yes | Command used to start the software. It is run after the `socat` bridge is established, so the device is already present at `/dev/device`. |
+| `config` | no | Inline configuration file content. When set, it is written to a ConfigMap and mounted at `configPath`. |
+| `configPath` | no | Path inside the container where `config` is mounted (for example `/data/config.yaml`). |
+
+`Manager` is cluster-scoped.
+
+## Example
+
+This is an OctoPrint manager for the `ender3` printer used in the [Quick Start](../../quick_start.md):
+
 ```yaml
 apiVersion: app.kubeserial.com/v1alpha1
 kind: Manager
 metadata:
-  annotations:
-    meta.helm.sh/release-name: kubeserial
-    meta.helm.sh/release-namespace: kubeserial
-  creationTimestamp: "2022-06-05T23:48:43Z"
-  generation: 1
-  labels:
-    app.kubernetes.io/instance: kubeserial
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: kubeserial
-    app.kubernetes.io/version: 0.0.1-8c68648
-    helm.sh/chart: kubeserial-0.0.1-8c68648
   name: octoprint
-  resourceVersion: "43158"
-  uid: c908bad7-8716-4f50-aa3f-aeb91bebe71f
+  namespace: kubeserial
 spec:
+  image:
+    repository: janekbaraniewski/octoprint
+    tag: 1.3.10
+  configPath: /data/config.yaml
   config: |
     accessControl:
       enabled: false
-    plugins:
-      announcements:
-        _config_version: 1
-        channels:
-          _blog:
-            read_until: 1573642500
-          _important:
-            read_until: 1521111600
-          _octopi:
-            read_until: 1573722900
-          _plugins:
-            read_until: 1573862400
-          _releases:
-            read_until: 1574699400
-      discovery:
-        upnpUuid: ef35acc7-a859-4947-980d-d5edb10508e4
-      softwareupdate:
-        _config_version: 6
-      tracking:
-        enabled: false
-    deviceProfiles:
-      default: _default
     serial:
       additionalPorts:
-      - /dev/devices/ender3
+      - /dev/device
       autoconnect: true
       baudrate: 0
       port: /dev/device
     server:
       firstRun: false
-      onlineCheck:
-        enabled: true
-      pluginBlacklist:
-        enabled: false
-      seenWizards:
-        corewizard: 3
-        cura: null
-        tracking: null`
-  configPath: /data/config.yaml
-  image:
-    repository: janekbaraniewski/octoprint
-    tag: 1.3.10
-  runCmd: mkdir /root/.octoprint && cp /data/config.yaml /root/.octoprint/config.yaml
-    && /OctoPrint-1.3.10/run --iknowwhatimdoing --port 80
+  runCmd: mkdir /root/.octoprint && cp /data/config.yaml /root/.octoprint/config.yaml && /OctoPrint-1.3.10/run --iknowwhatimdoing --port 80
 ```
+
+The device shows up inside the manager container as `/dev/device`, so the manager's own configuration should point at that path.

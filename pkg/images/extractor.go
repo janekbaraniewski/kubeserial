@@ -3,14 +3,14 @@ package images
 import (
 	"context"
 
-	"github.com/regclient/regclient/regclient"
+	"github.com/regclient/regclient"
 	regMan "github.com/regclient/regclient/types/manifest"
 	v1 "github.com/regclient/regclient/types/oci/v1"
 	"github.com/regclient/regclient/types/ref"
 )
 
 type OCIConfigExtractor struct {
-	client regclient.RegClient
+	client *regclient.RegClient
 }
 
 func (e *OCIConfigExtractor) getManifestFromList(
@@ -66,6 +66,6 @@ func (e *OCIConfigExtractor) GetImageConfig(ctx context.Context, image string) (
 
 func NewOCIConfigExtractor() *OCIConfigExtractor {
 	return &OCIConfigExtractor{
-		client: regclient.NewRegClient(),
+		client: regclient.New(),
 	}
 }

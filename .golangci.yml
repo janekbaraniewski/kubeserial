@@ -1,26 +1,30 @@
+version: "2"
+
+run:
+  go: "1.26"
+
 linters:
   enable:
     - govet
     - errcheck
     - staticcheck
-    - gofmt
-    - goimports
     - revive
-    - gosimple
     - unconvert
     - unused
+  exclusions:
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
 
-issues:
-  exclude-use-default: false
-  exclude-rules:
-    - linters:
-        - gofmt
-      text: "File is not `gofmt`-ed"
+formatters:
+  enable:
+    - gofmt
+    - goimports
 
 output:
   formats:
-    - format: colored-line-number
-    - format: json
-
-  print-issued-lines: true
-  print-linter-name: true
+    text:
+      print-issued-lines: true
+      print-linter-name: true

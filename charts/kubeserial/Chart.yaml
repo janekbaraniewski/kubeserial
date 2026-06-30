@@ -4,6 +4,10 @@ description: Kubeserial helps you manage and use serial devices in Kubernetes
 type: application
 version: "0.0.1"
 appVersion: "APP_VERSION"
+kubeVersion: ">=1.23.0-0"
+home: https://github.com/janekbaraniewski/kubeserial
+sources:
+  - https://github.com/janekbaraniewski/kubeserial
 maintainers:
   - name: janekbaraniewski
     url: https://github.com/janekbaraniewski

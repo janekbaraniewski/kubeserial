@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:latest
 
-FROM --platform=$BUILDPLATFORM golang:1.23-bullseye AS builder
+FROM --platform=$BUILDPLATFORM golang:1.26-bookworm AS builder
 
 WORKDIR /workspace
 COPY go.mod go.sum ./
@@ -15,20 +15,18 @@ COPY pkg pkg
 ARG TARGETOS TARGETARCH TARGETVARIANT
 RUN if [[ -n "${TARGETVARIANT}" ]]; then export GOARM=${TARGETVARIANT}; fi
 # Build
-RUN --mount=type=cache,target=/root/.cache/go-build GOOS=$TARGETOS GOARCH=$TARGETARCH \
+RUN --mount=type=cache,target=/root/.cache/go-build CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
     DEVICE_MONITOR_BUILD_OUTPUT_PATH=/build/bin/device-monitor \
     make device-monitor
 
-FROM debian:buster-slim
-LABEL org.opencontainers.image.source https://github.com/janekbaraniewski/kubeserial
+FROM debian:bookworm-slim
+LABEL org.opencontainers.image.source=https://github.com/janekbaraniewski/kubeserial
 
-ENV container docker
-ENV LC_ALL C
-
-RUN sed -i 's/# dev/dev/g' /etc/apt/sources.list
+ENV container=docker
+ENV LC_ALL=C
 
 RUN apt-get update \
-    && apt-get install -y systemd udev \
+    && apt-get install -y --no-install-recommends systemd udev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 

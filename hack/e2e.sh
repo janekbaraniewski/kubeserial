@@ -5,7 +5,7 @@
 # helm install -> `go test -tags e2e ./test/e2e` -> (always) export logs +
 # teardown.
 #
-# Used by `make test-e2e` and .github/workflows/e2e.yml. See docs/e2e-testing.md.
+# Used by `make test-e2e` and .github/workflows/e2e.yml.
 #
 # Environment knobs (all optional):
 #   E2E_KIND_CLUSTER         kind cluster name        (default: kubeserial-e2e)

@@ -17,7 +17,7 @@ limitations under the License.
 */
 
 // Package e2e runs kubeserial against a real cluster (kind in CI) with the Helm
-// charts installed. See docs/e2e-testing.md.
+// charts installed.
 package e2e
 
 import (

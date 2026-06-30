@@ -2,9 +2,8 @@
 #
 # The single node is a Docker container; its /dev is what the device-monitor
 # DaemonSet's `hostPath: /dev` mount surfaces into the monitor pod. The
-# device-simulation harness (see test/e2e/helpers.go, Option B in
-# docs/e2e-testing.md) creates /dev/<name> inside this node to mimic a plugged-in
-# serial device.
+# device-simulation harness (see test/e2e/helpers.go) creates /dev/<name> inside
+# this node to mimic a plugged-in serial device.
 #
 # Used by: `make test-e2e` and .github/workflows/e2e.yml via helm/kind-action.
 kind: Cluster

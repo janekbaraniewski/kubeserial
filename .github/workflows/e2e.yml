@@ -1,6 +1,6 @@
 name: E2E
 
-# End-to-end tests against a kind cluster. See docs/e2e-testing.md.
+# End-to-end tests against a kind cluster.
 #
 # Runs on every PR to master (a required check, gating merge) and on demand.
 # The whole flow (cluster create, image build/load, cert-manager, helm install,

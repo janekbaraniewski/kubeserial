@@ -188,7 +188,7 @@ update-kubeserial-crds-chart-version:
 
 .PHONY: helm-lint
 helm-lint: ## Run chart-testing to lint kubeserial chart.
-	@ct lint --chart-dirs charts/ --check-version-increment=false
+	@ct lint --chart-dirs charts/ --check-version-increment=false --remote origin --target-branch master
 
 .PHONY: update-crds-labels
 update-crds-labels:

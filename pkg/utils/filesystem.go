@@ -70,8 +70,7 @@ func (f *InMemoryFS) AddFileFromHostPath(path string) error {
 		return err
 	}
 
-	file.Close()
-	return nil
+	return file.Close()
 }
 
 // NewInMemoryFS returns new instance of InMemoryFS.

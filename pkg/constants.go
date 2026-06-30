@@ -1,7 +1,10 @@
+// Package kubeserial implements all kubeserial components
 package kubeserial
 
+// ResourceSpecPath represents path of resource spec
 type ResourceSpecPath string
 
+// ResourceLabel represents resource label
 type ResourceLabel string
 
 // Resource config paths.
@@ -19,5 +22,6 @@ const (
 )
 
 const (
+	// AppNameLabel stores app name resource label name
 	AppNameLabel ResourceLabel = "app.kubernetes.io/name"
 )

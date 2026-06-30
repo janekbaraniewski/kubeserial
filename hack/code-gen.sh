@@ -39,8 +39,6 @@ if [[ "${COPY_OR_DIFF}" == "copy" ]]; then
     cp -r "$GOPATH/src/github.com/janekbaraniewski/kubeserial/pkg/generated/"* ./pkg/generated/
 fi
 
-git diff
-
 replace_or_compare "$GOPATH/src/github.com/janekbaraniewski/kubeserial/pkg/generated/" ./pkg/generated/
 
 printf "All generators have completed.\n"

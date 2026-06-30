@@ -18,15 +18,16 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"context"
+	context "context"
 	time "time"
 
-	apisv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
+	pkgapisv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	versioned "github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned"
 	internalinterfaces "github.com/janekbaraniewski/kubeserial/pkg/generated/informers/externalversions/internalinterfaces"
-	v1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/generated/listers/apis/v1alpha1"
+	apisv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/generated/listers/apis/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
+	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	watch "k8s.io/apimachinery/pkg/watch"
 	cache "k8s.io/client-go/tools/cache"
 )
@@ -35,7 +36,7 @@ import (
 // Managers.
 type ManagerInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1alpha1.ManagerLister
+	Lister() apisv1alpha1.ManagerLister
 }
 
 type managerInformer struct {
@@ -47,42 +48,67 @@ type managerInformer struct {
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
 func NewManagerInformer(client versioned.Interface, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredManagerInformer(client, resyncPeriod, indexers, nil)
+	return NewManagerInformerWithOptions(client, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: indexers})
 }
 
 // NewFilteredManagerInformer constructs a new informer for Manager type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
 func NewFilteredManagerInformer(client versioned.Interface, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
-	return cache.NewSharedIndexInformer(
-		&cache.ListWatch{
-			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
+	return NewManagerInformerWithOptions(client, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: indexers, TweakListOptions: tweakListOptions})
+}
+
+// NewManagerInformerWithOptions constructs a new informer for Manager type with additional options.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewManagerInformerWithOptions(client versioned.Interface, options internalinterfaces.InformerOptions) cache.SharedIndexInformer {
+	gvr := schema.GroupVersionResource{Group: "app.kubeserial.com", Version: "v1alpha1", Resource: "managers"}
+	identifier := options.InformerName.WithResource(gvr)
+	tweakListOptions := options.TweakListOptions
+	return cache.NewSharedIndexInformerWithOptions(
+		cache.ToListWatcherWithWatchListSemantics(&cache.ListWatch{
+			ListFunc: func(opts v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.AppV1alpha1().Managers().List(context.TODO(), options)
+				return client.AppV1alpha1().Managers().List(context.Background(), opts)
 			},
-			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
+			WatchFunc: func(opts v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
-					tweakListOptions(&options)
+					tweakListOptions(&opts)
 				}
-				return client.AppV1alpha1().Managers().Watch(context.TODO(), options)
+				return client.AppV1alpha1().Managers().Watch(context.Background(), opts)
 			},
+			ListWithContextFunc: func(ctx context.Context, opts v1.ListOptions) (runtime.Object, error) {
+				if tweakListOptions != nil {
+					tweakListOptions(&opts)
+				}
+				return client.AppV1alpha1().Managers().List(ctx, opts)
+			},
+			WatchFuncWithContext: func(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
+				if tweakListOptions != nil {
+					tweakListOptions(&opts)
+				}
+				return client.AppV1alpha1().Managers().Watch(ctx, opts)
+			},
+		}, client),
+		&pkgapisv1alpha1.Manager{},
+		cache.SharedIndexInformerOptions{
+			ResyncPeriod: options.ResyncPeriod,
+			Indexers:     options.Indexers,
+			Identifier:   identifier,
 		},
-		&apisv1alpha1.Manager{},
-		resyncPeriod,
-		indexers,
 	)
 }
 
 func (f *managerInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredManagerInformer(client, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+	return NewManagerInformerWithOptions(client, internalinterfaces.InformerOptions{ResyncPeriod: resyncPeriod, Indexers: cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, InformerName: f.factory.InformerName(), TweakListOptions: f.tweakListOptions})
 }
 
 func (f *managerInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&apisv1alpha1.Manager{}, f.defaultInformer)
+	return f.factory.InformerFor(&pkgapisv1alpha1.Manager{}, f.defaultInformer)
 }
 
-func (f *managerInformer) Lister() v1alpha1.ManagerLister {
-	return v1alpha1.NewManagerLister(f.Informer().GetIndexer())
+func (f *managerInformer) Lister() apisv1alpha1.ManagerLister {
+	return apisv1alpha1.NewManagerLister(f.Informer().GetIndexer())
 }

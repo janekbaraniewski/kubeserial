@@ -18,15 +18,14 @@ limitations under the License.
 package v1alpha1
 
 import (
-	"context"
-	"time"
+	context "context"
 
-	v1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
+	apisv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	scheme "github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
-	rest "k8s.io/client-go/rest"
+	gentype "k8s.io/client-go/gentype"
 )
 
 // ManagersGetter has a method to return a ManagerInterface.
@@ -37,147 +36,34 @@ type ManagersGetter interface {
 
 // ManagerInterface has methods to work with Manager resources.
 type ManagerInterface interface {
-	Create(ctx context.Context, manager *v1alpha1.Manager, opts v1.CreateOptions) (*v1alpha1.Manager, error)
-	Update(ctx context.Context, manager *v1alpha1.Manager, opts v1.UpdateOptions) (*v1alpha1.Manager, error)
-	UpdateStatus(ctx context.Context, manager *v1alpha1.Manager, opts v1.UpdateOptions) (*v1alpha1.Manager, error)
+	Create(ctx context.Context, manager *apisv1alpha1.Manager, opts v1.CreateOptions) (*apisv1alpha1.Manager, error)
+	Update(ctx context.Context, manager *apisv1alpha1.Manager, opts v1.UpdateOptions) (*apisv1alpha1.Manager, error)
+	// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
+	UpdateStatus(ctx context.Context, manager *apisv1alpha1.Manager, opts v1.UpdateOptions) (*apisv1alpha1.Manager, error)
 	Delete(ctx context.Context, name string, opts v1.DeleteOptions) error
 	DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error
-	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1alpha1.Manager, error)
-	List(ctx context.Context, opts v1.ListOptions) (*v1alpha1.ManagerList, error)
+	Get(ctx context.Context, name string, opts v1.GetOptions) (*apisv1alpha1.Manager, error)
+	List(ctx context.Context, opts v1.ListOptions) (*apisv1alpha1.ManagerList, error)
 	Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error)
-	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.Manager, err error)
+	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *apisv1alpha1.Manager, err error)
 	ManagerExpansion
 }
 
 // managers implements ManagerInterface
 type managers struct {
-	client rest.Interface
+	*gentype.ClientWithList[*apisv1alpha1.Manager, *apisv1alpha1.ManagerList]
 }
 
 // newManagers returns a Managers
 func newManagers(c *AppV1alpha1Client) *managers {
 	return &managers{
-		client: c.RESTClient(),
+		gentype.NewClientWithList[*apisv1alpha1.Manager, *apisv1alpha1.ManagerList](
+			"managers",
+			c.RESTClient(),
+			scheme.ParameterCodec,
+			"",
+			func() *apisv1alpha1.Manager { return &apisv1alpha1.Manager{} },
+			func() *apisv1alpha1.ManagerList { return &apisv1alpha1.ManagerList{} },
+		),
 	}
-}
-
-// Get takes name of the manager, and returns the corresponding manager object, and an error if there is any.
-func (c *managers) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.Manager, err error) {
-	result = &v1alpha1.Manager{}
-	err = c.client.Get().
-		Resource("managers").
-		Name(name).
-		VersionedParams(&options, scheme.ParameterCodec).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// List takes label and field selectors, and returns the list of Managers that match those selectors.
-func (c *managers) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.ManagerList, err error) {
-	var timeout time.Duration
-	if opts.TimeoutSeconds != nil {
-		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
-	}
-	result = &v1alpha1.ManagerList{}
-	err = c.client.Get().
-		Resource("managers").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Timeout(timeout).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Watch returns a watch.Interface that watches the requested managers.
-func (c *managers) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
-	var timeout time.Duration
-	if opts.TimeoutSeconds != nil {
-		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
-	}
-	opts.Watch = true
-	return c.client.Get().
-		Resource("managers").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Timeout(timeout).
-		Watch(ctx)
-}
-
-// Create takes the representation of a manager and creates it.  Returns the server's representation of the manager, and an error, if there is any.
-func (c *managers) Create(ctx context.Context, manager *v1alpha1.Manager, opts v1.CreateOptions) (result *v1alpha1.Manager, err error) {
-	result = &v1alpha1.Manager{}
-	err = c.client.Post().
-		Resource("managers").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(manager).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Update takes the representation of a manager and updates it. Returns the server's representation of the manager, and an error, if there is any.
-func (c *managers) Update(ctx context.Context, manager *v1alpha1.Manager, opts v1.UpdateOptions) (result *v1alpha1.Manager, err error) {
-	result = &v1alpha1.Manager{}
-	err = c.client.Put().
-		Resource("managers").
-		Name(manager.Name).
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(manager).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// UpdateStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *managers) UpdateStatus(ctx context.Context, manager *v1alpha1.Manager, opts v1.UpdateOptions) (result *v1alpha1.Manager, err error) {
-	result = &v1alpha1.Manager{}
-	err = c.client.Put().
-		Resource("managers").
-		Name(manager.Name).
-		SubResource("status").
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(manager).
-		Do(ctx).
-		Into(result)
-	return
-}
-
-// Delete takes name of the manager and deletes it. Returns an error if one occurs.
-func (c *managers) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
-	return c.client.Delete().
-		Resource("managers").
-		Name(name).
-		Body(&opts).
-		Do(ctx).
-		Error()
-}
-
-// DeleteCollection deletes a collection of objects.
-func (c *managers) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	var timeout time.Duration
-	if listOpts.TimeoutSeconds != nil {
-		timeout = time.Duration(*listOpts.TimeoutSeconds) * time.Second
-	}
-	return c.client.Delete().
-		Resource("managers").
-		VersionedParams(&listOpts, scheme.ParameterCodec).
-		Timeout(timeout).
-		Body(&opts).
-		Do(ctx).
-		Error()
-}
-
-// Patch applies the patch and returns the patched manager.
-func (c *managers) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.Manager, err error) {
-	result = &v1alpha1.Manager{}
-	err = c.client.Patch(pt).
-		Resource("managers").
-		Name(name).
-		SubResource(subresources...).
-		VersionedParams(&opts, scheme.ParameterCodec).
-		Body(data).
-		Do(ctx).
-		Into(result)
-	return
 }

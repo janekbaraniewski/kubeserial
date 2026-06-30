@@ -18,10 +18,10 @@ limitations under the License.
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/client-go/tools/cache"
+	apisv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
+	labels "k8s.io/apimachinery/pkg/labels"
+	listers "k8s.io/client-go/listers"
+	cache "k8s.io/client-go/tools/cache"
 )
 
 // ManagerLister helps list Managers.
@@ -29,39 +29,19 @@ import (
 type ManagerLister interface {
 	// List lists all Managers in the indexer.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1alpha1.Manager, err error)
+	List(selector labels.Selector) (ret []*apisv1alpha1.Manager, err error)
 	// Get retrieves the Manager from the index for a given name.
 	// Objects returned here must be treated as read-only.
-	Get(name string) (*v1alpha1.Manager, error)
+	Get(name string) (*apisv1alpha1.Manager, error)
 	ManagerListerExpansion
 }
 
 // managerLister implements the ManagerLister interface.
 type managerLister struct {
-	indexer cache.Indexer
+	listers.ResourceIndexer[*apisv1alpha1.Manager]
 }
 
 // NewManagerLister returns a new ManagerLister.
 func NewManagerLister(indexer cache.Indexer) ManagerLister {
-	return &managerLister{indexer: indexer}
-}
-
-// List lists all Managers in the indexer.
-func (s *managerLister) List(selector labels.Selector) (ret []*v1alpha1.Manager, err error) {
-	err = cache.ListAll(s.indexer, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.Manager))
-	})
-	return ret, err
-}
-
-// Get retrieves the Manager from the index for a given name.
-func (s *managerLister) Get(name string) (*v1alpha1.Manager, error) {
-	obj, exists, err := s.indexer.GetByKey(name)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return nil, errors.NewNotFound(v1alpha1.Resource("manager"), name)
-	}
-	return obj.(*v1alpha1.Manager), nil
+	return &managerLister{listers.New[*apisv1alpha1.Manager](indexer, apisv1alpha1.Resource("manager"))}
 }

@@ -18,115 +18,32 @@ limitations under the License.
 package fake
 
 import (
-	"context"
-
 	v1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	labels "k8s.io/apimachinery/pkg/labels"
-	schema "k8s.io/apimachinery/pkg/runtime/schema"
-	types "k8s.io/apimachinery/pkg/types"
-	watch "k8s.io/apimachinery/pkg/watch"
-	testing "k8s.io/client-go/testing"
+	apisv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned/typed/apis/v1alpha1"
+	gentype "k8s.io/client-go/gentype"
 )
 
-// FakeManagers implements ManagerInterface
-type FakeManagers struct {
+// fakeManagers implements ManagerInterface
+type fakeManagers struct {
+	*gentype.FakeClientWithList[*v1alpha1.Manager, *v1alpha1.ManagerList]
 	Fake *FakeAppV1alpha1
 }
 
-var managersResource = schema.GroupVersionResource{Group: "app.kubeserial.com", Version: "v1alpha1", Resource: "managers"}
-
-var managersKind = schema.GroupVersionKind{Group: "app.kubeserial.com", Version: "v1alpha1", Kind: "Manager"}
-
-// Get takes name of the manager, and returns the corresponding manager object, and an error if there is any.
-func (c *FakeManagers) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.Manager, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewRootGetAction(managersResource, name), &v1alpha1.Manager{})
-	if obj == nil {
-		return nil, err
+func newFakeManagers(fake *FakeAppV1alpha1) apisv1alpha1.ManagerInterface {
+	return &fakeManagers{
+		gentype.NewFakeClientWithList[*v1alpha1.Manager, *v1alpha1.ManagerList](
+			fake.Fake,
+			"",
+			v1alpha1.SchemeGroupVersion.WithResource("managers"),
+			v1alpha1.SchemeGroupVersion.WithKind("Manager"),
+			func() *v1alpha1.Manager { return &v1alpha1.Manager{} },
+			func() *v1alpha1.ManagerList { return &v1alpha1.ManagerList{} },
+			func(dst, src *v1alpha1.ManagerList) { dst.ListMeta = src.ListMeta },
+			func(list *v1alpha1.ManagerList) []*v1alpha1.Manager { return gentype.ToPointerSlice(list.Items) },
+			func(list *v1alpha1.ManagerList, items []*v1alpha1.Manager) {
+				list.Items = gentype.FromPointerSlice(items)
+			},
+		),
+		fake,
 	}
-	return obj.(*v1alpha1.Manager), err
-}
-
-// List takes label and field selectors, and returns the list of Managers that match those selectors.
-func (c *FakeManagers) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.ManagerList, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewRootListAction(managersResource, managersKind, opts), &v1alpha1.ManagerList{})
-	if obj == nil {
-		return nil, err
-	}
-
-	label, _, _ := testing.ExtractFromListOptions(opts)
-	if label == nil {
-		label = labels.Everything()
-	}
-	list := &v1alpha1.ManagerList{ListMeta: obj.(*v1alpha1.ManagerList).ListMeta}
-	for _, item := range obj.(*v1alpha1.ManagerList).Items {
-		if label.Matches(labels.Set(item.Labels)) {
-			list.Items = append(list.Items, item)
-		}
-	}
-	return list, err
-}
-
-// Watch returns a watch.Interface that watches the requested managers.
-func (c *FakeManagers) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
-	return c.Fake.
-		InvokesWatch(testing.NewRootWatchAction(managersResource, opts))
-}
-
-// Create takes the representation of a manager and creates it.  Returns the server's representation of the manager, and an error, if there is any.
-func (c *FakeManagers) Create(ctx context.Context, manager *v1alpha1.Manager, opts v1.CreateOptions) (result *v1alpha1.Manager, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewRootCreateAction(managersResource, manager), &v1alpha1.Manager{})
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1alpha1.Manager), err
-}
-
-// Update takes the representation of a manager and updates it. Returns the server's representation of the manager, and an error, if there is any.
-func (c *FakeManagers) Update(ctx context.Context, manager *v1alpha1.Manager, opts v1.UpdateOptions) (result *v1alpha1.Manager, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewRootUpdateAction(managersResource, manager), &v1alpha1.Manager{})
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1alpha1.Manager), err
-}
-
-// UpdateStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeManagers) UpdateStatus(ctx context.Context, manager *v1alpha1.Manager, opts v1.UpdateOptions) (*v1alpha1.Manager, error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewRootUpdateSubresourceAction(managersResource, "status", manager), &v1alpha1.Manager{})
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1alpha1.Manager), err
-}
-
-// Delete takes name of the manager and deletes it. Returns an error if one occurs.
-func (c *FakeManagers) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
-	_, err := c.Fake.
-		Invokes(testing.NewRootDeleteActionWithOptions(managersResource, name, opts), &v1alpha1.Manager{})
-	return err
-}
-
-// DeleteCollection deletes a collection of objects.
-func (c *FakeManagers) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	action := testing.NewRootDeleteCollectionAction(managersResource, listOpts)
-
-	_, err := c.Fake.Invokes(action, &v1alpha1.ManagerList{})
-	return err
-}
-
-// Patch applies the patch and returns the patched manager.
-func (c *FakeManagers) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.Manager, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewRootPatchSubresourceAction(managersResource, name, pt, data, subresources...), &v1alpha1.Manager{})
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1alpha1.Manager), err
 }

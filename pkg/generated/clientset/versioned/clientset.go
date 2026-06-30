@@ -18,8 +18,8 @@ limitations under the License.
 package versioned
 
 import (
-	"fmt"
-	"net/http"
+	fmt "fmt"
+	http "net/http"
 
 	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/generated/clientset/versioned/typed/apis/v1alpha1"
 	discovery "k8s.io/client-go/discovery"
@@ -32,8 +32,7 @@ type Interface interface {
 	AppV1alpha1() appv1alpha1.AppV1alpha1Interface
 }
 
-// Clientset contains the clients for groups. Each group has exactly one
-// version included in a Clientset.
+// Clientset contains the clients for groups.
 type Clientset struct {
 	*discovery.DiscoveryClient
 	appV1alpha1 *appv1alpha1.AppV1alpha1Client

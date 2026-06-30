@@ -82,6 +82,10 @@ test: fmt vet envtest envtest-render-crds get-test-assets ## Run tests.
 test-fswatch: ## Use fswatch to watch source files and run tests on chamnge
 	fswatch -or pkg Makefile Makefile.build cmd go.mod go.sum | xargs -n1 -I{} make test
 
+.PHONY: test-e2e
+test-e2e: ## Run end-to-end tests against a kind cluster (requires docker, kind, helm, kubectl). See docs/e2e-testing.md.
+	./hack/e2e.sh
+
 .PHONY: envtest-render-crds
 envtest-render-crds:
 	@rm -rf build/_output/kubeserial-crds || echo ""

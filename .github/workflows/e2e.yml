@@ -1,0 +1,60 @@
+name: E2E
+
+# End-to-end tests against a kind cluster. See docs/e2e-testing.md.
+#
+# Gated on workflow_dispatch (manual) initially so it does not block every PR.
+# The whole flow (cluster create, image build/load, cert-manager, helm install,
+# run, teardown) lives in hack/e2e.sh so it is identical locally and in CI.
+on:
+  workflow_dispatch:
+    inputs:
+      skip_device_sim:
+        description: "Skip device-simulation specs (E4/E5)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Install kind
+        uses: helm/kind-action@v1.14.0
+        with:
+          # install the kind + kubectl binaries but do not create a cluster;
+          # hack/e2e.sh owns cluster lifecycle so local and CI runs match.
+          install_only: true
+
+      - name: Run e2e suite (make test-e2e)
+        run: make test-e2e
+        env:
+          E2E_SKIP_DEVICE_SIM: ${{ inputs.skip_device_sim }}
+          # kind-action installs a recent kind; let it pick its default node
+          # image (newer Kubernetes) rather than the v0.18-pinned default.
+          E2E_NODE_IMAGE: ""
+
+      - name: Upload kind logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kind-logs
+          path: /tmp/kubeserial-e2e-logs
+          if-no-files-found: ignore

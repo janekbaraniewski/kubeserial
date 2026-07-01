@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -74,14 +75,43 @@ func (r *ManagerScheduleRequestReconciler) Reconcile(ctx context.Context, req ct
 		Namespace: req.Namespace,
 	}, manager)
 	if err != nil {
-		// TODO: handle missing manager spec
-		return ctrl.Result{}, err
+		if errors.IsNotFound(err) {
+			logger.Info("Referenced manager not found, marking request unfulfilled and requeueing",
+				"manager", instance.Spec.Manager)
+			if statusErr := r.setFulfilled(ctx, instance, false); statusErr != nil {
+				return ctrl.Result{}, statusErr
+			}
+			return ctrl.Result{Requeue: true}, nil
+		}
+		return ctrl.Result{}, fmt.Errorf("getting manager %q: %w", instance.Spec.Manager, err)
 	}
 	logger = logger.WithValues("manager", manager)
 	logger.Info("Got manager, starting ReconcileManager")
-	err = r.ReconcileManager(ctx, instance, manager, req)
+	if err := r.ReconcileManager(ctx, instance, manager, req); err != nil {
+		return ctrl.Result{}, err
+	}
 
-	return ctrl.Result{}, err
+	if err := r.setFulfilled(ctx, instance, true); err != nil {
+		return ctrl.Result{}, err
+	}
+
+	return ctrl.Result{}, nil
+}
+
+// setFulfilled updates the request's Fulfilled status if it changed.
+func (r *ManagerScheduleRequestReconciler) setFulfilled(
+	ctx context.Context,
+	instance *kubeserialv1alpha1.ManagerScheduleRequest,
+	fulfilled bool,
+) error {
+	if instance.Status.Fulfilled == fulfilled {
+		return nil
+	}
+	instance.Status.Fulfilled = fulfilled
+	if err := r.Status().Update(ctx, instance); err != nil {
+		return fmt.Errorf("updating ManagerScheduleRequest status: %w", err)
+	}
+	return nil
 }
 
 // ReconcileManager.

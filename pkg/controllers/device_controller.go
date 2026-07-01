@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -36,6 +37,7 @@ import (
 	"github.com/janekbaraniewski/kubeserial/pkg/gateway"
 	api "github.com/janekbaraniewski/kubeserial/pkg/kubeapi"
 	"github.com/janekbaraniewski/kubeserial/pkg/utils"
+	"github.com/janekbaraniewski/kubeserial/pkg/utils/apis"
 )
 
 var devLog = logf.Log.WithName("DeviceController")
@@ -58,6 +60,8 @@ type SerialDeviceReconciler struct {
 func (r *SerialDeviceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := devLog.WithName("Reconcile")
 	logger.Info("Starting device reconcile", "req", req)
+
+	defer r.updateMetrics(ctx, logger)
 
 	device := &kubeserialv1alpha1.SerialDevice{}
 	err := r.Get(ctx, req.NamespacedName, device)
@@ -127,7 +131,10 @@ func (r *SerialDeviceReconciler) HandleDeviceUnavailable(
 }
 
 func (r *SerialDeviceReconciler) RequestGateway(ctx context.Context, device *kubeserialv1alpha1.SerialDevice) error {
-	gatewayObjects := gateway.NewBuilder(device, r.FS).Build()
+	gatewayObjects, err := gateway.NewBuilder(device, r.FS).Build()
+	if err != nil {
+		return fmt.Errorf("building gateway objects: %w", err)
+	}
 
 	for _, o := range gatewayObjects {
 		if err := r.APIClient.EnsureObject(ctx, device, o); err != nil {
@@ -139,7 +146,7 @@ func (r *SerialDeviceReconciler) RequestGateway(ctx context.Context, device *kub
 }
 
 func (r *SerialDeviceReconciler) EnsureNoGatewayRunning(ctx context.Context, device *kubeserialv1alpha1.SerialDevice) error {
-	name := device.Name + "-gateway" // TODO: move name generation to some utils so it's in one place
+	name := apis.GatewayName(device.Name)
 
 	if err := r.APIClient.DeleteObject(
 		ctx,
@@ -266,7 +273,7 @@ func (r *SerialDeviceReconciler) RequestManager(ctx context.Context, device *kub
 	}
 	request := &kubeserialv1alpha1.ManagerScheduleRequest{
 		ObjectMeta: v1.ObjectMeta{
-			Name:      device.Name + "-" + device.Spec.Manager,
+			Name:      apis.ScheduleRequestName(device.Name, device.Spec.Manager),
 			Namespace: device.Namespace,
 		},
 		Spec: kubeserialv1alpha1.ManagerScheduleRequestSpec{
@@ -292,7 +299,7 @@ func (r *SerialDeviceReconciler) EnsureNoManagerRequested(ctx context.Context, d
 	}
 	request := &kubeserialv1alpha1.ManagerScheduleRequest{}
 	if err := r.Get(ctx, types.NamespacedName{
-		Name:      device.Name + "-" + device.Spec.Manager,
+		Name:      apis.ScheduleRequestName(device.Name, device.Spec.Manager),
 		Namespace: device.Namespace,
 	}, request); err != nil {
 		if errors.IsNotFound(err) {
@@ -301,6 +308,29 @@ func (r *SerialDeviceReconciler) EnsureNoManagerRequested(ctx context.Context, d
 		return err
 	}
 	return r.Delete(ctx, request)
+}
+
+// updateMetrics refreshes the device gauges from the full set of SerialDevices.
+func (r *SerialDeviceReconciler) updateMetrics(ctx context.Context, logger logr.Logger) {
+	list := &kubeserialv1alpha1.SerialDeviceList{}
+	if err := r.List(ctx, list); err != nil {
+		logger.Error(err, "Failed listing devices for metrics")
+		return
+	}
+
+	var available, ready float64
+	for i := range list.Items {
+		if list.Items[i].IsAvailable() {
+			available++
+		}
+		if list.Items[i].IsReady() {
+			ready++
+		}
+	}
+
+	Devices.Set(float64(len(list.Items)))
+	AvailableDevices.Set(available)
+	ReadyDevices.Set(ready)
 }
 
 // SetupWithManager sets up the controller with the Manager.

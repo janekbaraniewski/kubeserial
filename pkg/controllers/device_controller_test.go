@@ -16,20 +16,23 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	controllerruntime "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	runtimefake "sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
-func TestDeviceReconciler_Reconcile(t *testing.T) { //nolint:paralleltest
-	// t.Parallel()
-	deviceName := types.NamespacedName{
-		Name:      "test-device",
-		Namespace: "test-ns",
-	}
+func newTestScheme(t *testing.T) *runtime.Scheme {
+	t.Helper()
+	scheme := runtime.NewScheme()
+	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
+	utilruntime.Must(v1alpha1.Install(scheme))
+	return scheme
+}
 
-	device := &v1alpha1.SerialDevice{
+func newTestDevice() *v1alpha1.SerialDevice {
+	return &v1alpha1.SerialDevice{
 		ObjectMeta: v1.ObjectMeta{
-			Name:      deviceName.Name,
-			Namespace: deviceName.Namespace,
+			Name:      "test-device",
+			Namespace: "test-ns",
 		},
 		Spec: v1alpha1.SerialDeviceSpec{
 			Manager:   "test-manager",
@@ -38,8 +41,10 @@ func TestDeviceReconciler_Reconcile(t *testing.T) { //nolint:paralleltest
 			Name:      "test-device",
 		},
 	}
+}
 
-	manager := &v1alpha1.Manager{
+func newTestManager() *v1alpha1.Manager {
+	return &v1alpha1.Manager{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      "test-manager",
 			Namespace: "test-ns",
@@ -54,153 +59,118 @@ func TestDeviceReconciler_Reconcile(t *testing.T) { //nolint:paralleltest
 			RunCmd:     "./test-manager",
 		},
 	}
+}
 
-	scheme := runtime.NewScheme()
-	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-	utilruntime.Must(v1alpha1.Install(scheme))
-	fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).Build()
-	fs := utils.NewInMemoryFS()
-	AddGatewaySpecFilesToFilesystem(t, fs)
-	{
-		t.Run("device-new-manager-not-available", func(t *testing.T) {
-			// t.Parallel()
-			t.Skip()
-			if err := fakeClient.Create(context.TODO(), device); err != nil {
-				t.Logf("ERROR - %v", err)
-				t.Fail()
-			}
-
-			deviceReconciler := SerialDeviceReconciler{
-				Client:    fakeClient,
-				Scheme:    scheme,
-				APIClient: kubeapi.NewFakeAPIClient(),
-				FS:        fs,
-			}
-
-			result, err := deviceReconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
-
-			require.NoError(t, err)
-			assert.Equal(t, controllerruntime.Result{}, result)
-
-			foundDevice := &v1alpha1.SerialDevice{}
-			err = fakeClient.Get(context.TODO(), deviceName, foundDevice)
-
-			require.NoError(t, err)
-			// assert.Equal(t, 3, len(foundDevice.Status.Conditions))
-
-			availableCondition := foundDevice.GetCondition(v1alpha1.SerialDeviceAvailable)
-			assert.Equal(t, v1.ConditionFalse, availableCondition.Status)
-			assert.Equal(t, "NotValidated", availableCondition.Reason)
-
-			readyCondition := foundDevice.GetCondition(v1alpha1.SerialDeviceReady)
-			assert.Equal(t, v1.ConditionFalse, readyCondition.Status)
-			assert.Equal(t, "ManagerNotAvailable", readyCondition.Reason)
-		})
+func TestDeviceReconciler_Reconcile(t *testing.T) {
+	t.Parallel()
+	deviceName := types.NamespacedName{
+		Name:      "test-device",
+		Namespace: "test-ns",
 	}
-	{
-		t.Run("device-new-manager-available", func(t *testing.T) {
-			// t.Parallel()
-			t.Skip()
 
-			if err := fakeClient.Create(context.TODO(), device); err != nil {
-				t.Logf("Error returned -> %v", err)
-				t.Fail()
-			}
-
-			if err := fakeClient.Create(context.TODO(), manager); err != nil {
-				t.Logf("Error returned -> %v", err)
-				t.Fail()
-			}
-
-			deviceReconciler := SerialDeviceReconciler{
-				Client:    fakeClient,
-				Scheme:    scheme,
-				APIClient: kubeapi.NewFakeAPIClient(),
-				FS:        fs,
-			}
-
-			result, err := deviceReconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
-
-			require.NoError(t, err)
-			assert.Equal(t, controllerruntime.Result{}, result)
-
-			foundDevice := &v1alpha1.SerialDevice{}
-			//nolint:errcheck
-			fakeClient.Get(context.TODO(), deviceName, foundDevice)
-
-			availableCondition := foundDevice.GetCondition(v1alpha1.SerialDeviceAvailable)
-			assert.Equal(t, v1.ConditionFalse, availableCondition.Status)
-			assert.Equal(t, "NotValidated", availableCondition.Reason)
-
-			readyCondition := foundDevice.GetCondition(v1alpha1.SerialDeviceReady)
-			assert.Equal(t, v1.ConditionTrue, readyCondition.Status)
-			assert.Equal(t, "AllChecksPassed", readyCondition.Reason)
-		})
+	newReconciler := func(scheme *runtime.Scheme, objs ...client.Object) (SerialDeviceReconciler, client.Client) {
+		fs := utils.NewInMemoryFS()
+		AddGatewaySpecFilesToFilesystem(t, fs)
+		fakeClient := runtimefake.NewClientBuilder().
+			WithScheme(scheme).
+			WithStatusSubresource(&v1alpha1.SerialDevice{}).
+			WithObjects(objs...).
+			Build()
+		return SerialDeviceReconciler{
+			Client:    fakeClient,
+			Scheme:    scheme,
+			APIClient: kubeapi.NewFakeAPIClient(),
+			FS:        fs,
+		}, fakeClient
 	}
-	{
-		t.Run("device-ready", func(t *testing.T) {
-			// t.Parallel()
-			t.Skip()
-			device.Status.Conditions = append(device.Status.Conditions, v1alpha1.SerialDeviceCondition{
-				Type:   v1alpha1.SerialDeviceAvailable,
-				Status: v1.ConditionTrue,
-			})
 
-			err := fakeClient.Create(context.TODO(), device)
-			t.Logf("Error returned -> %v", err)
-			if err != nil {
-				t.Fail()
-			}
+	t.Run("device-new-manager-not-available", func(t *testing.T) {
+		t.Parallel()
+		scheme := newTestScheme(t)
+		reconciler, fakeClient := newReconciler(scheme, newTestDevice())
 
-			//nolint:errcheck
-			fakeClient.Create(context.TODO(), manager)
+		result, err := reconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
+		require.NoError(t, err)
+		assert.Equal(t, controllerruntime.Result{}, result)
 
-			deviceReconciler := SerialDeviceReconciler{
-				Client:    fakeClient,
-				Scheme:    scheme,
-				APIClient: kubeapi.NewFakeAPIClient(),
-				FS:        fs,
-			}
+		foundDevice := &v1alpha1.SerialDevice{}
+		require.NoError(t, fakeClient.Get(context.TODO(), deviceName, foundDevice))
+		assert.Len(t, foundDevice.Status.Conditions, 3)
 
-			result, err := deviceReconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
+		availableCondition := foundDevice.GetCondition(v1alpha1.SerialDeviceAvailable)
+		require.NotNil(t, availableCondition)
+		assert.Equal(t, v1.ConditionFalse, availableCondition.Status)
+		assert.Equal(t, "NotValidated", availableCondition.Reason)
 
-			require.NoError(t, err)
-			assert.Equal(t, controllerruntime.Result{}, result)
+		readyCondition := foundDevice.GetCondition(v1alpha1.SerialDeviceReady)
+		require.NotNil(t, readyCondition)
+		assert.Equal(t, v1.ConditionFalse, readyCondition.Status)
+		assert.Equal(t, "ManagerNotAvailable", readyCondition.Reason)
+	})
 
-			foundDevice := &v1alpha1.SerialDevice{}
-			//nolint:errcheck
-			fakeClient.Get(context.TODO(), deviceName, foundDevice)
+	t.Run("device-new-manager-available", func(t *testing.T) {
+		t.Parallel()
+		scheme := newTestScheme(t)
+		reconciler, fakeClient := newReconciler(scheme, newTestDevice(), newTestManager())
 
-			readyCondition := foundDevice.GetCondition(v1alpha1.SerialDeviceReady)
-			assert.Equal(t, v1.ConditionTrue, readyCondition.Status)
-			assert.Equal(t, "AllChecksPassed", readyCondition.Reason)
+		result, err := reconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
+		require.NoError(t, err)
+		assert.Equal(t, controllerruntime.Result{}, result)
 
-			foundRequest := v1alpha1.ManagerScheduleRequest{}
-			//nolint:errcheck
-			fakeClient.Get(context.TODO(), types.NamespacedName{
-				Name:      device.Name + "-" + device.Spec.Manager,
-				Namespace: device.Name,
-			}, &foundRequest)
+		foundDevice := &v1alpha1.SerialDevice{}
+		require.NoError(t, fakeClient.Get(context.TODO(), deviceName, foundDevice))
 
-			assert.False(t, foundRequest.Status.Fulfilled)
+		availableCondition := foundDevice.GetCondition(v1alpha1.SerialDeviceAvailable)
+		require.NotNil(t, availableCondition)
+		assert.Equal(t, v1.ConditionFalse, availableCondition.Status)
+		assert.Equal(t, "NotValidated", availableCondition.Reason)
+
+		readyCondition := foundDevice.GetCondition(v1alpha1.SerialDeviceReady)
+		require.NotNil(t, readyCondition)
+		assert.Equal(t, v1.ConditionTrue, readyCondition.Status)
+		assert.Equal(t, "AllChecksPassed", readyCondition.Reason)
+	})
+
+	t.Run("device-ready", func(t *testing.T) {
+		t.Parallel()
+		scheme := newTestScheme(t)
+		device := newTestDevice()
+		device.Status.Conditions = append(device.Status.Conditions, v1alpha1.SerialDeviceCondition{
+			Type:   v1alpha1.SerialDeviceAvailable,
+			Status: v1.ConditionTrue,
 		})
-	}
-	{
-		t.Run("device-not-found", func(t *testing.T) {
-			// t.Parallel()
-			// t.Skip()
-			deviceReconciler := SerialDeviceReconciler{
-				Client:    fakeClient,
-				Scheme:    scheme,
-				APIClient: kubeapi.NewFakeAPIClient(),
-				FS:        fs,
-			}
+		reconciler, fakeClient := newReconciler(scheme, device, newTestManager())
 
-			result, err := deviceReconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
-			require.NoError(t, err)
-			assert.Equal(t, controllerruntime.Result{}, result)
-		})
-	}
+		result, err := reconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
+		require.NoError(t, err)
+		assert.Equal(t, controllerruntime.Result{}, result)
+
+		foundDevice := &v1alpha1.SerialDevice{}
+		require.NoError(t, fakeClient.Get(context.TODO(), deviceName, foundDevice))
+
+		readyCondition := foundDevice.GetCondition(v1alpha1.SerialDeviceReady)
+		require.NotNil(t, readyCondition)
+		assert.Equal(t, v1.ConditionTrue, readyCondition.Status)
+		assert.Equal(t, "AllChecksPassed", readyCondition.Reason)
+
+		// Device controller only creates the request; the MSR controller fulfills it.
+		foundRequest := &v1alpha1.ManagerScheduleRequest{}
+		require.NoError(t, fakeClient.Get(context.TODO(), types.NamespacedName{
+			Name:      device.Name + "-" + device.Spec.Manager,
+			Namespace: device.Namespace,
+		}, foundRequest))
+		assert.False(t, foundRequest.Status.Fulfilled)
+	})
+
+	t.Run("device-not-found", func(t *testing.T) {
+		t.Parallel()
+		scheme := newTestScheme(t)
+		reconciler, _ := newReconciler(scheme)
+
+		result, err := reconciler.Reconcile(context.TODO(), controllerruntime.Request{NamespacedName: deviceName})
+		require.NoError(t, err)
+		assert.Equal(t, controllerruntime.Result{}, result)
+	})
 }
 
 func AddGatewaySpecFilesToFilesystem(t *testing.T, fs *utils.InMemoryFS) {

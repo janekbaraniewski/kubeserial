@@ -1,0 +1,12 @@
+{{- if .Values.dashboard.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "kubeserial.fullname" . }}-dashboard
+  labels:
+    grafana_dashboard: "1"
+    {{- include "kubeserial.labels" . | nindent 4 }}
+data:
+  kubeserial.json: |-
+    {{- .Files.Get "dashboards/kubeserial.json" | nindent 4 }}
+{{- end }}

@@ -1,0 +1,95 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "schemaVersion": 39,
+  "title": "KubeSerial",
+  "tags": ["kubeserial"],
+  "time": { "from": "now-6h", "to": "now" },
+  "timezone": "",
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {},
+        "hide": 0
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Devices",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "devices", "legendFormat": "total", "refId": "A" }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Available devices",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 0 },
+      "targets": [
+        { "expr": "devices_available", "legendFormat": "available", "refId": "A" }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Ready devices",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 0 },
+      "targets": [
+        { "expr": "devices_ready", "legendFormat": "ready", "refId": "A" }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Devices monitored",
+      "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 0 },
+      "targets": [
+        { "expr": "devices_monitored", "legendFormat": "monitored", "refId": "A" }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Device counts over time",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "targets": [
+        { "expr": "devices", "legendFormat": "total", "refId": "A" },
+        { "expr": "devices_available", "legendFormat": "available", "refId": "B" },
+        { "expr": "devices_ready", "legendFormat": "ready", "refId": "C" },
+        { "expr": "devices_monitored", "legendFormat": "monitored", "refId": "D" }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Webhook pods handled",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 6, "x": 12, "y": 6 },
+      "targets": [
+        { "expr": "pods_handled", "legendFormat": "pods handled", "refId": "A" }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "Injected commands rate",
+      "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "gridPos": { "h": 8, "w": 6, "x": 18, "y": 6 },
+      "targets": [
+        { "expr": "rate(injected_commands_total[5m])", "legendFormat": "injected commands/s", "refId": "A" }
+      ]
+    }
+  ]
+}

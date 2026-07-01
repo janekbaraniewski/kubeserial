@@ -6,11 +6,16 @@ import (
 	kubeserial "github.com/janekbaraniewski/kubeserial/pkg"
 	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	"github.com/janekbaraniewski/kubeserial/pkg/utils"
+	"github.com/janekbaraniewski/kubeserial/pkg/utils/apis"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+// configVolumeName is the name of the config volume defined in the gateway
+// deployment spec; the config map is wired into it by name at build time.
+const configVolumeName = "config"
 
 type Builder struct {
 	Device *appv1alpha1.SerialDevice
@@ -24,30 +29,28 @@ func NewBuilder(device *appv1alpha1.SerialDevice, fs utils.FileSystem) *Builder 
 	}
 }
 
-func (g *Builder) Build() []client.Object {
+func (g *Builder) Build() ([]client.Object, error) {
 	cm, err := CreateConfigMap(g.Device, g.FS)
 	if err != nil {
-		return nil
+		return nil, fmt.Errorf("building gateway config map: %w", err)
 	}
 
 	dpl, err := CreateDeployment(g.Device, g.FS)
 	if err != nil {
-		return nil
+		return nil, fmt.Errorf("building gateway deployment: %w", err)
 	}
 
 	svc, err := CreateService(g.Device, g.FS)
 	if err != nil {
-		return nil
+		return nil, fmt.Errorf("building gateway service: %w", err)
 	}
 
-	return []client.Object{
-		cm, dpl, svc,
-	}
+	return []client.Object{cm, dpl, svc}, nil
 }
 
 func CreateConfigMap(device metav1.Object, fs utils.FileSystem) (*corev1.ConfigMap, error) {
 	cm := &corev1.ConfigMap{}
-	name := fmt.Sprintf("%v-gateway", device.GetName())
+	name := apis.GatewayName(device.GetName())
 
 	conf := fmt.Sprintf(
 		"3333:raw:600:/dev/%v:115200 8DATABITS NONE 1STOPBIT -XONXOFF LOCAL -RTSCTS HANGUP_WHEN_DONE\n",
@@ -71,7 +74,7 @@ func CreateDeployment(device *appv1alpha1.SerialDevice, fs utils.FileSystem) (*a
 	if err := utils.LoadResourceFromYaml(fs, kubeserial.GatewayDeploySpecPath, deployment); err != nil {
 		return deployment, err
 	}
-	name := fmt.Sprintf("%v-gateway", device.GetName())
+	name := apis.GatewayName(device.GetName())
 
 	deployment.Name = name
 	deployment.Labels[string(kubeserial.AppNameLabel)] = name
@@ -85,7 +88,7 @@ func CreateDeployment(device *appv1alpha1.SerialDevice, fs utils.FileSystem) (*a
 	volumes := []corev1.Volume{}
 
 	for _, volume := range deployment.Spec.Template.Spec.Volumes {
-		if volume.Name == "config" { // TODO: fix this, shouldn't be hardcoded string
+		if volume.Name == configVolumeName {
 			volume.ConfigMap.Name = name
 		}
 		volumes = append(volumes, volume)
@@ -100,7 +103,7 @@ func CreateService(device *appv1alpha1.SerialDevice, fs utils.FileSystem) (*core
 	if err := utils.LoadResourceFromYaml(fs, kubeserial.GatewaySvcSpecPath, svc); err != nil {
 		return svc, err
 	}
-	name := fmt.Sprintf("%v-gateway", device.GetName())
+	name := apis.GatewayName(device.GetName())
 	svc.Name = name
 	svc.Labels[string(kubeserial.AppNameLabel)] = name
 	svc.Spec.Selector[string(kubeserial.AppNameLabel)] = name

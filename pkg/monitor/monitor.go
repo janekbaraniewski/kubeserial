@@ -64,6 +64,7 @@ func (m *Monitor) UpdateDeviceState(ctx context.Context) {
 		log.Error(err, "Failed listing SerialDevice CRs")
 		return
 	}
+	DevicesMonitored.Set(float64(len(devices.Items)))
 	readyDevices := make([]v1alpha1.SerialDevice, 0, len(devices.Items))
 	for _, device := range devices.Items {
 		readyCondition := device.GetCondition(v1alpha1.SerialDeviceReady)

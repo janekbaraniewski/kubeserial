@@ -10,10 +10,9 @@ import (
 	appv1alpha1 "github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
 	api "github.com/janekbaraniewski/kubeserial/pkg/kubeapi"
 	"github.com/janekbaraniewski/kubeserial/pkg/utils"
+	"github.com/janekbaraniewski/kubeserial/pkg/utils/apis"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	networkingv1 "k8s.io/api/networking/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 )
 
@@ -71,13 +70,6 @@ func Schedule(
 		return err
 	}
 
-	// TODO: bring back ingress support
-	// if cr.Spec.Ingress.Enabled {
-	// 	ingress := manager.CreateIngress(cr, device, cr.Spec.Ingress.Domain)
-	// 	if err := api.EnsureIngress(ctx, cr, ingress); err != nil {
-	// 		return err
-	// 	}
-	// }
 	return nil
 }
 
@@ -115,7 +107,7 @@ func (m *Manager) CreateDeployment(cr types.NamespacedName, deviceName string, i
 		"-c",
 		fmt.Sprintf(
 			"socat -d -d pty,raw,echo=0,b115200,link=/dev/device,perm=0660,group=tty tcp:%v:3333 & %v",
-			strings.ToLower(deviceName+"-gateway"), m.RunCmnd,
+			strings.ToLower(apis.GatewayName(deviceName)), m.RunCmnd,
 		),
 	}
 
@@ -168,65 +160,3 @@ func (m *Manager) CreateService(cr types.NamespacedName, deviceName string) (*co
 
 	return svc, nil
 }
-
-func (m *Manager) Delete(ctx context.Context, cr *appv1alpha1.KubeSerial, device *appv1alpha1.ManagedDevice, api api.API) error {
-	name := m.GetName(cr.Name, device.Name)
-
-	if err := api.DeleteObject(ctx, &appsv1.Deployment{ObjectMeta: v1.ObjectMeta{Name: name, Namespace: cr.Namespace}}); err != nil {
-		return err
-	}
-	if err := api.DeleteObject(ctx, &corev1.ConfigMap{ObjectMeta: v1.ObjectMeta{Name: name, Namespace: cr.Namespace}}); err != nil {
-		return err
-	}
-	if err := api.DeleteObject(ctx, &corev1.Service{ObjectMeta: v1.ObjectMeta{Name: name, Namespace: cr.Namespace}}); err != nil {
-		return err
-	}
-	if err := api.DeleteObject(
-		ctx, &networkingv1.Ingress{ObjectMeta: v1.ObjectMeta{Name: name, Namespace: cr.Namespace}}); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-//nolint
-// func (m *Manager) CreateIngress(cr *appv1alpha1.KubeSerial, device *appv1alpha1.ManagedDevice, domain string) *networkingv1.Ingress {
-// 	name := m.GetName(cr.Name, device.Name)
-// 	labels := map[string]string{
-// 		"app": name,
-// 	}
-// 	typePrefix := networkingv1.PathTypePrefix
-// 	return &networkingv1.Ingress{
-// 		ObjectMeta: metav1.ObjectMeta{
-// 			Name:        name,
-// 			Namespace:   cr.Namespace,
-// 			Labels:      labels,
-// 			Annotations: cr.Spec.Ingress.Annotations,
-// 		},
-// 		Spec: networkingv1.IngressSpec{
-// 			Rules: []networkingv1.IngressRule{
-// 				{
-// 					Host: strings.ToLower(device.Name + domain),
-// 					IngressRuleValue: networkingv1.IngressRuleValue{
-// 						HTTP: &networkingv1.HTTPIngressRuleValue{
-// 							Paths: []networkingv1.HTTPIngressPath{
-// 								{
-// 									Path:     "/",
-// 									PathType: &typePrefix,
-// 									Backend: networkingv1.IngressBackend{
-// 										Service: &networkingv1.IngressServiceBackend{
-// 											Name: m.GetName(cr.Name, device.Name),
-// 											Port: networkingv1.ServiceBackendPort{
-// 												Number: 80,
-// 											},
-// 										},
-// 									},
-// 								},
-// 							},
-// 						},
-// 					},
-// 				},
-// 			},
-// 		},
-// 	}
-// }

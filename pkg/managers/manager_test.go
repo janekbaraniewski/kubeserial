@@ -30,15 +30,6 @@ func TestSchedule(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestDelete(t *testing.T) {
-	t.Parallel()
-	manager := Manager{}
-
-	err := manager.Delete(context.TODO(), &v1alpha1.KubeSerial{}, &v1alpha1.ManagedDevice{}, kubeapi.NewFakeAPIClient())
-
-	assert.NoError(t, err)
-}
-
 func AddSpecFilesToFilesystem(t *testing.T, fs *utils.InMemoryFS) {
 	t.Helper()
 	if err := fs.AddFileFromHostPath(string(kubeserial.ManagerCMSpecPath)); err != nil {

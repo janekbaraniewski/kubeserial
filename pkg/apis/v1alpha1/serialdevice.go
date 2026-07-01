@@ -124,18 +124,20 @@ func (d *SerialDevice) NeedsManager() bool {
 }
 
 func (d *SerialDevice) IsAvailable() bool {
-	availableCondition := d.GetCondition(SerialDeviceAvailable)
-	return availableCondition.Status == metav1.ConditionTrue
+	return d.conditionIsTrue(SerialDeviceAvailable)
 }
 
 func (d *SerialDevice) IsReady() bool {
-	readyCondition := d.GetCondition(SerialDeviceReady)
-	return readyCondition.Status == metav1.ConditionTrue
+	return d.conditionIsTrue(SerialDeviceReady)
 }
 
 func (d *SerialDevice) IsFree() bool {
-	freeCondition := d.GetCondition(SerialDeviceFree)
-	return freeCondition.Status == metav1.ConditionTrue
+	return d.conditionIsTrue(SerialDeviceFree)
+}
+
+func (d *SerialDevice) conditionIsTrue(conditionType SerialDeviceConditionType) bool {
+	condition := d.GetCondition(conditionType)
+	return condition != nil && condition.Status == metav1.ConditionTrue
 }
 
 func (d *SerialDevice) GetCondition(conditionType SerialDeviceConditionType) *SerialDeviceCondition {

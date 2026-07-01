@@ -20,5 +20,6 @@ var (
 func init() {
 	metrics.Registry.MustRegister(
 		PodsHandled,
+		InjectedCommands,
 	)
 }

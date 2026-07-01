@@ -1,0 +1,27 @@
+name: Release Please
+
+on:
+  push:
+    branches: [ master ]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release-please-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    steps:
+      # Maintains a release PR that bumps the version and CHANGELOG from
+      # Conventional Commits; merging it tags X.Y.Z, which the Release workflow
+      # builds from. Uses RELEASE_PLEASE_TOKEN if set so the tag push triggers
+      # the tag-gated Release workflow (a GITHUB_TOKEN tag push does not).
+      - uses: googleapis/release-please-action@v4
+        with:
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN || secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json

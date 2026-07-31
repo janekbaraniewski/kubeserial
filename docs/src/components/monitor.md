@@ -10,7 +10,7 @@ The Device Monitor is deployed by the [KubeSerial controller](controllers.md) as
 
 - **`udev-monitor`** mounts the host `/dev` and a generated udev rules file (`98-devices.rules`). For each device in the [KubeSerial](../configuration/kubeserial.md) spec it gets a rule of the form:
 
-  ```
+  ```text
   SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6001", SYMLINK+="ender3"
   ```
 

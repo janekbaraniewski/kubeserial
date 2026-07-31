@@ -1,7 +1,7 @@
 package managers
 
-import "strings"
+import "github.com/janekbaraniewski/kubeserial/pkg/utils/apis"
 
 func (m *Manager) GetName(crName string, deviceName string) string {
-	return strings.ToLower(crName + "-" + deviceName + "-manager")
+	return apis.ManagerName(crName, deviceName)
 }

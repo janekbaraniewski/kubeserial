@@ -24,7 +24,8 @@ func TestManagerScheduleRequestReconcile(t *testing.T) {
 	scheme := runtime.NewScheme()
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 	utilruntime.Must(v1alpha1.Install(scheme))
-	fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).Build()
+	fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).
+		WithStatusSubresource(&v1alpha1.ManagerScheduleRequest{}).Build()
 
 	reconciler := ManagerScheduleRequestReconciler{
 		Client: fakeClient,
@@ -77,7 +78,8 @@ func TestManagerScheduleRequestReconcile_DeviceFoundNoManager(t *testing.T) {
 	fs := utils.NewInMemoryFS()
 	AddSpecFilesToFilesystem(t, fs)
 
-	fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).Build()
+	fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).
+		WithStatusSubresource(&v1alpha1.ManagerScheduleRequest{}).Build()
 	//nolint:errcheck
 	fakeClient.Create(context.TODO(), mgr)
 	//nolint:errcheck
@@ -129,7 +131,8 @@ func TestManagerScheduleRequestReconcile_DeviceManagerFound(t *testing.T) {
 		},
 	}
 
-	fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).Build()
+	fakeClient := runtimefake.NewClientBuilder().WithScheme(scheme).
+		WithStatusSubresource(&v1alpha1.ManagerScheduleRequest{}).Build()
 	//nolint:errcheck
 	fakeClient.Create(context.TODO(), msr)
 	//nolint:errcheck

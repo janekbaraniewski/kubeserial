@@ -23,10 +23,26 @@ func TestBuilder_Build(t *testing.T) {
 		},
 	}
 
-	objects := NewBuilder(device, fs).Build()
+	objects, err := NewBuilder(device, fs).Build()
 
-	assert.NotNil(t, objects)
+	require.NoError(t, err)
 	assert.Len(t, objects, 3)
+}
+
+func TestBuilder_BuildMissingSpecs(t *testing.T) {
+	t.Parallel()
+	fs := utils.NewInMemoryFS()
+
+	device := &v1alpha1.SerialDevice{
+		ObjectMeta: v1.ObjectMeta{
+			Name: "test-device",
+		},
+	}
+
+	objects, err := NewBuilder(device, fs).Build()
+
+	require.Error(t, err)
+	assert.Nil(t, objects)
 }
 
 func TestCreateConfigMap(t *testing.T) {

@@ -14,7 +14,7 @@ When a [`SerialDevice`](../configuration/devices.md) becomes `Available`, the [S
 
 The `ser2net` container is privileged and mounts the host `/dev`. Its config maps the device to a raw TCP port:
 
-```
+```text
 3333:raw:600:/dev/ender3:115200 8DATABITS NONE 1STOPBIT -XONXOFF LOCAL -RTSCTS HANGUP_WHEN_DONE
 ```
 

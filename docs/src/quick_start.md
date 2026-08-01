@@ -4,14 +4,14 @@
 
 ## Requirements
 
-- k8s cluster
-- CertManager installed and Cert Issuer configured
+- a Kubernetes cluster
+- [cert-manager](https://cert-manager.io/) installed, with an Issuer or ClusterIssuer configured (the device-injection webhook needs it for its serving certificate)
 
 ## Install with Helm
 
-### Add help repo
+### Add the Helm repo
 
-First you'll need to add helm repository that stores KubeSerial charts
+First add the Helm repository that hosts the KubeSerial charts:
 
 ```bash
 > helm repo add baraniewski https://baraniewski.com/charts/
@@ -19,15 +19,15 @@ First you'll need to add helm repository that stores KubeSerial charts
 
 ### Install CRDs
 
-Due to way in which helm handles CRDs, they are managed using separate chart.
+Because of the way Helm handles CRDs, they are shipped as a separate chart:
 
 ```bash
 > helm upgrade --install kubeserial-crds baraniewski/kubeserial-crds
 ```
 
-### Create minimal values file
+### Create a minimal values file
 
-In order to make webhook work, you'll need to specify which Cert Issuer should be used for SSL cert used by webhook. To do this, create values file with following structure (change values depending on your setup):
+For the webhook to work you must tell it which issuer to use for its TLS certificate. Create a values file like this (adjust to your setup):
 
 ```yaml
 certManagerIssuer:
@@ -35,29 +35,29 @@ certManagerIssuer:
   kind: ClusterIssuer
 ```
 
-<mark>Set proper name and kind of your Issuer or ClusterIssuer</mark>
+<mark>Set the proper name and kind of your Issuer or ClusterIssuer</mark>
 
-### Install Controller
+### Install the controllers
 
 ```bash
-> helm upgrade --install kubeserial baraniewski/kubeserial
+> helm upgrade --install kubeserial baraniewski/kubeserial -f my-values.yaml
 ```
 
 ## Get device attributes
 
-To find out values of `idVendor` and `idProduct` for your device, connect it to your computer, locate where it is (let's say `/dev/ttyUSB0`) and run:
+To find the `idVendor` and `idProduct` for your device, connect it to a machine, find its node (say `/dev/ttyUSB0`) and run:
 
 ```bash
 > udevadm info -q all -n /dev/ttyUSB0 --attribute-walk
 ```
 
-Look for them from the top.
+Look for them near the top of the output.
 
-## Update helm values file
+## Add your devices
 
-Now you're ready to create configuration for your devices. Here you can find example of 2 devices - one is using predefined manager, one doesn't. To learn about the difference, please refer to [manager configuration docs](configuration/managers/SUMMARY.md)
+Now declare your devices. The example below has two: one is bound to a predefined manager, one is not. To learn about the difference, see the [manager configuration docs](configuration/managers/SUMMARY.md).
 
-Add this config to your values file:
+Add this to your values file:
 
 ```yaml
 kubeserial:
@@ -71,7 +71,9 @@ kubeserial:
     name: sonoff-zigbee
 ```
 
-## Update your helm release with new values
+> Quote values that are all digits (for example `"6001"`) so they stay strings.
+
+## Update your release with the new values
 
 ```bash
 > helm upgrade kubeserial baraniewski/kubeserial -f my-values.yaml
@@ -79,25 +81,27 @@ kubeserial:
 
 ## Validate that everything is working
 
-You should see 3 workloads in your cluster - controler manager, device injector webhook and device monitor:
+You should see three workloads in your cluster - the controller manager, the device-injection webhook and the device monitor:
 
 ```bash
-$ ➜  kubectl get pods
+$ kubectl get pods
 NAME                                         READY   STATUS    RESTARTS   AGE
 kubeserial-7d58555d4c-97nqk                  1/1     Running   0          5m
 kubeserial-device-injector-cc7696b59-mfdn5   1/1     Running   0          5m
 kubeserial-monitor-rjs82                     2/2     Running   0          5m
 ```
 
-Number of `kubeserial-monitor` pods should match number of your cluster nodes.
+The number of `kubeserial-monitor` pods should match the number of nodes in your cluster.
 
 You should also see your devices:
 
 ```bash
-$ ➜  kubectl get serialdevice
+$ kubectl get serialdevice
 NAME            READY   AVAILABLE   NODE
-ender3          True    False
-sonoff-zigbee   True    False
+ender3          True    True        worker-1
+sonoff-zigbee   True    True        worker-2
 ```
 
-You're all set with basic configuration of KubeSerial. Please read through rest of docs to configure it to your needs.
+A device shows `AVAILABLE=True` and a `NODE` once the monitor detects it plugged in. From here you can attach workloads to it: either through a predefined [Manager](configuration/managers/internal.md), or by annotating any pod for the [device-injection webhook](configuration/managers/external.md).
+
+You're all set with the basic configuration of KubeSerial. Read through the rest of the docs to configure it to your needs.

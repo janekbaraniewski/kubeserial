@@ -1,19 +1,18 @@
 # Managers
 
-> In order to learn more about concept of Manager take a look at [Manager docs][MD]
+> To learn more about the concept of a Manager take a look at the [Manager docs][MD].
 
-Manager configuration is not required, although it's the easiest way to work with serial devices using KubeSerial.
-
-There are 2 ways to work with managers. You can use them both at the same time for different devices, but not for the same one.
+Configuring a manager is not required, but it is the easiest way to actually use a device once KubeSerial has exposed it. There are two ways to attach something to a device. You can use both at the same time for different devices, but not for the same device.
 
 ## Manager scheduled by KubeSerial
 
-In this approach, you'll need to create `Manager` type object which will hold spec of manager software you want to run and bind it with `SerialDevice`. Then, when KubeSerial detects that device is connected, it will schedule management software for you and create link to the device inside. Once device is disconnected, everything is cleaned up. Learn how to configure it by [reading the docs][MIC]
-## Manager scheduled externaly
+You create a `Manager` resource holding the spec of the management software you want to run and bind it to a `SerialDevice` (via `spec.manager`). When KubeSerial detects that the device is connected it schedules the management software for you and bridges the device into the container. When the device is disconnected everything is cleaned up. Learn how to configure it by [reading the docs][MIC].
 
-In this approach, you add annotation to your Pod and KubeSerial mutating webhook will update pod spec when it's created to inject connection to device. Learn how to configure it by [reading the docs][MEC]
+## Manager scheduled externally
+
+You add an annotation to your Pod and the KubeSerial mutating webhook rewrites the pod when it is created to bridge in the device. This works with any image and needs no `Manager` resource. Learn how to configure it by [reading the docs][MEC].
 
 <!-- Links  -->
-[MD]:  /components/manager.md            "Manager"
-[MIC]: /configuration/managers/internal.md "Manager internal"
-[MEC]: /configuration/managers/external.md "Manager external"
+[MD]:  ../../components/manager.md   "Manager"
+[MIC]: internal.md                  "Manager internal"
+[MEC]: external.md                  "Manager external"

@@ -2,7 +2,10 @@ package controllers
 
 import (
 	"context"
+	"errors"
 	"testing"
+
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
 	kubeserial "github.com/janekbaraniewski/kubeserial/pkg"
 	"github.com/janekbaraniewski/kubeserial/pkg/apis/v1alpha1"
@@ -171,6 +174,74 @@ func TestDeviceReconciler_Reconcile(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, controllerruntime.Result{}, result)
 	})
+
+	// Regression test: the schedule request already exists on every reconcile
+	// after the first, and treating that as an error used to put the device into
+	// a permanent requeue-with-backoff loop.
+	t.Run("repeated-reconcile-of-available-device-does-not-error", func(t *testing.T) {
+		t.Parallel()
+		scheme := newTestScheme(t)
+		device := newTestDevice()
+		device.Status.Conditions = append(device.Status.Conditions, v1alpha1.SerialDeviceCondition{
+			Type:   v1alpha1.SerialDeviceAvailable,
+			Status: v1.ConditionTrue,
+		})
+		reconciler, fakeClient := newReconciler(scheme, device, newTestManager())
+		req := controllerruntime.Request{NamespacedName: deviceName}
+
+		for i := range 3 {
+			result, err := reconciler.Reconcile(context.TODO(), req)
+			require.NoErrorf(t, err, "reconcile %d should not error", i+1)
+			assert.Equal(t, controllerruntime.Result{}, result)
+		}
+
+		// Exactly one request, created once and then left alone.
+		requests := &v1alpha1.ManagerScheduleRequestList{}
+		require.NoError(t, fakeClient.List(context.TODO(), requests))
+		assert.Len(t, requests.Items, 1)
+	})
+
+	// A manager lookup that fails for a reason other than NotFound must not be
+	// read as "manager available" — that marked the device Ready against a
+	// manager we never confirmed exists.
+	t.Run("device-not-ready-when-manager-lookup-fails", func(t *testing.T) {
+		t.Parallel()
+		scheme := newTestScheme(t)
+		reconciler, _ := newReconciler(scheme, newTestDevice())
+
+		reconciler.Client = &failingGetClient{
+			Client: reconciler.Client,
+			failOn: func(key client.ObjectKey, obj client.Object) bool {
+				_, isManager := obj.(*v1alpha1.Manager)
+				return isManager && key.Name == "test-manager"
+			},
+		}
+
+		assert.False(t, reconciler.ManagerIsAvailable(
+			context.TODO(),
+			newTestDevice(),
+			controllerruntime.Request{NamespacedName: deviceName},
+		))
+	})
+}
+
+// failingGetClient makes Get fail with a non-NotFound error for the objects
+// selected by failOn, so error handling can be tested without a live apiserver.
+type failingGetClient struct {
+	client.Client
+	failOn func(client.ObjectKey, client.Object) bool
+}
+
+func (c *failingGetClient) Get(
+	ctx context.Context,
+	key client.ObjectKey,
+	obj client.Object,
+	opts ...client.GetOption,
+) error {
+	if c.failOn(key, obj) {
+		return apierrors.NewInternalError(errors.New("simulated apiserver failure"))
+	}
+	return c.Client.Get(ctx, key, obj, opts...)
 }
 
 func AddGatewaySpecFilesToFilesystem(t *testing.T, fs *utils.InMemoryFS) {

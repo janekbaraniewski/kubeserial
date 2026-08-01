@@ -26,6 +26,13 @@ var log = logf.Log.WithName("DeviceSidecarInjector")
 const (
 	requestDeviceSidecarAnnotation   = "app.kubeserial.com/inject-device"
 	sidecarAlreadyInjectedAnnotation = "app.kubeserial.com/device-injected"
+	devicePathAnnotation             = "app.kubeserial.com/device-path"
+
+	// defaultDevicePath is where the socat bridge exposes the device inside the
+	// container. It is device-independent on purpose: a Manager spec is reused
+	// across devices, so its config can only reference a fixed path. Override
+	// per pod with devicePathAnnotation.
+	defaultDevicePath = "/dev/device"
 )
 
 type SerialDeviceInjector struct {
@@ -63,13 +70,22 @@ func returnProperResponse(pod *corev1.Pod, req admission.Request) admission.Resp
 	return admission.PatchResponseFromRaw(req.Object.Raw, marshaledPod)
 }
 
-func concatCommandWithSocat(command []string, args []string, device string) (newCommand []string, newArgs []string) {
+// devicePath returns the in-container path the device is bridged to, honouring
+// devicePathAnnotation and falling back to defaultDevicePath.
+func devicePath(pod *corev1.Pod) string {
+	if p := pod.Annotations[devicePathAnnotation]; p != "" {
+		return p
+	}
+	return defaultDevicePath
+}
+
+func concatCommandWithSocat(command []string, args []string, device, path string) (newCommand []string, newArgs []string) {
 	newCommand = []string{"/bin/sh"}
 	newArgs = []string{
 		"-c",
 		fmt.Sprintf(
-			"socat -d -d pty,raw,echo=0,b115200,link=/dev/device,perm=0660,group=tty tcp:%v-gateway:3333 & %v",
-			device, strings.Join(append(command, args...), " ")),
+			"socat -d -d pty,raw,echo=0,b115200,link=%v,perm=0660,group=tty tcp:%v-gateway:3333 & %v",
+			path, device, strings.Join(append(command, args...), " ")),
 	}
 	return
 }
@@ -150,12 +166,15 @@ func (si *SerialDeviceInjector) Handle(ctx context.Context, req admission.Reques
 		args = imageConfig.Cmd
 	}
 
-	newCommand, newArgs := concatCommandWithSocat(command, args, deviceToInject)
+	newCommand, newArgs := concatCommandWithSocat(command, args, deviceToInject, devicePath(pod))
 
 	container.Command = newCommand
 	container.Args = newArgs
+	// The webhook is registered for UPDATE as well as CREATE, so without this
+	// marker a later pod mutation would wrap the already-wrapped command again,
+	// nesting one socat bridge inside another.
+	pod.Annotations[sidecarAlreadyInjectedAnnotation] = "true"
 	InjectedCommands.Inc()
-	// TODO: mutate command and args, maybe the best would be to mount entrypoint from some CM?
 	log.Info(
 		"Injected",
 		"Container command", pod.Spec.Containers[0].Command,

@@ -9,3 +9,11 @@ clientConfig:
     name: '{{ include "kubeserial.injectorFullname" . }}'
     namespace: '{{ .Release.Namespace }}'
     path: /mutate-inject-device
+# Scoping and failure behaviour are chart values rather than controller-gen
+# marker settings, because they need to stay operator-tunable per install.
+# Injecting a device is an opt-in convenience: refusing every pod in the
+# cluster when this webhook is down is far worse than skipping the injection,
+# so the default failurePolicy is Ignore.
+failurePolicy: '{{ .Values.webhook.failurePolicy }}'
+namespaceSelector: '{{- toYaml .Values.webhook.namespaceSelector | nindent 4 }}'
+objectSelector: '{{- toYaml .Values.webhook.objectSelector | nindent 4 }}'

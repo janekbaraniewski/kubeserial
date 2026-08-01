@@ -70,6 +70,19 @@ Webhook fullname
 
 
 {{/*
+Create the name of the service account the device injector runs as. It is kept
+separate from the controller's account so the webhook only ever holds read
+access to SerialDevices.
+*/}}
+{{- define "kubeserial.injectorServiceAccountName" -}}
+{{- if .Values.webhook.serviceAccount.create }}
+{{- default (include "kubeserial.injectorFullname" .) .Values.webhook.serviceAccount.name }}
+{{- else }}
+{{- default (include "kubeserial.serviceAccountName" .) .Values.webhook.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
 Webhook common labels
 */}}
 {{- define "kubeserial.injectorLabels" -}}

@@ -1,3 +1,13 @@
+{{/*
+Scoped to what the controllers actually create, update and delete: ConfigMaps,
+Services, Deployments and DaemonSets for gateways, managers and the device
+monitor, plus Leases for leader election and the kubeserial CRDs.
+
+Dropped from the previous wildcard set because no code path touches them:
+secrets, endpoints, persistentvolumeclaims, replicasets, statefulsets,
+services/finalizers and the whole networking.k8s.io group (manager Ingress
+support is not wired up). Re-add alongside the code that needs them.
+*/}}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -5,71 +15,112 @@ metadata:
   labels:
     {{- include "kubeserial.labels" . | nindent 4 }}
 rules:
+# Gateway and manager ConfigMaps/Services, and the device-monitor ConfigMap.
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - services
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+# Read-only: pods are inspected, never mutated by the controller.
 - apiGroups:
   - ""
   resources:
   - pods
-  - services
-  - services/finalizers
-  - endpoints
-  - persistentvolumeclaims
-  - events
-  - configmaps
-  - secrets
   verbs:
-  - '*'
+  - get
+  - list
+  - watch
+# Emitting events about reconcile outcomes.
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+# Gateway/manager Deployments and the device-monitor DaemonSet.
 - apiGroups:
   - apps
   resources:
   - deployments
   - daemonsets
-  - replicasets
-  - statefulsets
   verbs:
-  - '*'
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+# Leader election (-leader-elect=true).
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+# The kubeserial CRDs.
+- apiGroups:
+  - app.kubeserial.com
+  resources:
+  - kubeserials
+  - serialdevices
+  - managerschedulerequests
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+# Manager specs are authored by the operator (the chart ships them); the
+# controller only reads them.
+- apiGroups:
+  - app.kubeserial.com
+  resources:
+  - managers
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - app.kubeserial.com
+  resources:
+  - kubeserials/status
+  - serialdevices/status
+  - managerschedulerequests/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - app.kubeserial.com
+  resources:
+  - kubeserials/finalizers
+  - serialdevices/finalizers
+  - managerschedulerequests/finalizers
+  verbs:
+  - update
 - apiGroups:
   - monitoring.coreos.com
   resources:
   - servicemonitors
+  - podmonitors
   verbs:
   - get
   - create
-- apiGroups:
-  - apps
-  resourceNames:
-  - kubeserial
-  resources:
-  - deployments/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - ""
-  resources:
-  - pods
-  verbs:
-  - get
-- apiGroups:
-  - apps
-  resources:
-  - replicasets
-  - deployments
-  verbs:
-  - get
-- apiGroups:
-  - app.kubeserial.com
-  resources:
-  - '*'
-  verbs:
-  - '*'
-- apiGroups:
-  - networking.k8s.io
-  resources:
-  - '*'
-  verbs:
-  - '*'
-- apiGroups:
-  - coordination.k8s.io
-  resources:
-  -  '*'
-  verbs:
-  - '*'

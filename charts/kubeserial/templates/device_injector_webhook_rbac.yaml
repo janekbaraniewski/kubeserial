@@ -1,0 +1,49 @@
+{{/*
+The device injector only needs to read SerialDevices to decide whether a
+requested device is Free. It deliberately does not share the controller's
+ClusterRole, which can write workloads and config across the cluster.
+*/}}
+{{- if .Values.webhook.serviceAccount.create }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "kubeserial.injectorServiceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubeserial.injectorLabels" . | nindent 4 }}
+  {{- with .Values.webhook.serviceAccount.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+---
+{{- end }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "kubeserial.injectorFullname" . }}
+  labels:
+    {{- include "kubeserial.injectorLabels" . | nindent 4 }}
+rules:
+  - apiGroups:
+      - app.kubeserial.com
+    resources:
+      - serialdevices
+    verbs:
+      - get
+      - list
+      - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "kubeserial.injectorFullname" . }}
+  labels:
+    {{- include "kubeserial.injectorLabels" . | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "kubeserial.injectorServiceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: {{ include "kubeserial.injectorFullname" . }}
+  apiGroup: rbac.authorization.k8s.io

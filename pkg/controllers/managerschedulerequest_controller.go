@@ -45,9 +45,9 @@ type ManagerScheduleRequestReconciler struct {
 }
 
 //nolint
-//+kubebuilder:rbac:groups=kubeserial.app.kubeserial.com,resources=managerschedulerequests,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=kubeserial.app.kubeserial.com,resources=managerschedulerequests/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=kubeserial.app.kubeserial.com,resources=managerschedulerequests/finalizers,verbs=update
+//+kubebuilder:rbac:groups=app.kubeserial.com,resources=managerschedulerequests,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=app.kubeserial.com,resources=managerschedulerequests/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=app.kubeserial.com,resources=managerschedulerequests/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.

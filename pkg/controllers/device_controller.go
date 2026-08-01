@@ -255,10 +255,13 @@ func (r *SerialDeviceReconciler) ManagerIsAvailable(
 		Namespace: req.Namespace,
 	}, manager)
 	if err != nil {
-		if errors.IsNotFound(err) {
-			return false
+		// Any lookup failure means we can't confirm the manager exists. Treating
+		// a transient API error as "available" would mark the device Ready
+		// against a manager that may not be there.
+		if !errors.IsNotFound(err) {
+			logger.Error(err, "Failed looking up manager", "manager", device.Spec.Manager)
 		}
-		logger.Error(err, "Unknown error")
+		return false
 	}
 
 	return true
@@ -285,8 +288,14 @@ func (r *SerialDeviceReconciler) RequestManager(ctx context.Context, device *kub
 		logger.Info("Can't set reference")
 		return err
 	}
-	err := r.Create(ctx, request)
-	if err != nil {
+	// Reconcile runs repeatedly for the same device, so the request usually
+	// already exists by the second pass. Treating that as an error put the
+	// device into a permanent requeue-with-backoff loop.
+	if err := r.Create(ctx, request); err != nil {
+		if errors.IsAlreadyExists(err) {
+			logger.V(3).Info("Schedule request already exists", "request", request.Name)
+			return nil
+		}
 		return err
 	}
 	return nil

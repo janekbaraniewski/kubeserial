@@ -87,3 +87,6 @@ test-assets/
 
 ### InteliJ
 .idea/
+
+# Local tool binaries (Makefile LOCALBIN)
+bin/

@@ -15,6 +15,37 @@ webhook:
     pullPolicy: IfNotPresent
     tag: "APP_VERSION"
 
+  # Device injection is opt-in per pod (via the app.kubeserial.com/inject-device
+  # annotation), so a webhook outage should skip injection rather than block
+  # every pod creation in the cluster. Set to Fail only if a missing device
+  # bridge must be treated as a hard error.
+  failurePolicy: Ignore
+
+  # Namespaces the injector is consulted for. The default keeps the webhook out
+  # of the control-plane namespaces, so a broken or not-yet-running injector can
+  # never stop the cluster (or itself) from starting up.
+  # kubernetes.io/metadata.name is set automatically on every namespace.
+  namespaceSelector:
+    matchExpressions:
+      - key: kubernetes.io/metadata.name
+        operator: NotIn
+        values:
+          - kube-system
+          - kube-node-lease
+          - kube-public
+          - cert-manager
+
+  # Additional label-based narrowing of which pods are sent to the webhook.
+  # Empty means "all pods in the selected namespaces". Note this matches pod
+  # labels only: admission objectSelector cannot match annotations, so it cannot
+  # key off app.kubeserial.com/inject-device.
+  objectSelector: {}
+
+  serviceAccount:
+    create: true
+    annotations: {}
+    name: ""
+
 monitor:
   image:
     repository: ghcr.io/janekbaraniewski/kubeserial-device-monitor

@@ -39,6 +39,12 @@ $ helm upgrade --install kubeserial baraniewski/kubeserial
 |webhook.image.repository|`ghcr.io/janekbaraniewski/kubeserial-injector-webhook`||true|
 |webhook.image.pullPolicy|`IfNotPresent`||true|
 |webhook.image.tag|`APP_VERSION`||true|
+|webhook.failurePolicy|`Ignore`|What happens to a pod creation when the injector is unreachable. `Ignore` skips injection; `Fail` rejects the pod.|false|
+|webhook.namespaceSelector|excludes `kube-system`, `kube-node-lease`, `kube-public`, `cert-manager`|Namespaces the injector is consulted for.|false|
+|webhook.objectSelector|`{}`|Extra pod-label narrowing. Cannot match annotations, so it cannot key off `app.kubeserial.com/inject-device`.|false|
+|webhook.serviceAccount.create|`true`|Create a dedicated service account for the injector, holding only read access to SerialDevices.|false|
+|webhook.serviceAccount.name|`""`|Name of the injector service account. Defaults to `<release>-device-injector`.|false|
+|webhook.serviceAccount.annotations|`{}`||false|
 |monitoring.prometheusMonitors.enabled|`true`||true|
 
 

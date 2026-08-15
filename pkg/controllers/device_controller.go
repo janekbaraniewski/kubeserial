@@ -51,9 +51,13 @@ type SerialDeviceReconciler struct {
 	FS        utils.FileSystem
 }
 
-//+kubebuilder:rbac:groups=kubeserial.app.kubeserial.com,resources=devices,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=kubeserial.app.kubeserial.com,resources=devices/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=kubeserial.app.kubeserial.com,resources=devices/finalizers,verbs=update
+//+kubebuilder:rbac:groups=app.kubeserial.com,resources=serialdevices,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=app.kubeserial.com,resources=serialdevices/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=app.kubeserial.com,resources=serialdevices/finalizers,verbs=update
+//+kubebuilder:rbac:groups=app.kubeserial.com,resources=managers,verbs=get;list;watch
+//+kubebuilder:rbac:groups=app.kubeserial.com,resources=managerschedulerequests,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups="",resources=configmaps;services,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.

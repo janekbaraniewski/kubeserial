@@ -15,8 +15,10 @@ webhooks:
       name: {{ include "kubeserial.injectorFullname" . }}
       namespace: {{ .Release.Namespace }}
       path: /mutate-inject-device
-  failurePolicy: Fail
+  failurePolicy: {{ .Values.webhook.failurePolicy }}
   name: device.kubeserial.com
+  namespaceSelector: {{- toYaml .Values.webhook.namespaceSelector | nindent 4 }}
+  objectSelector: {{- toYaml .Values.webhook.objectSelector | nindent 4 }}
   rules:
   - apiGroups:
     - ''
